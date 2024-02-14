@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6E8C57162B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */; };
+		6E8C57172B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */; };
+		6E8C57182B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */; };
+		6E8C571B2B7CA73E00B5BF59 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C571A2B7CA73E00B5BF59 /* FirebaseAnalytics */; };
+		6E8C571D2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C571C2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift */; };
+		6E8C571F2B7CA73E00B5BF59 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C571E2B7CA73E00B5BF59 /* FirebaseAuth */; };
 		6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */; };
 		6EE110712B7B57F700747F04 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110702B7B57F700747F04 /* ContentView.swift */; };
 		6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110722B7B57FA00747F04 /* Assets.xcassets */; };
@@ -34,6 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MUSitesMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileApp.swift; sourceTree = "<group>"; };
 		6EE110702B7B57F700747F04 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -51,6 +58,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E8C571D2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift in Frameworks */,
+				6E8C571F2B7CA73E00B5BF59 /* FirebaseAuth in Frameworks */,
+				6E8C571B2B7CA73E00B5BF59 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,6 +107,7 @@
 				6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */,
 				6EE110702B7B57F700747F04 /* ContentView.swift */,
 				6EE110722B7B57FA00747F04 /* Assets.xcassets */,
+				6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */,
 				6EE110742B7B57FA00747F04 /* Preview Content */,
 			);
 			path = MUSitesMobile;
@@ -143,6 +154,11 @@
 			dependencies = (
 			);
 			name = MUSitesMobile;
+			packageProductDependencies = (
+				6E8C571A2B7CA73E00B5BF59 /* FirebaseAnalytics */,
+				6E8C571C2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift */,
+				6E8C571E2B7CA73E00B5BF59 /* FirebaseAuth */,
+			);
 			productName = MUSitesMobile;
 			productReference = 6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +231,9 @@
 				Base,
 			);
 			mainGroup = 6EE110622B7B57F600747F04;
+			packageReferences = (
+				6E8C57192B7CA73D00B5BF59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 6EE1106C2B7B57F700747F04 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -233,6 +252,7 @@
 			files = (
 				6EE110762B7B57FA00747F04 /* Preview Assets.xcassets in Resources */,
 				6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */,
+				6E8C57162B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +260,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E8C57172B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,6 +268,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E8C57182B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,7 +458,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = umsystem.MUSitesMobile;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobile;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -466,7 +488,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = umsystem.MUSitesMobile;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobile;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -485,7 +507,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = umsystem.MUSitesMobileTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobileTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -505,7 +527,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = umsystem.MUSitesMobileTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobileTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -523,7 +545,7 @@
 				DEVELOPMENT_TEAM = YKMF2X3J6U;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = umsystem.MUSitesMobileUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobileUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -541,7 +563,7 @@
 				DEVELOPMENT_TEAM = YKMF2X3J6U;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = umsystem.MUSitesMobileUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobileUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -590,6 +612,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6E8C57192B7CA73D00B5BF59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.21.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6E8C571A2B7CA73E00B5BF59 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6E8C57192B7CA73D00B5BF59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		6E8C571C2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6E8C57192B7CA73D00B5BF59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsSwift;
+		};
+		6E8C571E2B7CA73E00B5BF59 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6E8C57192B7CA73D00B5BF59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6EE110632B7B57F600747F04 /* Project object */;
 }
