@@ -31,11 +31,31 @@ final class AuthenticationManager {
     
     private init() { }
     
+    // check local SDK if user is authenticated (signed in)
+    func getAuthenticatedUser() throws -> AuthDataResultModel {
+        // use Firebase SDK to check if there is a current authenticated user
+        // func is NOT async, because it is not reaching out to the server, it is checking the SDK locally
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.badServerResponse)
+            // if no authenticated user in our app, user = nil
+        }
+        
+        // return ResultModel if user is authenticated
+        return AuthDataResultModel(user: user)
+    }
+    
     // try to use Firebase's Auth SDK to create a user
     func createUser(email: String, password: String) async throws -> AuthDataResultModel {
         let authDataResult = try await Auth.auth().createUser(withEmail: email, password: password)
         // try (method can throw errors); await (asynchronously wait for the result)
+        
+        // return the ResultModel of newly created user, saved in the local SDK
         return AuthDataResultModel(user: authDataResult.user)
+    }
+    
+    // sign out locally (does not ping the server)
+    func signOut() throws {
+        try Auth.auth().signOut()
     }
     
 }

@@ -14,6 +14,8 @@
 		6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8C57212B7CAAEB00B5BF59 /* AuthenticationView.swift */; };
 		6E8C57262B7CADBE00B5BF59 /* SignInEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8C57252B7CADBE00B5BF59 /* SignInEmailView.swift */; };
 		6E8C57282B7CB39D00B5BF59 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8C57272B7CB39D00B5BF59 /* AuthenticationManager.swift */; };
+		6E8C572A2B7CC35100B5BF59 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8C57292B7CC35100B5BF59 /* RootView.swift */; };
+		6E8C572C2B7CC76800B5BF59 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8C572B2B7CC76800B5BF59 /* SettingsView.swift */; };
 		6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */; };
 		6EE110712B7B57F700747F04 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110702B7B57F700747F04 /* ContentView.swift */; };
 		6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110722B7B57FA00747F04 /* Assets.xcassets */; };
@@ -25,6 +27,8 @@
 		6E8C57212B7CAAEB00B5BF59 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		6E8C57252B7CADBE00B5BF59 /* SignInEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInEmailView.swift; sourceTree = "<group>"; };
 		6E8C57272B7CB39D00B5BF59 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		6E8C57292B7CC35100B5BF59 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		6E8C572B2B7CC76800B5BF59 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MUSitesMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileApp.swift; sourceTree = "<group>"; };
 		6EE110702B7B57F700747F04 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -52,9 +56,11 @@
 		6E8C57202B7CAAB400B5BF59 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
+				6E8C57292B7CC35100B5BF59 /* RootView.swift */,
 				6E8C57212B7CAAEB00B5BF59 /* AuthenticationView.swift */,
 				6E8C57252B7CADBE00B5BF59 /* SignInEmailView.swift */,
 				6E8C57272B7CB39D00B5BF59 /* AuthenticationManager.swift */,
+				6E8C572B2B7CC76800B5BF59 /* SettingsView.swift */,
 			);
 			path = Authentication;
 			sourceTree = "<group>";
@@ -196,8 +202,10 @@
 			files = (
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */,
+				6E8C572A2B7CC35100B5BF59 /* RootView.swift in Sources */,
 				6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */,
 				6E8C57282B7CB39D00B5BF59 /* AuthenticationManager.swift in Sources */,
+				6E8C572C2B7CC76800B5BF59 /* SettingsView.swift in Sources */,
 				6E8C57262B7CADBE00B5BF59 /* SignInEmailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -32,6 +32,7 @@ final class SignInEmailViewModel: ObservableObject {
                 print(returnedUserData)
             } catch {
                 print("Error: \(error)")
+                // the password must be 6 or more characters long or it will fail!
             }
         }
     }
