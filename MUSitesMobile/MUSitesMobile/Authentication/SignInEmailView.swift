@@ -7,12 +7,76 @@
 
 import SwiftUI
 
+@MainActor // UI updates must occur on the main thread to avoid concurrency issues
+final class SignInEmailViewModel: ObservableObject {
+    // to have @StateObjects vars, the class should conform to the ObservableObject protocol
+    // final class means that another class will not inherit from this class; it has performance benefits
+    
+    // @Published means that if this value changes, send an announcement
+    @Published var email = ""
+    @Published var password = ""
+    
+    func signIn() {
+        // if the fields are NOT empty
+        guard !email.isEmpty, !password.isEmpty else {
+            print("No email or password is found.")
+            // we can add validation here
+            return
+        }
+        
+        Task { // perform an asynchronous operation
+            do {
+                let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
+                // wait for the async operation to complete without blocking main thread
+                print("Success: user returned")
+                print(returnedUserData)
+            } catch {
+                print("Error: \(error)")
+            }
+        }
+    }
+}
+
 struct SignInEmailView: View {
+    
+    // create a new instance of viewModel object
+    // @StateObject will keep the viewModel object alive for the lifetime of the program
+    @StateObject private var viewModel = SignInEmailViewModel()
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            TextField("Email...", text: $viewModel.email)
+                .padding()
+                .background(Color.gray.opacity(0.4))
+                .cornerRadius(10)
+            
+            SecureField("Password...", text: $viewModel.password)
+                .padding()
+                .background(Color.gray.opacity(0.4))
+                .cornerRadius(10)
+            
+            Button {
+                viewModel.signIn()
+            } label: {
+                Text("Sign In")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(height: 55)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .cornerRadius(10)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .navigationTitle("Sign In With Email")
     }
 }
 
 #Preview {
-    SignInEmailView()
+    // this view will exist in a navigation hierarchy
+    NavigationStack {
+        SignInEmailView()
+    }
 }
