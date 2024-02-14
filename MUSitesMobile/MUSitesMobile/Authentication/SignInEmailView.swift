@@ -16,7 +16,7 @@ final class SignInEmailViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
     
-    func signIn() {
+    func signUp() async throws {
         // if the fields are NOT empty
         guard !email.isEmpty, !password.isEmpty else {
             print("No email or password is found.")
@@ -24,17 +24,20 @@ final class SignInEmailViewModel: ObservableObject {
             return
         }
         
-        Task { // perform an asynchronous operation
-            do {
-                let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
-                // wait for the async operation to complete without blocking main thread
-                print("Success: user returned")
-                print(returnedUserData)
-            } catch {
-                print("Error: \(error)")
-                // the password must be 6 or more characters long or it will fail!
-            }
+        try await AuthenticationManager.shared.createUser(email: email, password: password)
+        // the password must be 6 or more characters long or it will fail!
+        // wait for the async operation to complete without blocking main thread
+        // value returned was discarded
+    }
+    
+    func signIn() async throws {
+        // if the fields are NOT empty
+        guard !email.isEmpty, !password.isEmpty else {
+            print("No email or password is found.")
+            return
         }
+        
+        try await AuthenticationManager.shared.signInUser(email: email, password: password)
     }
 }
 
@@ -43,6 +46,7 @@ struct SignInEmailView: View {
     // create a new instance of viewModel object
     // @StateObject will keep the viewModel object alive for the lifetime of the program
     @StateObject private var viewModel = SignInEmailViewModel()
+    @Binding var showSignInView: Bool
     
     var body: some View {
         VStack {
@@ -57,7 +61,26 @@ struct SignInEmailView: View {
                 .cornerRadius(10)
             
             Button {
-                viewModel.signIn()
+                Task {
+                    // first, try to sign up user
+                    do {
+                        try await viewModel.signUp()
+                        // creates new user and signs them in
+                        // now hide SignInView
+                        showSignInView = false
+                    } catch {
+                        print("Error: \(error)")
+                    }
+                    
+                    // if user can't sign up, try to sign them in
+                    do {
+                        try await viewModel.signIn()
+                        // if signed in, then hide SignInView
+                        showSignInView = false
+                    } catch {
+                        print("Error: \(error)")
+                    }
+                }
             } label: {
                 Text("Sign In")
                     .font(.headline)
@@ -78,6 +101,6 @@ struct SignInEmailView: View {
 #Preview {
     // this view will exist in a navigation hierarchy
     NavigationStack {
-        SignInEmailView()
+        SignInEmailView(showSignInView: .constant(false))
     }
 }
