@@ -8,47 +8,25 @@
 
 /* Begin PBXBuildFile section */
 		6E8C57162B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */; };
-		6E8C57172B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */; };
-		6E8C57182B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */; };
 		6E8C571B2B7CA73E00B5BF59 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C571A2B7CA73E00B5BF59 /* FirebaseAnalytics */; };
 		6E8C571D2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C571C2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift */; };
 		6E8C571F2B7CA73E00B5BF59 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C571E2B7CA73E00B5BF59 /* FirebaseAuth */; };
+		6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8C57212B7CAAEB00B5BF59 /* AuthenticationView.swift */; };
 		6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */; };
 		6EE110712B7B57F700747F04 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110702B7B57F700747F04 /* ContentView.swift */; };
 		6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110722B7B57FA00747F04 /* Assets.xcassets */; };
 		6EE110762B7B57FA00747F04 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110752B7B57FA00747F04 /* Preview Assets.xcassets */; };
-		6EE110802B7B57FA00747F04 /* MUSitesMobileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE1107F2B7B57FA00747F04 /* MUSitesMobileTests.swift */; };
-		6EE1108A2B7B57FA00747F04 /* MUSitesMobileUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110892B7B57FA00747F04 /* MUSitesMobileUITests.swift */; };
-		6EE1108C2B7B57FA00747F04 /* MUSitesMobileUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE1108B2B7B57FA00747F04 /* MUSitesMobileUITestsLaunchTests.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		6EE1107C2B7B57FA00747F04 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 6EE110632B7B57F600747F04 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 6EE1106A2B7B57F700747F04;
-			remoteInfo = MUSitesMobile;
-		};
-		6EE110862B7B57FA00747F04 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 6EE110632B7B57F600747F04 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 6EE1106A2B7B57F700747F04;
-			remoteInfo = MUSitesMobile;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		6E8C57212B7CAAEB00B5BF59 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MUSitesMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileApp.swift; sourceTree = "<group>"; };
 		6EE110702B7B57F700747F04 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6EE110722B7B57FA00747F04 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6EE110752B7B57FA00747F04 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		6EE1107B2B7B57FA00747F04 /* MUSitesMobileTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MUSitesMobileTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE1107F2B7B57FA00747F04 /* MUSitesMobileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileTests.swift; sourceTree = "<group>"; };
-		6EE110852B7B57FA00747F04 /* MUSitesMobileUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MUSitesMobileUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE110892B7B57FA00747F04 /* MUSitesMobileUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileUITests.swift; sourceTree = "<group>"; };
 		6EE1108B2B7B57FA00747F04 /* MUSitesMobileUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -64,23 +42,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6EE110782B7B57FA00747F04 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6EE110822B7B57FA00747F04 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6E8C57202B7CAAB400B5BF59 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				6E8C57212B7CAAEB00B5BF59 /* AuthenticationView.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
 		6EE110622B7B57F600747F04 = {
 			isa = PBXGroup;
 			children = (
@@ -95,8 +67,6 @@
 			isa = PBXGroup;
 			children = (
 				6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */,
-				6EE1107B2B7B57FA00747F04 /* MUSitesMobileTests.xctest */,
-				6EE110852B7B57FA00747F04 /* MUSitesMobileUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -106,6 +76,7 @@
 			children = (
 				6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */,
 				6EE110702B7B57F700747F04 /* ContentView.swift */,
+				6E8C57202B7CAAB400B5BF59 /* Authentication */,
 				6EE110722B7B57FA00747F04 /* Assets.xcassets */,
 				6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */,
 				6EE110742B7B57FA00747F04 /* Preview Content */,
@@ -163,42 +134,6 @@
 			productReference = 6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */;
 			productType = "com.apple.product-type.application";
 		};
-		6EE1107A2B7B57FA00747F04 /* MUSitesMobileTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 6EE110922B7B57FA00747F04 /* Build configuration list for PBXNativeTarget "MUSitesMobileTests" */;
-			buildPhases = (
-				6EE110772B7B57FA00747F04 /* Sources */,
-				6EE110782B7B57FA00747F04 /* Frameworks */,
-				6EE110792B7B57FA00747F04 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				6EE1107D2B7B57FA00747F04 /* PBXTargetDependency */,
-			);
-			name = MUSitesMobileTests;
-			productName = MUSitesMobileTests;
-			productReference = 6EE1107B2B7B57FA00747F04 /* MUSitesMobileTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		6EE110842B7B57FA00747F04 /* MUSitesMobileUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 6EE110952B7B57FA00747F04 /* Build configuration list for PBXNativeTarget "MUSitesMobileUITests" */;
-			buildPhases = (
-				6EE110812B7B57FA00747F04 /* Sources */,
-				6EE110822B7B57FA00747F04 /* Frameworks */,
-				6EE110832B7B57FA00747F04 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				6EE110872B7B57FA00747F04 /* PBXTargetDependency */,
-			);
-			name = MUSitesMobileUITests;
-			productName = MUSitesMobileUITests;
-			productReference = 6EE110852B7B57FA00747F04 /* MUSitesMobileUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -211,14 +146,6 @@
 				TargetAttributes = {
 					6EE1106A2B7B57F700747F04 = {
 						CreatedOnToolsVersion = 15.2;
-					};
-					6EE1107A2B7B57FA00747F04 = {
-						CreatedOnToolsVersion = 15.2;
-						TestTargetID = 6EE1106A2B7B57F700747F04;
-					};
-					6EE110842B7B57FA00747F04 = {
-						CreatedOnToolsVersion = 15.2;
-						TestTargetID = 6EE1106A2B7B57F700747F04;
 					};
 				};
 			};
@@ -239,8 +166,6 @@
 			projectRoot = "";
 			targets = (
 				6EE1106A2B7B57F700747F04 /* MUSitesMobile */,
-				6EE1107A2B7B57FA00747F04 /* MUSitesMobileTests */,
-				6EE110842B7B57FA00747F04 /* MUSitesMobileUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -256,22 +181,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6EE110792B7B57FA00747F04 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				6E8C57172B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6EE110832B7B57FA00747F04 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				6E8C57182B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -281,40 +190,11 @@
 			files = (
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6EE110772B7B57FA00747F04 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				6EE110802B7B57FA00747F04 /* MUSitesMobileTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6EE110812B7B57FA00747F04 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				6EE1108A2B7B57FA00747F04 /* MUSitesMobileUITests.swift in Sources */,
-				6EE1108C2B7B57FA00747F04 /* MUSitesMobileUITestsLaunchTests.swift in Sources */,
+				6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		6EE1107D2B7B57FA00747F04 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 6EE1106A2B7B57F700747F04 /* MUSitesMobile */;
-			targetProxy = 6EE1107C2B7B57FA00747F04 /* PBXContainerItemProxy */;
-		};
-		6EE110872B7B57FA00747F04 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 6EE1106A2B7B57F700747F04 /* MUSitesMobile */;
-			targetProxy = 6EE110862B7B57FA00747F04 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		6EE1108D2B7B57FA00747F04 /* Debug */ = {
@@ -496,82 +376,6 @@
 			};
 			name = Release;
 		};
-		6EE110932B7B57FA00747F04 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YKMF2X3J6U;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobileTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MUSitesMobile.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MUSitesMobile";
-			};
-			name = Debug;
-		};
-		6EE110942B7B57FA00747F04 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YKMF2X3J6U;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobileTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MUSitesMobile.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MUSitesMobile";
-			};
-			name = Release;
-		};
-		6EE110962B7B57FA00747F04 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YKMF2X3J6U;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobileUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MUSitesMobile;
-			};
-			name = Debug;
-		};
-		6EE110972B7B57FA00747F04 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YKMF2X3J6U;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sitesmobile.MUSitesMobileUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MUSitesMobile;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -589,24 +393,6 @@
 			buildConfigurations = (
 				6EE110902B7B57FA00747F04 /* Debug */,
 				6EE110912B7B57FA00747F04 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		6EE110922B7B57FA00747F04 /* Build configuration list for PBXNativeTarget "MUSitesMobileTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				6EE110932B7B57FA00747F04 /* Debug */,
-				6EE110942B7B57FA00747F04 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		6EE110952B7B57FA00747F04 /* Build configuration list for PBXNativeTarget "MUSitesMobileUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				6EE110962B7B57FA00747F04 /* Debug */,
-				6EE110972B7B57FA00747F04 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
