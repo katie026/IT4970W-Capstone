@@ -9,40 +9,6 @@ import SwiftUI
 import GoogleSignIn // can remove this if we use out own Google Button
 import GoogleSignInSwift // can remove this if we use out own Google Button
 
-// Authentication View Model to hold functions
-@MainActor
-final class AuthenticationViewModel: ObservableObject {
-    // ObservableObject protocol allows models to publish changes to their properties using the @Published and trigger reactive UI updates
-    
-    // Sign in with Google
-    func signInGoogle() async throws {
-        // create a SignInGoogleHelper
-        let helper = SignInGoogleHelper()
-        // get Google Sign In result model from Google using SignInGoogleHelper
-        let googleSignInResult = try await helper.signIn()
-        // now try to log into Firebase using Google result (holds the tokens)
-        try await AuthenticationManager.shared.signInWithGoogle(googleSignInResult: googleSignInResult)
-    }
-    
-    // Sign in with Apple (will not work until we have developer account)
-    func signInApple() async throws {
-        // async means signInApple() does not complete until all these lines are completed as well, meaning helper will not get deallocated as we wait for the sign in to complete
-        
-        // create a SignInAppleHelper
-        let helper = SignInAppleHelper()
-        
-        // Use a for-await loop to handle the asynchronous stream
-        for try await appleSignInResult in helper.startSignInWithAppleFlow() {
-            // Try to sign in to Firebase using Apple credentials
-            try await AuthenticationManager.shared.signInWithApple(appleSignInResult: appleSignInResult)
-            // If successful, you can break out of the loop as you have the result
-            break
-        }
-    }
-}
-
-
-
 struct AuthenticationView: View {
     // create a view model to hold functions
     @StateObject private var viewModel = AuthenticationViewModel()

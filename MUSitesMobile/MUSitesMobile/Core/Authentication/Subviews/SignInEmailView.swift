@@ -7,40 +7,6 @@
 
 import SwiftUI
 
-@MainActor // UI updates must occur on the main thread to avoid concurrency issues
-final class SignInEmailViewModel: ObservableObject {
-    // to have @StateObjects vars, the class should conform to the ObservableObject protocol
-    // final class means that another class will not inherit from this class; it has performance benefits
-    
-    // @Published means that if this value changes, send an announcement
-    @Published var email = ""
-    @Published var password = ""
-    
-    func signUp() async throws {
-        // if the fields are NOT empty
-        guard !email.isEmpty, !password.isEmpty else {
-            print("No email or password is found.")
-            // we can add validation here
-            return
-        }
-        
-        try await AuthenticationManager.shared.createUser(email: email, password: password)
-        // the password must be 6 or more characters long or it will fail!
-        // wait for the async operation to complete without blocking main thread
-        // value returned was discarded
-    }
-    
-    func signIn() async throws {
-        // if the fields are NOT empty
-        guard !email.isEmpty, !password.isEmpty else {
-            print("No email or password is found.")
-            return
-        }
-        
-        try await AuthenticationManager.shared.signInUser(email: email, password: password)
-    }
-}
-
 struct SignInEmailView: View {
     
     // create a new instance of viewModel object

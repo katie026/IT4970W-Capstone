@@ -17,7 +17,7 @@ struct RootView: View {
             // if user is logged in, show the Settings View
             if !showSignInView {
                 NavigationStack {
-                    SettingsView(showSignInView: $showSignInView)
+                    ProfileView(showSignInView: $showSignInView)
                     // pass and bind showSignInView variable to the SettingsView, so that it can change this value
                 }
             }
