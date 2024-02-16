@@ -29,7 +29,7 @@ final class AuthenticationViewModel: ObservableObject {
         // create a SignInAppleHelper
         let helper = SignInAppleHelper()
         // have helper prompt user with Apple sign in
-        let appleSignInResult = try await helper.signInWithAppleFlow()
+        let appleSignInResult = try await helper.startSignInWithAppleFlow()
         // try to sign in to Firebase using Apple credentials
         try await AuthenticationManager.shared.signInWithApple(appleSignInResult: appleSignInResult)
         

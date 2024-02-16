@@ -6,11 +6,12 @@
 //
 
 import Foundation
-import SwiftUI // may need to be UIKit
+import SwiftUI
+import UIKit
 import AuthenticationServices
 import CryptoKit
 
-// this method may be deprecated now, we may need to reference https://github.com/SwiftfulThinking/SwiftfulFirebaseAuth/blob/main/Sources/SwiftfulFirebaseAuth/Helpers/SignInWithApple.swift to update it
+// referenced https://github.com/SwiftfulThinking/SwiftfulFirebaseAuth/blob/main/Sources/SwiftfulFirebaseAuth/Helpers/SignInWithApple.swift
 
 // creating our own AppleSignInResultModel to send to Firebase
 struct AppleSignInResultModel {
@@ -82,7 +83,6 @@ struct SignInWithAppleButtonViewRepresentable: UIViewRepresentable {
     }
 }
 
-@MainActor
 final class SignInAppleHelper: NSObject {
     
     // create a variable for the nonce string so it can be accessed later
@@ -90,65 +90,43 @@ final class SignInAppleHelper: NSObject {
     // create a variable for the completion block/closure so it can be accessed later
     private var completionHandler: ((Result<AppleSignInResultModel,Error>) -> Void)? = nil
     
-    // using continuation to bridge gap between older completion handlers and new Concurrency
-    func signInWithAppleFlow() async throws -> AppleSignInResultModel {
-        // withCheckedThrowingContinuation takes a closure and suspends startSignInWithAppleFlow's execution while the sign-in process happens in the background
-        try await withCheckedThrowingContinuation { continuation in
-            // begin asynchronous sign-in process and pass control to the continuation (instead of waiting for it to finish and returning a Result)
-            // once startSignInWithAppleFlow finishes, it calls the completion handler to be evaluated
-            self.signInWithAppleFlow { result in
+    // Start Sign In With Apple and present OS modal.
+    // Parameter viewController: ViewController to present OS modal on. If nil, function will attempt to find the top-most ViewController. Throws an error if no ViewController is found.
+    @MainActor
+    func startSignInWithAppleFlow(viewController: UIViewController? = nil) -> AsyncThrowingStream<AppleSignInResultModel, Error> {
+        AsyncThrowingStream { continuation in
+            startSignInWithAppleFlow { result in
                 switch result {
-                // if result is a success, receive appleSignInResult
                 case .success(let appleSignInResult):
-                    continuation.resume(returning: appleSignInResult) // trigger the continuation to resume its execution and provides the appleSignInResult
+                    continuation.yield(appleSignInResult)
+                    continuation.finish()
                     return
-                // if result is a failure, receive an error
                 case .failure(let error):
-                    continuation.resume(throwing: error) // trigger the continuation to resume its execution and throws the error
+                    continuation.finish(throwing: error)
                     return
                 }
             }
         }
     }
     
-    // start the flow for SignInWithApple
-    // Adopted from https://firebase.google.com/docs/auth/ios/apple?hl=en&authuser=0
-    func signInWithAppleFlow(completion: @escaping (Result<AppleSignInResultModel,Error>) -> Void) {
-        // we need a completion handler so we can send the result back to where we called this function (our app)
-        // function accepts a closure (called completion) as a parameter; using a closure creates an asynchronous operation without directly waiting for the sign-in flow to finish
-        // @escaping means closure can be stored/executed after the function finishes aka it allows asynchronous operations
-        // we'll return a Result (generic type) which includes a success value (the appleSignInResult) or an error
-        
+    @MainActor
+    private func startSignInWithAppleFlow(viewController: UIViewController? = nil, completion: @escaping (Result<AppleSignInResultModel, Error>) -> Void) {
         // get the current top view controller
         guard let topVC = Utilities.shared.topViewController() else {
             // send back an error if we can't get the top view controller
-            completion(.failure(URLError(.badURL))) // customize this error!
+            completion(.failure(SignInWithAppleError.noViewController))
             return
         }
         
-        // create a nonce
         let nonce = randomNonceString()
         currentNonce = nonce
-        
-        // create the completion handler
         completionHandler = completion
-        
-        // get provider to create Apple ID auth request
-        let appleIDProvider = ASAuthorizationAppleIDProvider()
-        // create Apple ID authorization request
-        let request = appleIDProvider.createRequest()
-        request.requestedScopes = [.fullName, .email]
-        request.nonce = sha256(nonce)
-        
-        // create an authorization controller from collection of authorization requests
-        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
-        authorizationController.delegate = self
-        // provide display context where system can present the auth interface to user
-        authorizationController.presentationContextProvider = topVC
-        // starts authorization flows (system displays Apple Sign-In prompts, interacts with the user, and communicates with Apple servers to verify credentials) and executes the delegate methods below (listeners who will execute certain functions based on what they 'hear')
-        authorizationController.performRequests()
+        showOSPrompt(nonce: nonce, on: topVC)
     }
-    
+}
+
+// MARK: PRIVATE
+private extension SignInAppleHelper {
     // function to generate a nonce
     // Adopted from https://firebase.google.com/docs/auth/ios/apple?hl=en&authuser=0
     private func randomNonceString(length: Int = 32) -> String {
@@ -175,43 +153,75 @@ final class SignInAppleHelper: NSObject {
     // function to hash a string
     // Adopted from https://firebase.google.com/docs/auth/ios/apple?hl=en&authuser=0
     private func sha256(_ input: String) -> String {
-      let inputData = Data(input.utf8)
-      let hashedData = SHA256.hash(data: inputData)
-      let hashString = hashedData.compactMap {
-        String(format: "%02x", $0)
-      }.joined()
-
-      return hashString
+        let inputData = Data(input.utf8)
+        let hashedData = SHA256.hash(data: inputData)
+        let hashString = hashedData.compactMap {
+            String(format: "%02x", $0)
+        }.joined()
+        
+        return hashString
+    }
+    
+    private func showOSPrompt(nonce: String, on viewController: UIViewController) {
+        // get provider to create Apple ID auth request
+        let appleIDProvider = ASAuthorizationAppleIDProvider()
+        // create Apple ID authorization request
+        let request = appleIDProvider.createRequest()
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = sha256(nonce)
+        
+        // create an authorization controller from collection of authorization requests
+        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+        authorizationController.delegate = self
+        // provide display context where system can present the auth interface to user
+        authorizationController.presentationContextProvider = viewController
+        
+        // starts authorization flows (system displays Apple Sign-In prompts, interacts with the user, and communicates with Apple servers to verify credentials) and executes the delegate methods below (listeners who will execute certain functions based on what they 'hear')
+        authorizationController.performRequests()
+    }
+    
+    private enum SignInWithAppleError: LocalizedError {
+        case noViewController
+        case invalidCredential
+        case badResponse
+        case unableToFindNonce
+        
+        var errorDescription: String? {
+            switch self {
+            case .noViewController:
+                return "Could not find top view controller."
+            case .invalidCredential:
+                return "Invalid sign in credential."
+            case .badResponse:
+                return "Apple Sign In had a bad response."
+            case .unableToFindNonce:
+                return "Apple Sign In token expired."
+            }
+        }
     }
 }
-
-// extend helper so this code can conform to the protocol
-extension SignInAppleHelper: ASAuthorizationControllerDelegate {
-    // ASAuthorizationControllerDelegate protocol means it acts as a "delegate" or a listener for events related to Apple Sign-In, it can receive updates about the Sign-In process
-    // when events happen (ex. sign-in/error), the ASAuthorizationController from above calls these specific functions
     
-    // called when Apple Sign-In is successful
+extension SignInAppleHelper: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        // pass the ASAuthorization that was passed to this function when sign-in was successful and try to create an AppleSignInResultModel object
-        guard
-            let nonce = currentNonce,
-            let appleSignInResult = AppleSignInResultModel(authorization: authorization, nonce: nonce) else {
-            // send the completionHandler the error
-            completionHandler?(.failure(URLError(.badServerResponse))) // customize the error here
+        do {
+            guard let currentNonce else {
+                throw SignInWithAppleError.unableToFindNonce
+            }
+            
+            guard let result = AppleSignInResultModel(authorization: authorization, nonce: currentNonce) else {
+                throw SignInWithAppleError.badResponse
+            }
+            
+            completionHandler?(.success(result))
+        } catch {
+            completionHandler?(.failure(error))
             return
         }
-
-        // send the completionHandler the success
-        completionHandler?(.success(appleSignInResult))
     }
-    
-    // called if Apple Sign-In encounters an error
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        print("Sign in with Apple errored: \(error)")
-        // send the completionHandler the error
-        completionHandler?(.failure(URLError(.cannotFindHost))) // customize the error here
+        completionHandler?(.failure(error))
+        return
     }
-    
 }
 
 // extend the UIViewController so this code can conform to the protocol
@@ -221,5 +231,4 @@ extension UIViewController: ASAuthorizationControllerPresentationContextProvidin
         return self.view.window! // window is a container for the controller
         // any view controller has a view, which will have a window, so it is sfaer to force unwrap this
     }
-
 }
