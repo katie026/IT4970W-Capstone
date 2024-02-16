@@ -12,24 +12,42 @@ import GoogleSignInSwift // can remove this if we use out own Google Button
 // Authentication View Model to hold functions
 @MainActor
 final class AuthenticationViewModel: ObservableObject {
+    // ObservableObject protocol allows models to publish changes to their properties using the @Published and trigger reactive UI updates
     
+    // Sign in with Google
     func signInGoogle() async throws {
         // create a SignInGoogleHelper
         let helper = SignInGoogleHelper()
         // get Google Sign In result model from Google using SignInGoogleHelper
         let googleSignInResult = try await helper.signIn()
         // now try to log into Firebase using Google result (holds the tokens)
-        try await AuthenticationManager.shared.signInWithGoogle(GoogleSignInResult: googleSignInResult)
+        try await AuthenticationManager.shared.signInWithGoogle(googleSignInResult: googleSignInResult)
+    }
+    
+    // Sign in with Apple
+    func signInApple() async throws {
+        // create a SignInAppleHelper
+        let helper = SignInAppleHelper()
+        // have helper prompt user with Apple sign in
+        let appleSignInResult = try await helper.startSignInWithAppleFlow()
+        // try to sign in to Firebase using Apple credentials
+        try await AuthenticationManager.shared.signInWithApple(appleSignInResult: appleSignInResult)
+        
+        // async = signInApple function does not complete until all these lines are completed as well, meaning helper will not get deallocated as we wait for the sign in to complete
     }
 }
 
+
+
 struct AuthenticationView: View {
-    
+    // create a view model to hold functions
     @StateObject private var viewModel = AuthenticationViewModel()
+    // recieve and link to the showSignInView variable that belongs to RootView
     @Binding var showSignInView: Bool
     
     var body: some View {
         VStack {
+            //  Sign in with Email
             NavigationLink {
                 SignInEmailView(showSignInView: $showSignInView)
             } label: {
@@ -42,6 +60,7 @@ struct AuthenticationView: View {
                     .cornerRadius(10)
             }
             
+            //  Sign in with Google
             GoogleSignInButton(viewModel: GoogleSignInButtonViewModel(scheme: .light, style: .wide, state: .normal)) {
                 Task {
                     do {
@@ -54,6 +73,24 @@ struct AuthenticationView: View {
                     }
                 }
             }
+            
+            //  Sign in with Apple
+            Button(action: {
+                Task {
+                    do {
+                        // try to sign in using Apple
+                        try await viewModel.signInApple()
+                        // turn off the SignInView
+                        showSignInView = false;
+                    } catch {
+                        print(error)
+                    }
+                }
+            }, label: {
+                SignInWithAppleButtonViewRepresentable(type: .default, style: .black)
+                    .allowsHitTesting(false) // do not let user click it
+            })
+            .frame(height: 55)
             
             Spacer()
         }
