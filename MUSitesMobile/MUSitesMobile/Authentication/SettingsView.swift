@@ -27,6 +27,10 @@ final class SettingsViewModel: ObservableObject {
         try AuthenticationManager.shared.signOut()
     }
     
+    func deleteCurrentUser() async throws {
+        try await AuthenticationManager.shared.deleteCurrentUser()
+    }
+    
     func resetPassword() async throws {
         // get current user email
         let authUser = try AuthenticationManager.shared.getAuthenticatedUser()
@@ -86,6 +90,22 @@ struct SettingsView: View {
                     do {
                         // sign user out
                         try viewModel.signOut()
+                        // tell RootView to display the SignInView
+                        print("SIGNED OUT")
+                        showSignInView = true
+                    } catch {
+                        // error handling here
+                        print(error)
+                    }
+                }
+            }
+            // apps where user can create an account, MUST allow users to delete their account
+            Button("Delete Account", role: .destructive) {
+                Task {
+                    do {
+                        // we should warn the user first, then require them to re-sign into the account before deleting
+                        // delete current user's account
+                        try await viewModel.deleteCurrentUser()
                         // tell RootView to display the SignInView
                         print("SIGNED OUT")
                         showSignInView = true
