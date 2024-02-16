@@ -150,7 +150,7 @@ extension AuthenticationManager {
     @discardableResult
     func signInWithApple(appleSignInResult: AppleSignInResultModel) async throws -> AuthDataResultModel {
         // use FirebaseAuth to create Firebase AuthCredential using AppleIDCredential, nonce, and ID token
-        let credential = OAuthProvider.appleCredential(withIDToken: appleSignInResult.idToken, rawNonce: appleSignInResult.nonce, fullName: appleSignInResult.fullName)
+        let credential = OAuthProvider.appleCredential(withIDToken: appleSignInResult.idToken, rawNonce: appleSignInResult.nonce, fullName: appleSignInResult.fullNameComponents)
         // sign into Firebase using Firebase AuthCredential
         return try await signInWithCredential(credential: credential)
     }

@@ -6,15 +6,60 @@
 //
 
 import Foundation
-import SwiftUI
+import SwiftUI // may need to be UIKit
 import AuthenticationServices
 import CryptoKit
 
+// this method may be deprecated now, we may need to reference https://github.com/SwiftfulThinking/SwiftfulFirebaseAuth/blob/main/Sources/SwiftfulFirebaseAuth/Helpers/SignInWithApple.swift to update it
+
 // creating our own AppleSignInResultModel to send to Firebase
 struct AppleSignInResultModel {
+    // required for Firebase login request
     let idToken: String
     let nonce: String
-    let fullName: PersonNameComponents
+    let fullNameComponents: PersonNameComponents
+    
+    // optional
+    let email: String?
+    let firstName: String?
+    let lastName: String?
+    let nickName: String?
+    var fullName: String? {
+        if let firstName, let lastName {
+            return firstName + " " + lastName
+        } else if let firstName {
+            return firstName
+        } else if let lastName {
+            return lastName
+        }
+        return nil
+    }
+    var displayName: String? {
+        // use the full name, otherwise use nickname
+        fullName ?? nickName
+    }
+    
+    init?(authorization: ASAuthorization, nonce: String) { // will return nil if init fails
+        // use the ASAuthorization to try and create an ASAuthorizationAppleIDCredential and extract the credential values
+        guard
+            let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+            let fullName = appleIDCredential.fullName,
+            let appleIDToken = appleIDCredential.identityToken,
+            let idTokenString = String(data: appleIDToken, encoding: .utf8)
+        else {
+            // if failed, return nil
+            return nil
+        }
+        
+        // if we got an ASAuthorizationAppleIDCredential
+        self.idToken = idTokenString
+        self.nonce = nonce
+        self.email = appleIDCredential.email
+        self.fullNameComponents = fullName
+        self.firstName = appleIDCredential.fullName?.givenName
+        self.lastName = appleIDCredential.fullName?.familyName
+        self.nickName = appleIDCredential.fullName?.nickname
+    }
 }
 
 struct SignInWithAppleButtonViewRepresentable: UIViewRepresentable {
@@ -46,12 +91,12 @@ final class SignInAppleHelper: NSObject {
     private var completionHandler: ((Result<AppleSignInResultModel,Error>) -> Void)? = nil
     
     // using continuation to bridge gap between older completion handlers and new Concurrency
-    func startSignInWithAppleFlow() async throws -> AppleSignInResultModel {
+    func signInWithAppleFlow() async throws -> AppleSignInResultModel {
         // withCheckedThrowingContinuation takes a closure and suspends startSignInWithAppleFlow's execution while the sign-in process happens in the background
         try await withCheckedThrowingContinuation { continuation in
             // begin asynchronous sign-in process and pass control to the continuation (instead of waiting for it to finish and returning a Result)
             // once startSignInWithAppleFlow finishes, it calls the completion handler to be evaluated
-            self.startSignInWithAppleFlow { result in
+            self.signInWithAppleFlow { result in
                 switch result {
                 // if result is a success, receive appleSignInResult
                 case .success(let appleSignInResult):
@@ -68,7 +113,7 @@ final class SignInAppleHelper: NSObject {
     
     // start the flow for SignInWithApple
     // Adopted from https://firebase.google.com/docs/auth/ios/apple?hl=en&authuser=0
-    func startSignInWithAppleFlow(completion: @escaping (Result<AppleSignInResultModel,Error>) -> Void) {
+    func signInWithAppleFlow(completion: @escaping (Result<AppleSignInResultModel,Error>) -> Void) {
         // we need a completion handler so we can send the result back to where we called this function (our app)
         // function accepts a closure (called completion) as a parameter; using a closure creates an asynchronous operation without directly waiting for the sign-in flow to finish
         // @escaping means closure can be stored/executed after the function finishes aka it allows asynchronous operations
@@ -147,20 +192,15 @@ extension SignInAppleHelper: ASAuthorizationControllerDelegate {
     
     // called when Apple Sign-In is successful
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        // use the ASAuthorization that was passed when called to try and create an ASAuthorizationAppleIDCredential and extract the credential values
+        // pass the ASAuthorization that was passed to this function when sign-in was successful and try to create an AppleSignInResultModel object
         guard
-            let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
-            let fullName = appleIDCredential.fullName,
-            let appleIDToken = appleIDCredential.identityToken,
-            let idTokenString = String(data: appleIDToken, encoding: .utf8),
-            let nonce = currentNonce else {
+            let nonce = currentNonce,
+            let appleSignInResult = AppleSignInResultModel(authorization: authorization, nonce: nonce) else {
             // send the completionHandler the error
             completionHandler?(.failure(URLError(.badServerResponse))) // customize the error here
             return
         }
-        
-        // use the extracted values to create a AppleSignInResultModel object
-        let appleSignInResult = AppleSignInResultModel(idToken: idTokenString, nonce: nonce, fullName: fullName)
+
         // send the completionHandler the success
         completionHandler?(.success(appleSignInResult))
     }
