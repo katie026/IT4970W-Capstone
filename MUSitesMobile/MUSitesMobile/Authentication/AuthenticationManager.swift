@@ -131,14 +131,16 @@ extension AuthenticationManager {
     
     // sign into Firebase using AuthCredential object
     func signInWithCredential(credential: AuthCredential) async throws -> AuthDataResultModel {
+        // send AuthCredential to Firebase and receive an AuthDataResult
         let authDataResult = try await Auth.auth().signIn(with: credential)
+        // get user from AuthDataResult and return an AuthDataResultModel
         return AuthDataResultModel(user: authDataResult.user)
     }
     
     // sign in using Google
     @discardableResult
     func signInWithGoogle(googleSignInResult: GoogleSignInResultModel) async throws -> AuthDataResultModel {
-        // use FirebaseAuth to create Firebase AuthCredential using Google tokens
+        // use FirebaseAuth SDK to create Firebase AuthCredential using Google tokens
         let credential = GoogleAuthProvider.credential(withIDToken: googleSignInResult.idToken, accessToken: googleSignInResult.accessToken)
         // sign into Firebase using Firebase AuthCredential
         return try await signInWithCredential(credential: credential)
@@ -149,9 +151,49 @@ extension AuthenticationManager {
         // an option to sign in with Apple will be required to be published in the App Store
     @discardableResult
     func signInWithApple(appleSignInResult: AppleSignInResultModel) async throws -> AuthDataResultModel {
-        // use FirebaseAuth to create Firebase AuthCredential using AppleIDCredential, nonce, and ID token
+        // use FirebaseAuth SDK to create Firebase AuthCredential using AppleIDCredential, nonce, and ID token
         let credential = OAuthProvider.appleCredential(withIDToken: appleSignInResult.idToken, rawNonce: appleSignInResult.nonce, fullName: appleSignInResult.fullNameComponents)
         // sign into Firebase using Firebase AuthCredential
         return try await signInWithCredential(credential: credential)
+    }
+}
+
+// MARK: LINK SIGN INS
+extension AuthenticationManager {
+    // link Google account to current user
+    func linkGoogle(googleSignInResult: GoogleSignInResultModel) async throws -> AuthDataResultModel {
+        // use FirebaseAuth SDK to create Firebase AuthCredential using Google tokens
+        let credential = GoogleAuthProvider.credential(withIDToken: googleSignInResult.idToken, accessToken: googleSignInResult.accessToken)
+        // link current user to Google provider using AuthCredential
+        return try await linkCredential(credential: credential)
+    }
+    
+    // link Apple account to current user
+    func linkApple(appleSignInResult: AppleSignInResultModel) async throws -> AuthDataResultModel {
+        // use FirebaseAuth SDK to create Firebase AuthCredential using AppleIDCredential, nonce, and ID token
+        let credential = OAuthProvider.appleCredential(withIDToken: appleSignInResult.idToken, rawNonce: appleSignInResult.nonce, fullName: appleSignInResult.fullNameComponents)
+        // link current user to Apple provider using AuthCredential
+        return try await linkCredential(credential: credential)
+    }
+    
+    // link existing Email account to current user
+    func linkEmail(email: String, password: String) async throws -> AuthDataResultModel {
+        // use FirebaseAuth SDK to create Firebase AuthCredential using email and password
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        // link current user to Firebase using AuthCredential
+        return try await linkCredential(credential: credential)
+    }
+    
+    // link current user to another auth provider using AuthCredential
+    private func linkCredential(credential: AuthCredential) async throws -> AuthDataResultModel {
+        // get current user
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.badURL)
+        }
+        
+        // send AuthCredential to Firebase and attempt to link new credentials to current user
+        let authDataResult = try await user.link(with: credential)
+        // get user from AuthDataResult and return an AuthDataResultModel
+        return AuthDataResultModel(user: authDataResult.user)
     }
 }

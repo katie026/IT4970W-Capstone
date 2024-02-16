@@ -24,7 +24,7 @@ final class AuthenticationViewModel: ObservableObject {
         try await AuthenticationManager.shared.signInWithGoogle(googleSignInResult: googleSignInResult)
     }
     
-    // Sign in with Apple
+    // Sign in with Apple (will not work until we have developer account)
     func signInApple() async throws {
         // async means signInApple() does not complete until all these lines are completed as well, meaning helper will not get deallocated as we wait for the sign in to complete
         
@@ -51,18 +51,18 @@ struct AuthenticationView: View {
     
     var body: some View {
         VStack {
-            //  Sign in with Email
-            NavigationLink {
-                SignInEmailView(showSignInView: $showSignInView)
-            } label: {
-                Text("Sign In with Email")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(height: 55)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(10)
-            }
+//            //  Sign in with Email
+//            NavigationLink {
+//                SignInEmailView(showSignInView: $showSignInView)
+//            } label: {
+//                Text("Sign In with Email")
+//                    .font(.headline)
+//                    .foregroundColor(.white)
+//                    .frame(height: 55)
+//                    .frame(maxWidth: .infinity)
+//                    .background(Color.blue)
+//                    .cornerRadius(10)
+//            }
             
             //  Sign in with Google
             GoogleSignInButton(viewModel: GoogleSignInButtonViewModel(scheme: .light, style: .wide, state: .normal)) {
@@ -79,22 +79,22 @@ struct AuthenticationView: View {
             }
             
             //  Sign in with Apple
-            Button(action: {
-                Task {
-                    do {
-                        // try to sign in using Apple
-                        try await viewModel.signInApple()
-                        // turn off the SignInView
-                        showSignInView = false;
-                    } catch {
-                        print(error)
-                    }
-                }
-            }, label: {
-                SignInWithAppleButtonViewRepresentable(type: .default, style: .black)
-                    .allowsHitTesting(false) // do not let user click it
-            })
-            .frame(height: 55)
+//            Button(action: {
+//                Task {
+//                    do {
+//                        // try to sign in using Apple
+//                        try await viewModel.signInApple()
+//                        // turn off the SignInView
+//                        showSignInView = false;
+//                    } catch {
+//                        print(error)
+//                    }
+//                }
+//            }, label: {
+//                SignInWithAppleButtonViewRepresentable(type: .default, style: .black)
+//                    .allowsHitTesting(false) // do not let user click it
+//            })
+//            .frame(height: 55)
             
             Spacer()
         }
