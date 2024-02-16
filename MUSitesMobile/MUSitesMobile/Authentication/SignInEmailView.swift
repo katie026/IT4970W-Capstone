@@ -2,7 +2,7 @@
 //  SignInEmailView.swift
 //  MUSitesMobile
 //
-//  Created by J Kim on 2/14/24.
+//  Created by Katie Jackson on 2/14/24.
 //
 
 import SwiftUI

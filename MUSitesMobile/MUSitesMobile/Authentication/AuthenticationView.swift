@@ -2,20 +2,24 @@
 //  AuthenticationView.swift
 //  MUSitesMobile
 //
-//  Created by J Kim on 2/14/24.
+//  Created by Katie Jackson on 2/14/24.
 //
 
 import SwiftUI
-import GoogleSignIn
-import GoogleSignInSwift
+import GoogleSignIn // can remove this if we use out own Google Button
+import GoogleSignInSwift // can remove this if we use out own Google Button
 
+// Authentication View Model to hold functions
 @MainActor
 final class AuthenticationViewModel: ObservableObject {
     
     func signInGoogle() async throws {
-        
-        
-        //let something = GIDSignIn.sharedInstance.signIn(withPresenting: <#T##UIViewController#>)
+        // create a SignInGoogleHelper
+        let helper = SignInGoogleHelper()
+        // get Google Sign In result model from Google using SignInGoogleHelper
+        let googleSignInResult = try await helper.signIn()
+        // now try to log into Firebase using Google result (holds the tokens)
+        try await AuthenticationManager.shared.signInWithGoogle(GoogleSignInResult: googleSignInResult)
     }
 }
 
@@ -39,7 +43,16 @@ struct AuthenticationView: View {
             }
             
             GoogleSignInButton(viewModel: GoogleSignInButtonViewModel(scheme: .light, style: .wide, state: .normal)) {
-                
+                Task {
+                    do {
+                        // try to sign in using Google
+                        try await viewModel.signInGoogle()
+                        // turn off the SignInView
+                        showSignInView = false;
+                    } catch {
+                        print(error)
+                    }
+                }
             }
             
             Spacer()

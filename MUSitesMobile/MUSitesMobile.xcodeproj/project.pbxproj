@@ -19,6 +19,7 @@
 		6E8C57312B7CF00800B5BF59 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C57302B7CF00800B5BF59 /* GoogleSignIn */; };
 		6E8C57332B7CF00800B5BF59 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C57322B7CF00800B5BF59 /* GoogleSignInSwift */; };
 		6E8C57372B7CF32100B5BF59 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8C57362B7CF32100B5BF59 /* Utilities.swift */; };
+		6E8C57392B7ED9DF00B5BF59 /* SignInGoogleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8C57382B7ED9DF00B5BF59 /* SignInGoogleHelper.swift */; };
 		6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */; };
 		6EE110712B7B57F700747F04 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110702B7B57F700747F04 /* ContentView.swift */; };
 		6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110722B7B57FA00747F04 /* Assets.xcassets */; };
@@ -34,6 +35,7 @@
 		6E8C572D2B7CEF5B00B5BF59 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6E8C57342B7CF04400B5BF59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6E8C57362B7CF32100B5BF59 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		6E8C57382B7ED9DF00B5BF59 /* SignInGoogleHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInGoogleHelper.swift; sourceTree = "<group>"; };
 		6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MUSitesMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileApp.swift; sourceTree = "<group>"; };
 		6EE110702B7B57F700747F04 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 				6E8C57252B7CADBE00B5BF59 /* SignInEmailView.swift */,
 				6E8C57272B7CB39D00B5BF59 /* AuthenticationManager.swift */,
 				6E8C572B2B7CC76800B5BF59 /* SettingsView.swift */,
+				6E8C57382B7ED9DF00B5BF59 /* SignInGoogleHelper.swift */,
 			);
 			path = Authentication;
 			sourceTree = "<group>";
@@ -224,6 +227,7 @@
 				6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */,
 				6E8C572A2B7CC35100B5BF59 /* RootView.swift in Sources */,
 				6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */,
+				6E8C57392B7ED9DF00B5BF59 /* SignInGoogleHelper.swift in Sources */,
 				6E8C57282B7CB39D00B5BF59 /* AuthenticationManager.swift in Sources */,
 				6E8C572C2B7CC76800B5BF59 /* SettingsView.swift in Sources */,
 				6E8C57372B7CF32100B5BF59 /* Utilities.swift in Sources */,

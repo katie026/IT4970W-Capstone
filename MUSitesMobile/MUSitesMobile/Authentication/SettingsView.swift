@@ -2,13 +2,22 @@
 //  SettingsView.swift
 //  MUSitesMobile
 //
-//  Created by J Kim on 2/14/24.
+//  Created by Katie Jackson on 2/14/24.
 //
 
 import SwiftUI
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
+    
+    @Published var authProviders: [AuthProviderOption] = []
+    
+    func loadAuthProviders() {
+        if let providers = try? AuthenticationManager.shared.getProviders() {
+            authProviders = providers
+        }
+    }
+    
     func signOut() throws {
         try AuthenticationManager.shared.signOut()
     }
@@ -60,8 +69,12 @@ struct SettingsView: View {
                     }
                 }
             }
-            
-            emailSection // view extension below
+            if viewModel.authProviders.contains(.email) {
+                emailSection // view extension below
+            }
+        }
+        .onAppear {
+            viewModel.loadAuthProviders()
         }
         .navigationTitle("Settings")
     }

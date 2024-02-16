@@ -2,13 +2,13 @@
 //  AuthenticationManager.swift
 //  MUSitesMobile
 //
-//  Created by J Kim on 2/14/24.
+//  Created by Katie Jackson on 2/14/24.
 //
 
 import Foundation
 import FirebaseAuth
 
-// creating our own user model from Firebase's
+// creating our own user model from Firebase's user model
 struct AuthDataResultModel {
     let uid: String
     let email: String?
@@ -22,12 +22,16 @@ struct AuthDataResultModel {
     }
 }
 
+// creating an enum for expected authentication providers
+enum AuthProviderOption: String {
+    case email = "password"
+    case google = "google.com"
+}
+
 final class AuthenticationManager {
-    
     // create a singleton of the class
     // a single global instance of the class; there are limitations to using this on larger apps (Dependency Injection is a better way)
     static let shared = AuthenticationManager()
-    
     
     private init() { }
     
@@ -44,6 +48,39 @@ final class AuthenticationManager {
         return AuthDataResultModel(user: user)
     }
     
+    func getProviders() throws -> [AuthProviderOption] {
+        // get authentication provider data for current user
+        guard let providerData = Auth.auth().currentUser?.providerData else {
+            throw URLError(.badServerResponse)
+        } // providerData will return as an array because users can sign in with multiple providers
+        
+        // create list of providers
+        var providers: [AuthProviderOption] = []
+        
+        // check all providers under the current user
+        for provider in providerData {
+            // create a providerOption (enum) from the provider ID
+            if let option = AuthProviderOption(rawValue: provider.providerID) {
+                // add to providers list
+                providers.append(option)
+                // continue loop if this fails
+            } else {
+                // crash the app if a new Auth is added and the Option (enum) could not be created because it was not added yet
+                assertionFailure("Provider option not found: \(provider.providerID)")
+            }
+        }
+        
+        return providers
+    }
+    
+    // sign out user locally (does not ping the server)
+    func signOut() throws {
+        try Auth.auth().signOut()
+    }
+}
+
+// MARK: SIGN IN EMAIL
+extension AuthenticationManager {
     // create user (using Firebase's Auth SDK)
     @discardableResult // tells Swift it's okay if we do not use the result that will be returned
     func createUser(email: String, password: String) async throws -> AuthDataResultModel {
@@ -59,11 +96,6 @@ final class AuthenticationManager {
     func signInUser(email: String, password: String) async throws -> AuthDataResultModel {
         let authDataResult = try await Auth.auth().signIn(withEmail: email, password: password)
         return AuthDataResultModel(user: authDataResult.user)
-    }
-    
-    // sign out user locally (does not ping the server)
-    func signOut() throws {
-        try Auth.auth().signOut()
     }
     
     // reset password (ping server)
@@ -89,5 +121,22 @@ final class AuthenticationManager {
         }
         
         try await user.sendEmailVerification(beforeUpdatingEmail: email)
+    }
+}
+
+// MARK: SIGN IN SSO
+extension AuthenticationManager {
+    
+    @discardableResult
+    func signInWithGoogle(GoogleSignInResult: GoogleSignInResultModel) async throws -> AuthDataResultModel {
+        // use FirebaseAuth to get Firebase AuthCredential using Google tokens
+        let credential = GoogleAuthProvider.credential(withIDToken: GoogleSignInResult.idToken, accessToken: GoogleSignInResult.accessToken)
+        // sign into Firebase using Firebase AuthCredential
+        return try await signInWithCredential(credential: credential)
+    }
+    
+    func signInWithCredential(credential: AuthCredential) async throws -> AuthDataResultModel {
+        let authDataResult = try await Auth.auth().signIn(with: credential)
+        return AuthDataResultModel(user: authDataResult.user)
     }
 }
