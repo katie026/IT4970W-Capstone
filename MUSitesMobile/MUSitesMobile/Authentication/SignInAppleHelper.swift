@@ -95,12 +95,16 @@ final class SignInAppleHelper: NSObject {
     @MainActor
     func startSignInWithAppleFlow(viewController: UIViewController? = nil) -> AsyncThrowingStream<AppleSignInResultModel, Error> {
         AsyncThrowingStream { continuation in
+            // begin asynchronous sign-in process and pass control to the continuation (instead of waiting for it to finish and returning a Result)
+            // once startSignInWithAppleFlow finishes, it calls the completion handler to be evaluated
             startSignInWithAppleFlow { result in
                 switch result {
+                // if result is a success, receive appleSignInResult
                 case .success(let appleSignInResult):
                     continuation.yield(appleSignInResult)
                     continuation.finish()
                     return
+                // if result is a failure, receive the error
                 case .failure(let error):
                     continuation.finish(throwing: error)
                     return
@@ -180,6 +184,7 @@ private extension SignInAppleHelper {
         authorizationController.performRequests()
     }
     
+    // create custom errors
     private enum SignInWithAppleError: LocalizedError {
         case noViewController
         case invalidCredential

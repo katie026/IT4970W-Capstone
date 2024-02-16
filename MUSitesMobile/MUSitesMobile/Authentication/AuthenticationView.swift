@@ -26,14 +26,18 @@ final class AuthenticationViewModel: ObservableObject {
     
     // Sign in with Apple
     func signInApple() async throws {
+        // async means signInApple() does not complete until all these lines are completed as well, meaning helper will not get deallocated as we wait for the sign in to complete
+        
         // create a SignInAppleHelper
         let helper = SignInAppleHelper()
-        // have helper prompt user with Apple sign in
-        let appleSignInResult = try await helper.startSignInWithAppleFlow()
-        // try to sign in to Firebase using Apple credentials
-        try await AuthenticationManager.shared.signInWithApple(appleSignInResult: appleSignInResult)
         
-        // async = signInApple function does not complete until all these lines are completed as well, meaning helper will not get deallocated as we wait for the sign in to complete
+        // Use a for-await loop to handle the asynchronous stream
+        for try await appleSignInResult in helper.startSignInWithAppleFlow() {
+            // Try to sign in to Firebase using Apple credentials
+            try await AuthenticationManager.shared.signInWithApple(appleSignInResult: appleSignInResult)
+            // If successful, you can break out of the loop as you have the result
+            break
+        }
     }
 }
 
