@@ -14,6 +14,8 @@ import GoogleSignInSwift // can remove this if we use out own Google Button
 final class AuthenticationViewModel: ObservableObject {
     // ObservableObject protocol allows models to publish changes to their properties using the @Published and trigger reactive UI updates
     @Published var didSignInWithApple: Bool = false
+    // create a SignInAppleHelper
+    let signInAppleHelper = SignInAppleHelper() // helper must be created outside of signInApple() so it can stay alive between the completion of signInAppleHelper.startSignInWithAppleFlow and the completion for the code block (completion handler)
     
     // Sign in with Google
     func signInGoogle() async throws {
@@ -27,9 +29,6 @@ final class AuthenticationViewModel: ObservableObject {
     
     // Sign in with Apple
     func signInApple() async throws {
-        // create a SignInAppleHelper
-        let signInAppleHelper = SignInAppleHelper()
-        
         // start the SignInWithAppleFlow
         signInAppleHelper.startSignInWithAppleFlow { result in
             // function uses completion handler to make sure helper stays alive and doesn't get deallocated when running this async method
