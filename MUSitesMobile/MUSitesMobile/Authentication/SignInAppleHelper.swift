@@ -45,29 +45,32 @@ final class SignInAppleHelper: NSObject {
     // create a variable for the completion block/closure so it can be accessed later
     private var completionHandler: ((Result<AppleSignInResultModel,Error>) -> Void)? = nil
     
-//    // using concurrancy
-//    func startSignInWithAppleFlow() async throws -> AppleSignInResultModel {
-//        try await withCheckedThrowingContinuation { continuation in
-//            self.startSignInWithAppleFlow { result in
-//                switch result {
-//                // if result is a success
-//                case .success(let appleSignInResult):
-//                    continuation.resume(returning: appleSignInResult)
-//                    return
-//                // if result is a failure
-//                case .failure(let error):
-//                    continuation.resume(throwing: error)
-//                    return
-//                }
-//            }
-//        }
-//    }
+    // using continuation to bridge gap between older completion handlers and new Concurrency
+    func startSignInWithAppleFlow() async throws -> AppleSignInResultModel {
+        // withCheckedThrowingContinuation takes a closure and suspends startSignInWithAppleFlow's execution while the sign-in process happens in the background
+        try await withCheckedThrowingContinuation { continuation in
+            // begin asynchronous sign-in process and pass control to the continuation (instead of waiting for it to finish and returning a Result)
+            // once startSignInWithAppleFlow finishes, it calls the completion handler to be evaluated
+            self.startSignInWithAppleFlow { result in
+                switch result {
+                // if result is a success, receive appleSignInResult
+                case .success(let appleSignInResult):
+                    continuation.resume(returning: appleSignInResult) // trigger the continuation to resume its execution and provides the appleSignInResult
+                    return
+                // if result is a failure, receive an error
+                case .failure(let error):
+                    continuation.resume(throwing: error) // trigger the continuation to resume its execution and throws the error
+                    return
+                }
+            }
+        }
+    }
     
     // start the flow for SignInWithApple
     // Adopted from https://firebase.google.com/docs/auth/ios/apple?hl=en&authuser=0
     func startSignInWithAppleFlow(completion: @escaping (Result<AppleSignInResultModel,Error>) -> Void) {
         // we need a completion handler so we can send the result back to where we called this function (our app)
-        // function accepts a closure (called completion) as a parameter
+        // function accepts a closure (called completion) as a parameter; using a closure creates an asynchronous operation without directly waiting for the sign-in flow to finish
         // @escaping means closure can be stored/executed after the function finishes aka it allows asynchronous operations
         // we'll return a Result (generic type) which includes a success value (the appleSignInResult) or an error
         

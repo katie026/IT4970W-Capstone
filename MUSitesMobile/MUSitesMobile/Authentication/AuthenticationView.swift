@@ -13,7 +13,6 @@ import GoogleSignInSwift // can remove this if we use out own Google Button
 @MainActor
 final class AuthenticationViewModel: ObservableObject {
     // ObservableObject protocol allows models to publish changes to their properties using the @Published and trigger reactive UI updates
-    @Published var didSignInWithApple: Bool = false
     
     // Sign in with Google
     func signInGoogle() async throws {
@@ -28,37 +27,14 @@ final class AuthenticationViewModel: ObservableObject {
     // Sign in with Apple
     func signInApple() async throws {
         // create a SignInAppleHelper
-        let signInAppleHelper = SignInAppleHelper()
+        let helper = SignInAppleHelper()
+        // have helper prompt user with Apple sign in
+        let appleSignInResult = try await helper.startSignInWithAppleFlow()
+        // try to sign in to Firebase using Apple credentials
+        try await AuthenticationManager.shared.signInWithApple(appleSignInResult: appleSignInResult)
         
-        // start the SignInWithAppleFlow
-        signInAppleHelper.startSignInWithAppleFlow { result in
-            // function uses completion handler to make sure helper stays alive and doesn't get deallocated when running this async method
-            // call startSignInWithAppleFlow and pass it this code block as the completion handler
-                // result is a placeholder for the value that will be received later
-            // code can continue while waiting for the results of startSignInWithAppleFlow (as the user interacts with Sign-In prompts)
-            // once Sign-In finishes, the system calls this completion handler block and replaces the result placeholder with the Result(.success/.error)
-            
-            // this switch statement within the block examines the result and handles it
-            switch result {
-            // if result is a success
-            case .success(let appleSignInResult):
-                Task {
-                    do {
-                        // try to sign in to Firebase using Apple credentials
-                        try await AuthenticationManager.shared.signInWithApple(appleSignInResult: appleSignInResult)
-                        // tell the view the user signed in with Apple
-                        self.didSignInWithApple = true
-                    } catch {
-                        
-                    }
-                }
-            // if result is a failure
-            case .failure(let error):
-                print(error)
-            }
-        }
+        // async = signInApple function does not complete until all these lines are completed as well, meaning helper will not get deallocated as we wait for the sign in to complete
     }
-    
 }
 
 
@@ -104,6 +80,8 @@ struct AuthenticationView: View {
                     do {
                         // try to sign in using Apple
                         try await viewModel.signInApple()
+                        // turn off the SignInView
+                        showSignInView = false;
                     } catch {
                         print(error)
                     }
@@ -113,12 +91,6 @@ struct AuthenticationView: View {
                     .allowsHitTesting(false) // do not let user click it
             })
             .frame(height: 55)
-            // if Apple sign in is successful, turn off the SignInView
-            .onChange(of: viewModel.didSignInWithApple) { oldValue, newValue in
-                if newValue == true {
-                    showSignInView = false
-                }
-            }
             
             Spacer()
         }
