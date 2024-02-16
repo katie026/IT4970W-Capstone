@@ -26,6 +26,7 @@ struct AuthDataResultModel {
 enum AuthProviderOption: String {
     case email = "password"
     case google = "google.com"
+    case apple = "apple.com"
 }
 
 final class AuthenticationManager {
@@ -48,6 +49,7 @@ final class AuthenticationManager {
         return AuthDataResultModel(user: user)
     }
     
+    // get list of auth providers for user (enums)
     func getProviders() throws -> [AuthProviderOption] {
         // get authentication provider data for current user
         guard let providerData = Auth.auth().currentUser?.providerData else {
@@ -127,16 +129,29 @@ extension AuthenticationManager {
 // MARK: SIGN IN SSO
 extension AuthenticationManager {
     
+    // sign into Firebase using AuthCredential object
+    func signInWithCredential(credential: AuthCredential) async throws -> AuthDataResultModel {
+        let authDataResult = try await Auth.auth().signIn(with: credential)
+        return AuthDataResultModel(user: authDataResult.user)
+    }
+    
+    // sign in using Google
     @discardableResult
-    func signInWithGoogle(GoogleSignInResult: GoogleSignInResultModel) async throws -> AuthDataResultModel {
-        // use FirebaseAuth to get Firebase AuthCredential using Google tokens
-        let credential = GoogleAuthProvider.credential(withIDToken: GoogleSignInResult.idToken, accessToken: GoogleSignInResult.accessToken)
+    func signInWithGoogle(googleSignInResult: GoogleSignInResultModel) async throws -> AuthDataResultModel {
+        // use FirebaseAuth to create Firebase AuthCredential using Google tokens
+        let credential = GoogleAuthProvider.credential(withIDToken: googleSignInResult.idToken, accessToken: googleSignInResult.accessToken)
         // sign into Firebase using Firebase AuthCredential
         return try await signInWithCredential(credential: credential)
     }
     
-    func signInWithCredential(credential: AuthCredential) async throws -> AuthDataResultModel {
-        let authDataResult = try await Auth.auth().signIn(with: credential)
-        return AuthDataResultModel(user: authDataResult.user)
+    // sign in using Apple
+        // signing in with Apple will require an Apple Developer account for it to work
+        // an option to sign in with Apple will be required to be published in the App Store
+    @discardableResult
+    func signInWithApple(appleSignInResult: AppleSignInResultModel) async throws -> AuthDataResultModel {
+        // use FirebaseAuth to create Firebase AuthCredential using AppleIDCredential, nonce, and ID token
+        let credential = OAuthProvider.appleCredential(withIDToken: appleSignInResult.idToken, rawNonce: appleSignInResult.nonce, fullName: appleSignInResult.fullName)
+        // sign into Firebase using Firebase AuthCredential
+        return try await signInWithCredential(credential: credential)
     }
 }
