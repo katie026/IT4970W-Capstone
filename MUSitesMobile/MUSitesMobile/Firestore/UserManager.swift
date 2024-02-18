@@ -40,24 +40,6 @@ struct DBUser: Codable { // allow encoding and decoding
         self.isClockedIn = false
     }
     
-//    func toggleClockInStatus() -> DBUser {
-//        // get currentValue of isClockedIn, if nil return false
-//        let currentValue = isClockedIn ?? false
-//        return DBUser(
-//            userId: userId,
-//            email: email,
-//            photoURL: photoURL,
-//            dateCreated: dateCreated,
-//            isClockedIn: !currentValue)
-//    }
-    
-//    mutating func toggleClockInStatus() {
-//        // get currentValue of isClockedIn, if nil return false
-//        let currentValue = isClockedIn ?? false
-//        // toggle clock in Bool
-//        isClockedIn = !currentValue
-//    }
-    
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case email = "email"
@@ -86,89 +68,37 @@ struct DBUser: Codable { // allow encoding and decoding
 }
 
 final class UserManager {
-    // create singleton
+    // create singleton of UserManager
     static let shared = UserManager()
     private init() { }
     
-    // get the users collection
+    // get the 'users' collection as CollectionReference
     private let userCollection: CollectionReference = Firestore.firestore().collection("users")
     
-    // get user document
+    // get user's Firestore document as DocumentReference
     private func userDocument(userId: String) -> DocumentReference {
         userCollection.document(userId)
     }
     
-//    // create user encoder
-//    private let encoder: Firestore.Encoder = {
-//        let encoder = Firestore.Encoder()
-//        // convert keys from camelCase to snake_case
-//        encoder.keyEncodingStrategy = .convertToSnakeCase
-//        return encoder
-//    }()
-//    
-//    // create user decoder
-//    private let decoder: Firestore.Decoder = {
-//        let decoder = Firestore.Decoder()
-//        // convert keys from snake_case to camelCase
-//        decoder.keyDecodingStrategy = .convertFromSnakeCase
-//        return decoder
-//    }()
-    
-    // create user
-    func createNewUser(user: DBUser) async throws {
-        // connect to Firestore and create a new document from dictionary
-        try userDocument(userId: user.userId).setData(from: user, merge: false)
-    }
-    
-//    func createNewUser(auth: AuthDataResultModel) async throws {
-//        // create dictionary from authDataResultModel to pass into user document
-//        var userData: [String:Any] = [
-//            "id" : auth.uid,
-//            "date_created" : Timestamp() // Timestamp is from Firebase SDK
-//        ]
-//        // optional values
-//        if let email = auth.email {
-//            userData["email"] = email
-//        }
-//        if let photoURL = auth.photoURL {
-//            userData["photo_url"] = photoURL
-//        }
-//        
-//        // connect to Firestore and create a new document from dictionary
-//        try await userDocument(userId: auth.uid).setData(userData, merge: false)
-//    }
-    
+    // get a user from Firestore as DBUser struct
     func getUser(userId: String) async throws -> DBUser {
         try await userDocument(userId: userId).getDocument(as: DBUser.self)
     }
     
-//    func getUser(userId: String) async throws -> DBUser {
-//        let snapshot = try await userDocument(userId: userId).getDocument()
-//        
-//        // returns snapshot as dictionary
-//        guard let data = snapshot.data(),
-//              let userId = data["id"] as? String else {
-//            throw URLError(.badServerResponse)
-//        }
-//        
-//        let email = data["email"] as? String
-//        let photoURL = data["photo_url"] as? String
-//        let dateCreated = data["date_created"] as? Date
-//        
-//        return DBUser(userId: userId, email: email, photoURL: photoURL, dateCreated: dateCreated)
-//    }
+    // create a new user in Firestore
+    func createNewUser(user: DBUser) async throws {
+        // connect to Firestore and create a new document from codable DBUser struct
+        try userDocument(userId: user.userId).setData(from: user, merge: false)
+    }
     
-//    func updateUserClockInStatus(user: DBUser) async throws {
-//        // sends a DBUser object and rewrites the user in Firestore, this could end up seding stale data though
-//        try userDocument(userId: user.userId).setData(from: user, merge: true)
-//    }
-    
+    // update user's clock-in status in Firestore
     func updateUserClockInStatus(userId: String, isClockedIn: Bool) async throws {
         // create dictioanary to pass
         let data: [String:Any] = [
             // use DBUser object's coding key for dictionary key
             DBUser.CodingKeys.isClockedIn.rawValue : isClockedIn
         ]
+        
         // pass dictionary and update the key:value pairs for that user
         try await userDocument(userId: userId).updateData(data)
     }
