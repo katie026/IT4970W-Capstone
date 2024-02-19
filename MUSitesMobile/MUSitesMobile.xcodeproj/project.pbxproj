@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2677256D2B83A26A0028EF27 /* SitesMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2677256C2B83A26A0028EF27 /* SitesMap.swift */; };
 		6E8C57162B7C9D4500B5BF59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */; };
 		6E8C571B2B7CA73E00B5BF59 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C571A2B7CA73E00B5BF59 /* FirebaseAnalytics */; };
 		6E8C571D2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6E8C571C2B7CA73E00B5BF59 /* FirebaseAnalyticsSwift */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2677256C2B83A26A0028EF27 /* SitesMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitesMap.swift; sourceTree = "<group>"; };
 		6E8C57152B7C9D4500B5BF59 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6E8C57212B7CAAEB00B5BF59 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MUSitesMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -45,6 +47,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2677256B2B83A24C0028EF27 /* Apple Maps */ = {
+			isa = PBXGroup;
+			children = (
+				2677256C2B83A26A0028EF27 /* SitesMap.swift */,
+			);
+			path = "Apple Maps";
+			sourceTree = "<group>";
+		};
 		6E8C57202B7CAAB400B5BF59 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
@@ -75,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */,
+				2677256B2B83A24C0028EF27 /* Apple Maps */,
 				6EE110702B7B57F700747F04 /* ContentView.swift */,
 				6E8C57202B7CAAB400B5BF59 /* Authentication */,
 				6EE110722B7B57FA00747F04 /* Assets.xcassets */,
@@ -191,6 +202,7 @@
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */,
 				6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */,
+				2677256D2B83A26A0028EF27 /* SitesMap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
