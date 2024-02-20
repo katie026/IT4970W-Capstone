@@ -106,13 +106,13 @@ final class UserManager {
         userCollection.document(userId)
     }
     
-    // create user encoder
+    // create Firestore encoder
     private let encoder: Firestore.Encoder = {
         let encoder = Firestore.Encoder()
         return encoder
     }()
     
-    // create user decoder
+    // create Firestore decoder
     private let decoder: Firestore.Decoder = {
         let decoder = Firestore.Decoder()
         return decoder
