@@ -18,6 +18,33 @@ struct BuildingsView: View {
             }
         }
         .navigationTitle("Buildings")
+        .toolbar(content: {
+            // Sorting
+            ToolbarItem(placement: .navigationBarLeading) {
+                Menu("Filter: \(viewModel.selectedFilter?.rawValue ?? "NONE")") {
+                    ForEach(BuildingsViewModel.FilterOption.allCases, id: \.self) { option in
+                        Button(option.rawValue) {
+                            Task {
+                                try? await viewModel.filterSelected(option: option)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Filtering
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu("Category: \(viewModel.selectedCategory?.rawValue ?? "NONE")") {
+                    ForEach(BuildingsViewModel.CategoryOption.allCases, id: \.self) { option in
+                        Button(option.rawValue) {
+                            Task {
+                                try? await viewModel.categorySelected(option: option)
+                            }
+                        }
+                    }
+                }
+            }
+        })
         .task {
             try? await viewModel.getAllBuildings()
         }

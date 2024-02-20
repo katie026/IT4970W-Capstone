@@ -117,6 +117,21 @@ final class BuildingsManager {
     func getAllBuildings() async throws -> [Building] {
         try await buildingsCollection.getDocuments(as: Building.self)
     }
+    
+    // get buildings sorted by Name
+    func getAllBuildingsSortedByName(descending: Bool) async throws -> [Building] {
+        try await buildingsCollection.order(by: "name", descending: descending).getDocuments(as: Building.self)
+    }
+    
+    // get buildings sorted by Group
+    func getAllBuildingsSortedByGroup(descending: Bool) async throws -> [Building] {
+        try await buildingsCollection.order(by: "site_group", descending: descending).getDocuments(as: Building.self) // order by: document fields
+    }
+    
+    // get buildings by Group
+    func getAllBuildingsSortedByGroup(site_group: String) async throws -> [Building] {
+        try await buildingsCollection.whereField("site_group", isEqualTo: site_group).getDocuments(as: Building.self)
+    }
 }
 
 extension Query {
