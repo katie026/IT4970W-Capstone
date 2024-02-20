@@ -44,4 +44,14 @@ final class AuthenticationViewModel: ObservableObject {
             break
         }
     }
+    
+    // Sign in Anonymously
+    func signInAnonymous() async throws {
+        // sign in user anonymously and return authDataResult
+        let authDataResult = try await AuthenticationManager.shared.signInAnonymous()
+        // create a DBUser from AuthDataResultModel
+        let user = DBUser(auth: authDataResult)
+        // create their user profile in Firestore using DBUser
+        try await UserManager.shared.createNewUser(user: user)
+    }
 }

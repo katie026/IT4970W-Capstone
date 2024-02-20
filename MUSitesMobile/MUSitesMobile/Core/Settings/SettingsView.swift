@@ -14,17 +14,20 @@ struct SettingsView: View {
     
     var body: some View {
         List {
-            Button("Sign Out") {
-                Task { // perform an asynchronous operation
-                    do {
-                        // sign user out
-                        try viewModel.signOut()
-                        // tell RootView to display the SignInView
-                        print("SIGNED OUT")
-                        showSignInView = true
-                    } catch {
-                        // error handling here
-                        print(error)
+            // check if user is anoymous, show Sign Out if not
+            if viewModel.authUser?.isAnonymous == false {
+                Button("Sign Out") {
+                    Task { // perform an asynchronous operation
+                        do {
+                            // sign user out
+                            try viewModel.signOut()
+                            // tell RootView to display the SignInView
+                            print("SIGNED OUT")
+                            showSignInView = true
+                        } catch {
+                            // error handling here
+                            print(error)
+                        }
                     }
                 }
             }

@@ -88,8 +88,8 @@
 		6E3329712B7F6253009FCD14 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				6E33297B2B7F6442009FCD14 /* Profile */,
 				6E8C57292B7CC35100B5BF59 /* RootView.swift */,
+				6E33297B2B7F6442009FCD14 /* Profile */,
 				6E3329752B7F6363009FCD14 /* Authentication */,
 				6E3329722B7F62A7009FCD14 /* Settings */,
 			);

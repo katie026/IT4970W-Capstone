@@ -42,6 +42,6 @@ final class SignInEmailViewModel: ObservableObject {
             return
         }
         
-        try await AuthenticationManager.shared.signInUser(email: email, password: password)
+        try await AuthenticationManager.shared.signInEmail(email: email, password: password)
     }
 }

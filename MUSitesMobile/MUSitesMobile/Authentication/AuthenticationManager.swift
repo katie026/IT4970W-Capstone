@@ -8,22 +8,25 @@
 import Foundation
 import FirebaseAuth
 
-// creating our own user model from Firebase's user model
+// creating our own user model from Firebase's User model
 struct AuthDataResultModel {
     let uid: String
     let email: String?
     let photoURL: String?
+    let isAnonymous: Bool?
     
     init (user: User) {
-        // the type "user" is from the Firebase SDK
+        // the type "User" is from the Firebase SDK
         self.uid = user.uid
         self.email = user.email
         self.photoURL = user.photoURL?.absoluteString
+        self.isAnonymous = user.isAnonymous
     }
 }
 
 // creating an enum for expected authentication providers
 enum AuthProviderOption: String {
+    // these strings are how Firebase returns auth providers
     case email = "password"
     case google = "google.com"
     case apple = "apple.com"
@@ -33,7 +36,6 @@ final class AuthenticationManager {
     // create a singleton of the class
     // a single global instance of the class; there are limitations to using this on larger apps (Dependency Injection is a better way)
     static let shared = AuthenticationManager()
-    
     private init() { }
     
     // check if user signed in (using local SDK)
@@ -102,9 +104,9 @@ extension AuthenticationManager {
         return AuthDataResultModel(user: authDataResult.user)
     }
     
-    // sign user in
+    // sign user in with email
     @discardableResult
-    func signInUser(email: String, password: String) async throws -> AuthDataResultModel {
+    func signInEmail(email: String, password: String) async throws -> AuthDataResultModel {
         let authDataResult = try await Auth.auth().signIn(withEmail: email, password: password)
         return AuthDataResultModel(user: authDataResult.user)
     }
@@ -167,8 +169,32 @@ extension AuthenticationManager {
     }
 }
 
-// MARK: LINK SIGN INS
+// MARK: SIGN IN ANONYMOUS
 extension AuthenticationManager {
+    @discardableResult
+    func signInAnonymous() async throws -> AuthDataResultModel {
+        let authDataResult = try await Auth.auth().signInAnonymously()
+        return AuthDataResultModel(user: authDataResult.user)
+    }
+}
+
+// MARK: LINK SIGN-INS
+extension AuthenticationManager {
+    // NOTE: only Google/Apple/Email accounts NOT ALREADY associated with a user may be linked to the current user
+    
+    // link current user to another auth provider using AuthCredential
+    private func linkCredential(credential: AuthCredential) async throws -> AuthDataResultModel {
+        // get current user
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.badURL)
+        }
+        
+        // send AuthCredential to Firebase and attempt to link new credentials to current user
+        let authDataResult = try await user.link(with: credential)
+        // get user from AuthDataResult and return an AuthDataResultModel
+        return AuthDataResultModel(user: authDataResult.user)
+    }
+    
     // link Google account to current user
     func linkGoogle(googleSignInResult: GoogleSignInResultModel) async throws -> AuthDataResultModel {
         // use FirebaseAuth SDK to create Firebase AuthCredential using Google tokens
@@ -191,18 +217,5 @@ extension AuthenticationManager {
         let credential = EmailAuthProvider.credential(withEmail: email, password: password)
         // link current user to Firebase using AuthCredential
         return try await linkCredential(credential: credential)
-    }
-    
-    // link current user to another auth provider using AuthCredential
-    private func linkCredential(credential: AuthCredential) async throws -> AuthDataResultModel {
-        // get current user
-        guard let user = Auth.auth().currentUser else {
-            throw URLError(.badURL)
-        }
-        
-        // send AuthCredential to Firebase and attempt to link new credentials to current user
-        let authDataResult = try await user.link(with: credential)
-        // get user from AuthDataResult and return an AuthDataResultModel
-        return AuthDataResultModel(user: authDataResult.user)
     }
 }

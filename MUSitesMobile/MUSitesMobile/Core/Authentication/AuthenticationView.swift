@@ -17,6 +17,28 @@ struct AuthenticationView: View {
     
     var body: some View {
         VStack {
+            // Sign in Anonymously
+            Button (action: {
+                Task {
+                    do {
+                        // try to sign in Anonymously
+                        try await viewModel.signInAnonymous()
+                        // turn off the SignInView
+                        showSignInView = false;
+                    } catch {
+                        print(error)
+                    }
+                }
+            }, label: {
+                Text("Sign In Anonymously")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(height: 55)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.orange)
+                    .cornerRadius(10)
+            })
+            
 //            //  Sign in with Email
 //            NavigationLink {
 //                SignInEmailView(showSignInView: $showSignInView)
@@ -44,7 +66,7 @@ struct AuthenticationView: View {
                 }
             }
             
-            //  Sign in with Apple
+//            //  Sign in with Apple
 //            Button(action: {
 //                Task {
 //                    do {
