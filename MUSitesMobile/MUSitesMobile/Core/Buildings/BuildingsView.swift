@@ -20,6 +20,7 @@ struct BuildingsView: View {
                 if building == viewModel.buildings.last {
                     ProgressView()
                         .onAppear {
+                            print("fetching new buildings")
                             viewModel.getBuildings()
                         }
                 }

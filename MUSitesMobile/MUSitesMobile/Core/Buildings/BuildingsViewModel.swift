@@ -112,6 +112,8 @@ final class BuildingsViewModel: ObservableObject {
     }
     
     func getBuildings() {
+        print("LAST DOC")
+        print(lastDocument)
         Task {
             let (newBuildings, lastDocument) = try await BuildingsManager.shared.getAllBuildings(descending: selectedSort?.sortDescending, group: selectedFilter?.filterKey, count: 10, lastDocument: lastDocument)
             
@@ -121,6 +123,8 @@ final class BuildingsViewModel: ObservableObject {
                 self.lastDocument = lastDocument
             }
             // if lastDocument returns nil (no more documents), don't replace the local lastDocument with nil
+            print("RETURNED DOC")
+            print(lastDocument)
         }
     }
     

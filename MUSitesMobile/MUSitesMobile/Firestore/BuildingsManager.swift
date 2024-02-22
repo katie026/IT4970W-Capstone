@@ -124,31 +124,6 @@ final class BuildingsManager {
         try buildingDocument(buildingId: building.id).setData(from: building, merge: false)
     }
     
-//    // fetch building collection onto local device
-//    private func getAllBuildings() async throws -> [Building] {
-//        try await buildingsCollection.getDocuments(as: Building.self)
-//    }
-//    
-//    // get buildings sorted by Name
-//    private func getAllBuildingsSortedByName(descending: Bool) async throws -> [Building] {
-//        try await buildingsCollection.order(by: Building.CodingKeys.name.rawValue, descending: descending).getDocuments(as: Building.self)
-//    }
-//    
-//    // get buildings filtered by Group
-//    private func getAllBuildingsFilteredByGroup(siteGroup: String) async throws -> [Building] {
-//        try await buildingsCollection.whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: siteGroup).getDocuments(as: Building.self)
-//    }
-//    
-//    // get buildings filtered by group & sorted name
-//    private func getAllBuildingsByGroupAndName(nameDescending: Bool, group: String) async throws -> [Building] {
-//        try await buildingsCollection
-//            // filter by group
-//            .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: group)
-//            // sort by name
-//            .order(by: Building.CodingKeys.siteGroup.rawValue, descending: nameDescending)
-//            .getDocuments(as: Building.self)
-//    }
-    
     // fetch building collection onto local device
     private func getAllBuildingsQuery() -> Query {
         buildingsCollection
@@ -156,12 +131,14 @@ final class BuildingsManager {
     
     // get buildings sorted by Name
     private func getAllBuildingsSortedByNameQuery(descending: Bool) -> Query {
-        buildingsCollection.order(by: Building.CodingKeys.name.rawValue, descending: descending)
+        buildingsCollection
+            .order(by: Building.CodingKeys.name.rawValue, descending: descending)
     }
     
     // get buildings filtered by Group
     private func getAllBuildingsFilteredByGroupQuery(siteGroup: String) -> Query {
-        buildingsCollection.whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: siteGroup)
+        buildingsCollection
+            .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: siteGroup)
     }
     
     // get buildings filtered by group & sorted name
@@ -191,71 +168,22 @@ final class BuildingsManager {
             query = getAllBuildingsFilteredByGroupQuery(siteGroup: group)
         }
         
-        if let lastDocument {
-            // take query and get the douments using lastDocument
-            return try await query
-                .limit(to: count)
-                .start(afterDocument: lastDocument)
-                .getDocumentsWithLastDocument(as: Building.self)
-        } else {
-            // take query and get the douments
-            return try await query
-                .limit(to: count)
-                .getDocumentsWithLastDocument(as: Building.self)
-        }
+        return try await query
+            .limit(to: count)
+            .startOptionally(afterDocument: lastDocument) // start after lastDoc if it exists
+            .getDocumentsWithLastDocument(as: Building.self) // query buildings collection
     }
     
-    // get buildings sorted by Group
-    private func getAllBuildingsSortedByGroup(descending: Bool) async throws -> [Building] {
-        try await buildingsCollection.order(by: Building.CodingKeys.siteGroup.rawValue, descending: descending).getDocuments(as: Building.self) // order by: document fields
+    // get count of all buildings
+    // we can use this to determine if we need to use pagination
+    func allBuildingsCount() async throws -> Int {
+        try await buildingsCollection.aggregateCount()
     }
-    
-    // get buildings filtered by isResHall
-    func getAllBuildingsFilteredByIsResHall() async throws -> [Building] {
-        return try await buildingsCollection.whereField(Building.CodingKeys.isReshall.rawValue, isEqualTo: true).getDocuments(as: Building.self)
-    }
-    
-    // get buildings filtered by isLibrary
-    func getAllBuildingsFilteredByIsLibrary() async throws -> [Building] {
-        return try await buildingsCollection.whereField(Building.CodingKeys.isLibrary.rawValue, isEqualTo: true).getDocuments(as: Building.self)
-    }
-    
-//    // get Buildings by ex. "Coordinates" with pagination
-//    func getBuildingsByCoordinates(count: Int, lastDocument: DocumentSnapshot?) async throws -> (documents: [Building], lastDocument: DocumentSnapshot?) {
-//        if let lastDocument {
-//            return try await buildingsCollection
-//                .order(by: Building.CodingKeys.coordinates.rawValue, descending: true)
-//                .limit(to: count)
-//                .start(afterDocument: lastDocument)
-//                .getDocumentsWithLastDocument(as: Building.self)
-//        } else {
-//            return try await buildingsCollection
-//                .order(by: Building.CodingKeys.coordinates.rawValue, descending: true)
-//                .limit(to: count)
-//                .getDocumentsWithLastDocument(as: Building.self)
-//        }
-//    }
 }
 
 extension Query {
-//    // using generics
-//    // given any Decodable type, return an array of that type
-//    func getDocuments<T> (as type: T.Type) async throws -> [T] where T: Decodable {
-//        // we can get a collection of documents, BUT they will count against our fetching quota, so if it is a large collection, we should query first
-//        
-//        // fetch a snapshot of the collection from Firestore
-//        let snapshot = try await self.getDocuments()
-//        
-//        // map the documents in snapshot as an array of type T and return the array
-//        return try snapshot.documents.map({ document in
-//            try document.data(as: T.self)
-//        })
-//    }
-    
+    // using generics
     func getDocuments<T> (as type: T.Type) async throws -> [T] where T: Decodable {
-//        let (documents, _) = try await getDocumentsWithLastDocument(as: type)
-//        return documents
-        
         try await getDocumentsWithLastDocument(as: type).documents
     }
     
@@ -273,10 +201,18 @@ extension Query {
         return (documents, snapshot.documents.last)
     }
     
-    func start(afterDocument lastDocument: DocumentSnapshot?) -> Query {
+    func startOptionally(afterDocument lastDocument: DocumentSnapshot?) -> Query {
         // if there is a lastDocument return the query with a start.afterDocuemnt
         guard let lastDocument else { return self }
         // otherwise, return the query as is
         return self
+    }
+    
+    // count documents in a query
+    func aggregateCount() async throws -> Int {
+        // queries the server, only returns a single Int (snapshot)
+        let snapshot = try await self.count.getAggregation(source: .server)
+        // cast to an Int
+        return Int(truncating: snapshot.count)
     }
 }
