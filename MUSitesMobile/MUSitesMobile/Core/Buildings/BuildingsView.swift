@@ -13,12 +13,16 @@ struct BuildingsView: View {
     
     var body: some View {
         List {
-            Button("FETCH MORE OBJECTS") {
-                viewModel.getBuildingsByCoordinates()
-            }
-            
             ForEach(viewModel.buildings) { building in
                 BuildingCellView(building: building)
+                
+                // pagination, query & load 10 buildings in at a time
+                if building == viewModel.buildings.last {
+                    ProgressView()
+                        .onAppear {
+                            viewModel.getBuildings()
+                        }
+                }
             }
         }
         .navigationTitle("Buildings")
@@ -50,9 +54,9 @@ struct BuildingsView: View {
             }
         })
         .onAppear {
-//            Task {
-//                try? await viewModel.getBuildings()
-//            }
+            Task {
+                try? await viewModel.getBuildings()
+            }
         }
     }
 }

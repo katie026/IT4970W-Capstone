@@ -74,7 +74,10 @@ final class BuildingsViewModel: ObservableObject {
         
         // set sort option
         self.selectedSort = option
-        print("selectedSort = \(option)")
+        // reset building list for pagination
+        self.buildings = []
+        self.lastDocument = nil
+        // get buildings again
         self.getBuildings()
     }
     
@@ -100,24 +103,33 @@ final class BuildingsViewModel: ObservableObject {
         
         // set filter option
         self.selectedFilter = option
-        print("selectedFilter = \(option)")
+        // reset building list for pagination
+        self.buildings = []
+        self.lastDocument = nil
+        // get buildings again
         self.getBuildings()
         
     }
     
     func getBuildings() {
         Task {
-            print("selectedSort = \(selectedSort?.rawValue ?? "N/A")", "selectedFilter = \(selectedFilter?.rawValue ?? "N/A")")
-            self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: selectedSort?.sortDescending, group: selectedFilter?.filterKey)
+            let (newBuildings, lastDocument) = try await BuildingsManager.shared.getAllBuildings(descending: selectedSort?.sortDescending, group: selectedFilter?.filterKey, count: 10, lastDocument: lastDocument)
+            
+            self.buildings.append(contentsOf: newBuildings)
+            // if lastDocument is NOT nil, assign the new lastDocument
+            if let lastDocument {
+                self.lastDocument = lastDocument
+            }
+            // if lastDocument returns nil (no more documents), don't replace the local lastDocument with nil
         }
     }
     
-    // get Buildings by ex. "Rating" with pagination
-    func getBuildingsByCoordinates() {
-        Task {
-            let (newBuildings, lastDocument) = try await BuildingsManager.shared.getBuildingsByCoordinates(count: 3, lastDocument: lastDocument)
-            self.buildings.append(contentsOf: newBuildings)
-            self.lastDocument = lastDocument
-        }
-    }
+//    // get Buildings by ex. "Rating" with pagination
+//    func getBuildingsByCoordinates() {
+//        Task {
+//            let (newBuildings, lastDocument) = try await BuildingsManager.shared.getBuildingsByCoordinates(count: 3, lastDocument: lastDocument)
+//            self.buildings.append(contentsOf: newBuildings)
+//            self.lastDocument = lastDocument
+//        }
+//    }
 }
