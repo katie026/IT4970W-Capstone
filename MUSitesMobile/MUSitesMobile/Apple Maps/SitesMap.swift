@@ -15,6 +15,12 @@ struct MapView: UIViewRepresentable {
     private let locationManager = CLLocationManager()
     // Mizzou coordinates
     let universityLocation = CLLocationCoordinate2D(latitude: 38.9407, longitude: -92.3279)
+    let locations: [(CLLocationCoordinate2D, String, String)] = [
+            (CLLocationCoordinate2D(latitude: 38.9407, longitude: -92.3279), "Mizzou", "University of Missouri"),
+            (CLLocationCoordinate2D(latitude: 38.944782, longitude: -92.3274335), "Ellis Library", "University of Missouri")
+            // Add more locations as needed
+        ]
+    
     
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -36,7 +42,19 @@ struct MapView: UIViewRepresentable {
         locationManager.requestWhenInUseAuthorization()
         
         
-        return mapView
+        // Add annotations for each location in the array
+                for location in locations {
+                    let annotation = MKPointAnnotation()
+                    annotation.coordinate = location.0
+                    annotation.title = location.1
+                    annotation.subtitle = location.2
+                    mapView.addAnnotation(annotation)
+                }
+                
+                return mapView
+        
+        
+        
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
@@ -45,16 +63,55 @@ struct MapView: UIViewRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(self)
     }
     
     class Coordinator: NSObject, CLLocationManagerDelegate {
+        
+        var parent: MapView
+                
+                init(_ parent: MapView) {
+                    self.parent = parent
+                }
+        
         func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
             // Check authorization status
             if status == .authorizedWhenInUse {
                 manager.startUpdatingLocation()
             }
         }
+        
+        // Implement didSelect method
+                func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+                    guard let annotation = view.annotation else {
+                        return
+                    }
+                    // Show callout with title and subtitle
+                    mapView.deselectAnnotation(annotation, animated: true)
+                    mapView.selectAnnotation(annotation, animated: true)
+                }
+                
+                // Implement viewFor method
+                func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+                    guard !(annotation is MKUserLocation) else {
+                        return nil
+                    }
+                    
+                    let identifier = "annotationView"
+                    var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+                    
+                    if annotationView == nil {
+                        annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                        annotationView?.canShowCallout = true
+                    } else {
+                        annotationView?.annotation = annotation
+                    }
+                    
+                    return annotationView
+                }
+            
+        
+        
     }
 }
 
