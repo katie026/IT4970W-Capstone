@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 final class UserBuildingsViewModel: ObservableObject {
     
-    @Published private(set) var buildings: [(userBuilding: UserManager.UserBuilding, building: Building)] = []
+    @Published private(set) var userBuildings: [UserManager.UserBuilding] = []
     
     func getUserBuildings() {
         Task {
@@ -19,19 +19,7 @@ final class UserBuildingsViewModel: ObservableObject {
             
             
             // get all current UserBuildings
-            let userBuildings = try await UserManager.shared.getAllUserBuildings(userId: authDataResult.uid)
-            
-            // create empty array to return
-            var localArray: [(userBuilding: UserManager.UserBuilding, building: Building)] = []
-            
-            // for every UserBuilding
-            for userBuilding in userBuildings {
-                // get the Building that the UserBuilding is and return as a tuple
-                if let building = try? await BuildingsManager.shared.getBuilding(buildingId: userBuilding.buildingId) {
-                    localArray.append((userBuilding, building))
-                }
-            }
-            self.buildings = localArray
+            self.userBuildings = try await UserManager.shared.getAllUserBuildings(userId: authDataResult.uid)
         }
     }
     

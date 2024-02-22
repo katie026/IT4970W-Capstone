@@ -13,12 +13,12 @@ struct UserBuildingsView: View {
     
     var body: some View {
         List {
-            ForEach(viewModel.buildings, id: \.userBuilding.id.self) { item in
-                BuildingCellView(building: item.building)
+            ForEach(viewModel.userBuildings, id: \.id.self) { userBuilding in
+                BuildingCellViewBuilder(buildingId: userBuilding.buildingId)
                     .contextMenu {
                         // remove the UserBuilding
                         Button ("Remove from User Buildings") {
-                            viewModel.removeUserBuilding(userBuildingId: item.userBuilding.id)
+                            viewModel.removeUserBuilding(userBuildingId: userBuilding.id)
                         }
                     }
             }
