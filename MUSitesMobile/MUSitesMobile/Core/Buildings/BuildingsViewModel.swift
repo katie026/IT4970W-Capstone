@@ -15,7 +15,6 @@ final class BuildingsViewModel: ObservableObject {
     @Published private(set) var buildingTest: Building? = nil
     @Published var selectedSort: SortOption? = nil
     @Published var selectedFilter: FilterOption? = nil
-    private var lastDocument: DocumentSnapshot? = nil
     
     enum SortOption: String, CaseIterable {
         // CaseIterable so we can loop through them
@@ -74,9 +73,6 @@ final class BuildingsViewModel: ObservableObject {
         
         // set sort option
         self.selectedSort = option
-        // reset building list for pagination
-        self.buildings = []
-        self.lastDocument = nil
         // get buildings again
         self.getBuildings()
     }
@@ -103,28 +99,14 @@ final class BuildingsViewModel: ObservableObject {
         
         // set filter option
         self.selectedFilter = option
-        // reset building list for pagination
-        self.buildings = []
-        self.lastDocument = nil
         // get buildings again
         self.getBuildings()
         
     }
     
     func getBuildings() {
-        print("LAST DOC")
-        print(lastDocument)
         Task {
-            let (newBuildings, lastDocument) = try await BuildingsManager.shared.getAllBuildings(descending: selectedSort?.sortDescending, group: selectedFilter?.filterKey, count: 10, lastDocument: lastDocument)
-            
-            self.buildings.append(contentsOf: newBuildings)
-            // if lastDocument is NOT nil, assign the new lastDocument
-            if let lastDocument {
-                self.lastDocument = lastDocument
-            }
-            // if lastDocument returns nil (no more documents), don't replace the local lastDocument with nil
-            print("RETURNED DOC")
-            print(lastDocument)
+            self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: selectedSort?.sortDescending, group: selectedFilter?.filterKey)
         }
     }
     

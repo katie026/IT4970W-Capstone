@@ -15,15 +15,6 @@ struct BuildingsView: View {
         List {
             ForEach(viewModel.buildings) { building in
                 BuildingCellView(building: building)
-                
-                // pagination, query & load 10 buildings in at a time
-                if building == viewModel.buildings.last {
-                    ProgressView()
-                        .onAppear {
-                            print("fetching new buildings")
-                            viewModel.getBuildings()
-                        }
-                }
             }
         }
         .navigationTitle("Buildings")

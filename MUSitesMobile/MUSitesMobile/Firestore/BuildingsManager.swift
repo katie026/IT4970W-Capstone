@@ -151,7 +151,7 @@ final class BuildingsManager {
     }
     
     // get buildings by Group and/or Name
-    func getAllBuildings(descending: Bool?, group: String?, count: Int, lastDocument: DocumentSnapshot?) async throws -> (documents: [Building], lastDocument: DocumentSnapshot?) {
+    func getAllBuildings(descending: Bool?, group: String?) async throws -> [Building] {
         var query: Query = getAllBuildingsQuery()
         
         // if given a Group and nameSort
@@ -169,9 +169,7 @@ final class BuildingsManager {
         }
         
         return try await query
-            .limit(to: count)
-            .startOptionally(afterDocument: lastDocument) // start after lastDoc if it exists
-            .getDocumentsWithLastDocument(as: Building.self) // query buildings collection
+            .getDocuments(as: Building.self) // query buildings collection
     }
     
     // get count of all buildings
@@ -199,13 +197,6 @@ extension Query {
         })
         
         return (documents, snapshot.documents.last)
-    }
-    
-    func startOptionally(afterDocument lastDocument: DocumentSnapshot?) -> Query {
-        // if there is a lastDocument return the query with a start.afterDocuemnt
-        guard let lastDocument else { return self }
-        // otherwise, return the query as is
-        return self
     }
     
     // count documents in a query
