@@ -118,6 +118,9 @@ final class UserManager {
         return decoder
     }()
     
+    // create a var to hold UserBuilding listener
+    private var userBuildingsListener : ListenerRegistration? = nil
+    
     // get a user from Firestore as DBUser struct
     func getUser(userId: String) async throws -> DBUser {
         try await userDocument(userId: userId).getDocument(as: DBUser.self)
@@ -221,9 +224,13 @@ final class UserManager {
         return try await userBuildingsCollection(userId: userId).getDocuments(as: UserBuilding.self)
     }
     
+    func removeListenerForAllUserBuildings() {
+        self.userBuildingsListener?.remove()
+    }
+    
     func addListenerForAllUserBuildings(userId: String, completion: @escaping (_ buildings: [UserBuilding]) -> Void) {
         // add listner
-        userBuildingsCollection(userId: userId).addSnapshotListener { querySnapshot, error in
+        self.userBuildingsListener = userBuildingsCollection(userId: userId).addSnapshotListener { querySnapshot, error in
             // this closure will continuouslly execute over time for the rest of its lifespan, any time there is a change at this collection, this snapshot listener will execute
             // needs @escaping because the completion handler will be outliving the original call for addListenerForAllUserBuildings() function
             
@@ -244,6 +251,19 @@ final class UserManager {
             let buildings: [UserBuilding] = documents.compactMap({ try? $0.data(as: UserBuilding.self) })
             // completion handler gets called on the "way back"
             completion(buildings)
+            
+            // be notified on what is changing
+            querySnapshot?.documentChanges.forEach { diff in
+                if (diff.type == .added) {
+                    print("New user_building: \(diff.document.data())")
+                }
+                if (diff.type == .modified) {
+                    print("Modified user_building: \(diff.document.data())")
+                }
+                if (diff.type == .removed) {
+                    print("Removed user_building: \(diff.document.data())")
+                }
+            }
         }
     }
 }
