@@ -45,8 +45,10 @@ struct BuildingsView: View {
                 }
             }
         })
-        .task {
-            try? await viewModel.getAllBuildings()
+        .onAppear {
+            Task {
+                try? await viewModel.getBuildings()
+            }
         }
     }
 }

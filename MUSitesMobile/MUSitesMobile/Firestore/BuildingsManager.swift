@@ -120,39 +120,42 @@ final class BuildingsManager {
     }
     
     // fetch building collection onto local device
-    func getAllBuildings() async throws -> [Building] {
+    private func getAllBuildings() async throws -> [Building] {
         try await buildingsCollection.getDocuments(as: Building.self)
     }
     
-    // get buildings by Group & sorted
-    func getAllBuildingsByGroup(descending: Bool?, filter: String?) async throws -> [Building] {
-        // if given a sort and filter
-        if let descending, let filter {
-            return try await getAllBuildingsByGroupAndFilter(descending: descending, filter: filter)
+    // get buildings by Group and/or Name
+    func getAllBuildings(descending: Bool?, group: String?) async throws -> [Building] {
+        // if given a Group and nameSort
+        if let descending, let group {
+            // filter and sort collection
+            return try await getAllBuildingsByGroupAndName(nameDescending: descending, group: group)
         // if given sort
         } else if let descending {
-            return try await getAllBuildingsSortedByGroup(descending: descending)
+            // sort whole collection
+            return try await getAllBuildingsSortedByName(descending: descending)
         // if given filter
-        } else if let filter {
-            return try await getAllBuildingsFilteredByGroup(siteGroup: filter)
+        } else if let group {
+            // filter whole collection
+            return try await getAllBuildingsFilteredByGroup(siteGroup: group)
         }
         
         // else return all
         return try await getAllBuildings()
     }
     
-    // get buildings by Group & sorted
-    private func getAllBuildingsByGroupAndFilter(descending: Bool, filter: String) async throws -> [Building] {
+    // get buildings by group & name
+    private func getAllBuildingsByGroupAndName(nameDescending: Bool, group: String) async throws -> [Building] {
         try await buildingsCollection
             // filter by group
-            .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: filter)
-            // sort by group
-            .order(by: Building.CodingKeys.siteGroup.rawValue, descending: descending)
+            .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: group)
+            // sort by name
+            .order(by: Building.CodingKeys.siteGroup.rawValue, descending: nameDescending)
             .getDocuments(as: Building.self)
     }
     
     // get buildings sorted by Name
-    func getAllBuildingsSortedByName(descending: Bool) async throws -> [Building] {
+    private func getAllBuildingsSortedByName(descending: Bool) async throws -> [Building] {
         try await buildingsCollection.order(by: Building.CodingKeys.name.rawValue, descending: descending).getDocuments(as: Building.self)
     }
     
@@ -190,18 +193,5 @@ extension Query {
         return try snapshot.documents.map({ document in
             try document.data(as: T.self)
         })
-        
-//        // using empty array and for loop
-//        // create an array to hold Buildings
-//        var itemArray: [T] = []
-//        
-//        // decode each building into a Building struct
-//        for document in snapshot.documents {
-//            // try to decode
-//            let item = try document.data(as: T.self)
-//            // add to Building array
-//            itemArray.append(item)
-//        }
-//        return itemArray
     }
 }
