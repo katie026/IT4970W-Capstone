@@ -21,11 +21,11 @@ struct BuildingsView: View {
         .toolbar(content: {
             // Sorting
             ToolbarItem(placement: .navigationBarLeading) {
-                Menu("Filter: \(viewModel.selectedFilter?.rawValue ?? "NONE")") {
-                    ForEach(BuildingsViewModel.FilterOption.allCases, id: \.self) { option in
+                Menu("Sort by: \(viewModel.selectedSort?.rawValue ?? "NONE")") {
+                    ForEach(BuildingsViewModel.SortOption.allCases, id: \.self) { option in
                         Button(option.rawValue) {
                             Task {
-                                try? await viewModel.filterSelected(option: option)
+                                try? await viewModel.sortSelected(option: option)
                             }
                         }
                     }
@@ -34,11 +34,11 @@ struct BuildingsView: View {
             
             // Filtering
             ToolbarItem(placement: .navigationBarTrailing) {
-                Menu("Category: \(viewModel.selectedCategory?.rawValue ?? "NONE")") {
-                    ForEach(BuildingsViewModel.CategoryOption.allCases, id: \.self) { option in
+                Menu("Filter: \(viewModel.selectedFilter?.rawValue ?? "NONE")") {
+                    ForEach(BuildingsViewModel.FilterOption.allCases, id: \.self) { option in
                         Button(option.rawValue) {
                             Task {
-                                try? await viewModel.categorySelected(option: option)
+                                try? await viewModel.filterSelected(option: option)
                             }
                         }
                     }

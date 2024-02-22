@@ -12,24 +12,28 @@ final class BuildingsViewModel: ObservableObject {
     
     @Published private(set) var buildings: [Building] = []
     @Published private(set) var buildingTest: Building? = nil
+    @Published var selectedSort: SortOption? = nil
     @Published var selectedFilter: FilterOption? = nil
-    @Published var selectedCategory: CategoryOption? = nil
     
-    enum FilterOption: String, CaseIterable {
+    enum SortOption: String, CaseIterable {
         // CaseIterable so we can loop through them
-        case noFilter
+        case noSort
         case name
         case siteGroup
         case isLibrary
         case isResHall
     }
     
-    enum CategoryOption: String, CaseIterable { // may want to relocate this eventually
+    enum FilterOption: String, CaseIterable { // may want to relocate this eventually
         // CaseIterable so we can loop through them
-        case noCategory
-        case siteGroup
+        case noFilter
         case isLibrary
         case isResHall
+        case G1
+        case G2
+        case G3
+        case R1
+        case R2
     }
     
     func getAllBuildings() async throws {
@@ -42,9 +46,9 @@ final class BuildingsViewModel: ObservableObject {
         self.buildingTest = try await BuildingsManager.shared.getBuilding(buildingId: id)
     }
     
-    func filterSelected(option: FilterOption) async throws {
+    func sortSelected(option: SortOption) async throws {
         switch option {
-        case .noFilter:
+        case .noSort:
             self.buildings = try await BuildingsManager.shared.getAllBuildings()
             break
         case .name:
@@ -52,35 +56,39 @@ final class BuildingsViewModel: ObservableObject {
             break
         case .siteGroup:
             // query sorted buildings and assign to buildings list
-            self.buildings = try await BuildingsManager.shared.getAllBuildingsSortedByGroup(descending: false)
+            self.buildings = try await BuildingsManager.shared.getAllBuildingsByGroup(descending: false, filter: nil)
             break
         case .isLibrary:
             break
         case.isResHall:
+            break
+        }
+        
+        // update the selected filter
+        self.selectedSort = option
+    }
+    
+    func filterSelected(option: FilterOption) async throws {
+        switch option {
+        case .noFilter:
+            // get all buildings
+            self.buildings = try await BuildingsManager.shared.getAllBuildings()
+            break
+        case .G1, .G2, .G3, .R1, .R2:
+            // query sorted buildings and assign to buildings list
+            self.buildings = try await BuildingsManager.shared.getAllBuildingsByGroup(descending: false, filter: option.rawValue)
+            break
+        case .isLibrary:
+            // query sorted buildings and assign to buildings list
+            self.buildings = try await BuildingsManager.shared.getAllBuildingsFilteredByIsLibrary()
+            break
+        case.isResHall:
+            // query sorted buildings and assign to buildings list
+            self.buildings = try await BuildingsManager.shared.getAllBuildingsFilteredByIsResHall()
             break
         }
         
         // update the selected filter
         self.selectedFilter = option
-    }
-    
-    func categorySelected(option: CategoryOption) async throws {
-        switch option {
-        case .noCategory:
-            // get all buildings
-            self.buildings = try await BuildingsManager.shared.getAllBuildings()
-            break
-        case .siteGroup:
-            // query sorted buildings and assign to buildings list
-            self.buildings = try await BuildingsManager.shared.getAllBuildingsSortedByGroup(site_group: option.rawValue)
-            break
-        case .isLibrary:
-            break
-        case.isResHall:
-            break
-        }
-        
-        // update the selected filter
-        self.selectedCategory = option
     }
 }

@@ -29,6 +29,7 @@ struct Building: Identifiable, Codable { // allow encoding and decoding
     let coordinates: GeoPoint?
     let isLibrary: Bool?
     let isReshall: Bool?
+    let siteGroup: String?
     
     // create Building manually
     init(
@@ -37,7 +38,8 @@ struct Building: Identifiable, Codable { // allow encoding and decoding
         address: Address? = nil,
         coordinates: GeoPoint? = nil,
         isLibrary: Bool? = nil,
-        isReshall: Bool? = nil
+        isReshall: Bool? = nil,
+        siteGroup: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -45,6 +47,7 @@ struct Building: Identifiable, Codable { // allow encoding and decoding
         self.coordinates = coordinates
         self.isLibrary = isLibrary
         self.isReshall = isReshall
+        self.siteGroup = siteGroup
     }
     
     enum CodingKeys: String, CodingKey {
@@ -54,6 +57,7 @@ struct Building: Identifiable, Codable { // allow encoding and decoding
         case coordinates = "coordinates"
         case isLibrary = "is_library"
         case isReshall = "is_reshall"
+        case siteGroup = "site_group"
     }
     
     init(from decoder: Decoder) throws {
@@ -64,6 +68,7 @@ struct Building: Identifiable, Codable { // allow encoding and decoding
         self.coordinates = try container.decodeIfPresent(GeoPoint.self, forKey: .coordinates)
         self.isLibrary = try container.decodeIfPresent(Bool.self, forKey: .isLibrary)
         self.isReshall = try container.decodeIfPresent(Bool.self, forKey: .isReshall)
+        self.siteGroup = try container.decodeIfPresent(String.self, forKey: .siteGroup)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -74,6 +79,7 @@ struct Building: Identifiable, Codable { // allow encoding and decoding
         try container.encodeIfPresent(self.coordinates, forKey: .coordinates)
         try container.encodeIfPresent(self.isLibrary, forKey: .isLibrary)
         try container.encodeIfPresent(self.isReshall, forKey: .isReshall)
+        try container.encodeIfPresent(self.siteGroup, forKey: .siteGroup)
     }
 }
 
@@ -118,19 +124,56 @@ final class BuildingsManager {
         try await buildingsCollection.getDocuments(as: Building.self)
     }
     
+    // get buildings by Group & sorted
+    func getAllBuildingsByGroup(descending: Bool?, filter: String?) async throws -> [Building] {
+        // if given a sort and filter
+        if let descending, let filter {
+            return try await getAllBuildingsByGroupAndFilter(descending: descending, filter: filter)
+        // if given sort
+        } else if let descending {
+            return try await getAllBuildingsSortedByGroup(descending: descending)
+        // if given filter
+        } else if let filter {
+            return try await getAllBuildingsFilteredByGroup(siteGroup: filter)
+        }
+        
+        // else return all
+        return try await getAllBuildings()
+    }
+    
+    // get buildings by Group & sorted
+    private func getAllBuildingsByGroupAndFilter(descending: Bool, filter: String) async throws -> [Building] {
+        try await buildingsCollection
+            // filter by group
+            .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: filter)
+            // sort by group
+            .order(by: Building.CodingKeys.siteGroup.rawValue, descending: descending)
+            .getDocuments(as: Building.self)
+    }
+    
     // get buildings sorted by Name
     func getAllBuildingsSortedByName(descending: Bool) async throws -> [Building] {
-        try await buildingsCollection.order(by: "name", descending: descending).getDocuments(as: Building.self)
+        try await buildingsCollection.order(by: Building.CodingKeys.name.rawValue, descending: descending).getDocuments(as: Building.self)
     }
     
     // get buildings sorted by Group
-    func getAllBuildingsSortedByGroup(descending: Bool) async throws -> [Building] {
-        try await buildingsCollection.order(by: "site_group", descending: descending).getDocuments(as: Building.self) // order by: document fields
+    private func getAllBuildingsSortedByGroup(descending: Bool) async throws -> [Building] {
+        try await buildingsCollection.order(by: Building.CodingKeys.siteGroup.rawValue, descending: descending).getDocuments(as: Building.self) // order by: document fields
     }
     
-    // get buildings by Group
-    func getAllBuildingsSortedByGroup(site_group: String) async throws -> [Building] {
-        try await buildingsCollection.whereField("site_group", isEqualTo: site_group).getDocuments(as: Building.self)
+    // get buildings filtered by Group
+    private func getAllBuildingsFilteredByGroup(siteGroup: String) async throws -> [Building] {
+        try await buildingsCollection.whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: siteGroup).getDocuments(as: Building.self)
+    }
+    
+    // get buildings filtered by isResHall
+    func getAllBuildingsFilteredByIsResHall() async throws -> [Building] {
+        return try await buildingsCollection.whereField(Building.CodingKeys.isReshall.rawValue, isEqualTo: true).getDocuments(as: Building.self)
+    }
+    
+    // get buildings filtered by isLibrary
+    func getAllBuildingsFilteredByIsLibrary() async throws -> [Building] {
+        return try await buildingsCollection.whereField(Building.CodingKeys.isLibrary.rawValue, isEqualTo: true).getDocuments(as: Building.self)
     }
 }
 
