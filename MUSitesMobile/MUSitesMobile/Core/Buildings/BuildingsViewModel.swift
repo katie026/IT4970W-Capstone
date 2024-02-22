@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 @MainActor
 final class BuildingsViewModel: ObservableObject {
@@ -14,6 +15,7 @@ final class BuildingsViewModel: ObservableObject {
     @Published private(set) var buildingTest: Building? = nil
     @Published var selectedSort: SortOption? = nil
     @Published var selectedFilter: FilterOption? = nil
+    private var lastDocument: DocumentSnapshot? = nil
     
     enum SortOption: String, CaseIterable {
         // CaseIterable so we can loop through them
@@ -107,6 +109,15 @@ final class BuildingsViewModel: ObservableObject {
         Task {
             print("selectedSort = \(selectedSort?.rawValue ?? "N/A")", "selectedFilter = \(selectedFilter?.rawValue ?? "N/A")")
             self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: selectedSort?.sortDescending, group: selectedFilter?.filterKey)
+        }
+    }
+    
+    // get Buildings by ex. "Rating" with pagination
+    func getBuildingsByCoordinates() {
+        Task {
+            let (newBuildings, lastDocument) = try await BuildingsManager.shared.getBuildingsByCoordinates(count: 3, lastDocument: lastDocument)
+            self.buildings.append(contentsOf: newBuildings)
+            self.lastDocument = lastDocument
         }
     }
 }

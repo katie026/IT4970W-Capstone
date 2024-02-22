@@ -13,6 +13,10 @@ struct BuildingsView: View {
     
     var body: some View {
         List {
+            Button("FETCH MORE OBJECTS") {
+                viewModel.getBuildingsByCoordinates()
+            }
+            
             ForEach(viewModel.buildings) { building in
                 BuildingCellView(building: building)
             }
@@ -46,9 +50,9 @@ struct BuildingsView: View {
             }
         })
         .onAppear {
-            Task {
-                try? await viewModel.getBuildings()
-            }
+//            Task {
+//                try? await viewModel.getBuildings()
+//            }
         }
     }
 }

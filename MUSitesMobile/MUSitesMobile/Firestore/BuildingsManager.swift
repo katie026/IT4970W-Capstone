@@ -178,20 +178,57 @@ final class BuildingsManager {
     func getAllBuildingsFilteredByIsLibrary() async throws -> [Building] {
         return try await buildingsCollection.whereField(Building.CodingKeys.isLibrary.rawValue, isEqualTo: true).getDocuments(as: Building.self)
     }
+    
+    // get Buildings by ex. "Coordinates" with pagination
+    func getBuildingsByCoordinates(count: Int, lastDocument: DocumentSnapshot?) async throws -> (documents: [Building], lastDocument: DocumentSnapshot?) {
+        if let lastDocument {
+            return try await buildingsCollection
+                .order(by: Building.CodingKeys.coordinates.rawValue, descending: true)
+                .limit(to: count)
+                .start(afterDocument: lastDocument)
+                .getDocumentsWithLastDocument(as: Building.self)
+        } else {
+            return try await buildingsCollection
+                .order(by: Building.CodingKeys.coordinates.rawValue, descending: true)
+                .limit(to: count)
+                .getDocumentsWithLastDocument(as: Building.self)
+        }
+    }
 }
 
 extension Query {
-    // using generics
-    // given any Decodable type, return an array of that type
+//    // using generics
+//    // given any Decodable type, return an array of that type
+//    func getDocuments<T> (as type: T.Type) async throws -> [T] where T: Decodable {
+//        // we can get a collection of documents, BUT they will count against our fetching quota, so if it is a large collection, we should query first
+//        
+//        // fetch a snapshot of the collection from Firestore
+//        let snapshot = try await self.getDocuments()
+//        
+//        // map the documents in snapshot as an array of type T and return the array
+//        return try snapshot.documents.map({ document in
+//            try document.data(as: T.self)
+//        })
+//    }
+    
     func getDocuments<T> (as type: T.Type) async throws -> [T] where T: Decodable {
+//        let (documents, _) = try await getDocumentsWithLastDocument(as: type)
+//        return documents
+        
+        try await getDocumentsWithLastDocument(as: type).documents
+    }
+    
+    func getDocumentsWithLastDocument<T> (as type: T.Type) async throws -> (documents: [T], lastDocument: DocumentSnapshot?) where T: Decodable {
         // we can get a collection of documents, BUT they will count against our fetching quota, so if it is a large collection, we should query first
         
         // fetch a snapshot of the collection from Firestore
         let snapshot = try await self.getDocuments()
         
         // map the documents in snapshot as an array of type T and return the array
-        return try snapshot.documents.map({ document in
+        let documents = try snapshot.documents.map({ document in
             try document.data(as: T.self)
         })
+        
+        return (documents, snapshot.documents.last)
     }
 }
