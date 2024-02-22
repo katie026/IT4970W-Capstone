@@ -2,7 +2,7 @@
 //  MUSitesMobileApp.swift
 //  MUSitesMobile
 //
-//  Created by J Kim on 2/13/24.
+//  Created by Katie Jackson on 2/13/24.
 //
 
 import SwiftUI
@@ -15,15 +15,15 @@ struct MUSitesMobileApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
         }
     }
 }
 
+// Configure Firebase
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
-        print("Configured Firebase.")
         
         return true
     }
