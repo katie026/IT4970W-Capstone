@@ -10,6 +10,7 @@ import SwiftUI
 struct UserBuildingsView: View {
     
     @StateObject private var viewModel = UserBuildingsViewModel()
+    @State private var didAppear: Bool = false // to make sure we don't keep adding a listener
     
     var body: some View {
         List {
@@ -25,7 +26,10 @@ struct UserBuildingsView: View {
         }
         .navigationTitle("User Tasks")
         .onAppear {
-            viewModel.getUserBuildings()
+            if !didAppear {
+                viewModel.addListenerForUserBuildings()
+                didAppear = true
+            }
         }
     }
 }

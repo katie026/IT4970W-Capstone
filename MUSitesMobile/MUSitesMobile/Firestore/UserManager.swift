@@ -188,32 +188,6 @@ final class UserManager {
     }
     
     // MARK: BOOTCAMP #15 TUTORIAL: sub-collections
-    struct UserBuilding: Codable {
-        let id: String
-        let buildingId: String
-        let dateAssigned: Date
-        
-        enum CodingKeys: String, CodingKey {
-            case id = "id"
-            case buildingId = "building_id"
-            case dateAssigned = "date_assigned"
-        }
-        
-        init(from decoder: Decoder) throws {
-            let container: KeyedDecodingContainer<UserManager.UserBuilding.CodingKeys> = try decoder.container(keyedBy: UserManager.UserBuilding.CodingKeys.self)
-            self.id = try container.decode(String.self, forKey: UserManager.UserBuilding.CodingKeys.id)
-            self.buildingId = try container.decode(String.self, forKey: UserManager.UserBuilding.CodingKeys.buildingId)
-            self.dateAssigned = try container.decode(Date.self, forKey: UserManager.UserBuilding.CodingKeys.dateAssigned)
-        }
-        
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: UserManager.UserBuilding.CodingKeys.self)
-            try container.encode(self.id, forKey: UserManager.UserBuilding.CodingKeys.id)
-            try container.encode(self.buildingId, forKey: UserManager.UserBuilding.CodingKeys.buildingId)
-            try container.encode(self.dateAssigned, forKey: UserManager.UserBuilding.CodingKeys.dateAssigned)
-        }
-    }
-    
     private func userBuildingsCollection(userId: String) -> CollectionReference {
         userDocument(userId: userId).collection("user_buildings")
     }
@@ -245,5 +219,57 @@ final class UserManager {
     
     func getAllUserBuildings(userId: String) async throws -> [UserBuilding] {
         return try await userBuildingsCollection(userId: userId).getDocuments(as: UserBuilding.self)
+    }
+    
+    func addListenerForAllUserBuildings(userId: String, completion: @escaping (_ buildings: [UserBuilding]) -> Void) {
+        // add listner
+        userBuildingsCollection(userId: userId).addSnapshotListener { querySnapshot, error in
+            // this closure will continuouslly execute over time for the rest of its lifespan, any time there is a change at this collection, this snapshot listener will execute
+            // needs @escaping because the completion handler will be outliving the original call for addListenerForAllUserBuildings() function
+            
+            // get snapshot of all userBuildings as documents fot a user
+            guard let documents = querySnapshot?.documents else {
+                print("No Documents")
+                return
+            }
+            
+            // convert documents to Buildings
+//            // compactMap means if any do not convert, we just ignore and move on
+//            let buildings: [UserBuilding] = documents.compactMap { documentSnapshot in
+//                return try? documentSnapshot.data(as: UserBuilding.self)
+//                // try? makes it optinoal meaning compact map will remove it from the array if nil
+//            }
+            
+            // decode the snapshot's documents into an array of UserBuildings
+            let buildings: [UserBuilding] = documents.compactMap({ try? $0.data(as: UserBuilding.self) })
+            // completion handler gets called on the "way back"
+            completion(buildings)
+        }
+    }
+}
+
+struct UserBuilding: Codable {
+    let id: String
+    let buildingId: String
+    let dateAssigned: Date
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case buildingId = "building_id"
+        case dateAssigned = "date_assigned"
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container: KeyedDecodingContainer<UserBuilding.CodingKeys> = try decoder.container(keyedBy: UserBuilding.CodingKeys.self)
+        self.id = try container.decode(String.self, forKey: UserBuilding.CodingKeys.id)
+        self.buildingId = try container.decode(String.self, forKey: UserBuilding.CodingKeys.buildingId)
+        self.dateAssigned = try container.decode(Date.self, forKey: UserBuilding.CodingKeys.dateAssigned)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: UserBuilding.CodingKeys.self)
+        try container.encode(self.id, forKey: UserBuilding.CodingKeys.id)
+        try container.encode(self.buildingId, forKey: UserBuilding.CodingKeys.buildingId)
+        try container.encode(self.dateAssigned, forKey: UserBuilding.CodingKeys.dateAssigned)
     }
 }
