@@ -31,6 +31,7 @@ struct ProfileView: View {
                 
                 // toggle clock in status
                 Button {
+                    print("Toggle time-clock")
                     viewModel.toggleClockInStatus()
                 } label: {
                     Text("User is clocked in: \((user.isClockedIn ?? false).description.capitalized)")

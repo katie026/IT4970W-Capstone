@@ -15,6 +15,11 @@ struct BuildingsView: View {
         List {
             ForEach(viewModel.buildings) { building in
                 BuildingCellView(building: building)
+                    .contextMenu {
+                        Button("Add to Tasks") {
+                            viewModel.addUserBuilding(buildingId: building.id)
+                        }
+                    }
             }
         }
         .navigationTitle("Buildings")

@@ -59,18 +59,6 @@ final class BuildingsViewModel: ObservableObject {
     }
     
     func sortSelected(option: SortOption) async throws {
-//        switch option {
-//        case .noSort:
-//            self.buildings = try await BuildingsManager.shared.getAllBuildings()
-//            break
-//        case .nameAscending:
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsSortedByName(descending: false)
-//            break
-//        case .nameDescending:
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsSortedByName(descending: true)
-//            break
-//        }
-        
         // set sort option
         self.selectedSort = option
         // get buildings again
@@ -78,25 +66,6 @@ final class BuildingsViewModel: ObservableObject {
     }
     
     func filterSelected(option: FilterOption) async throws {
-//        switch option {
-//        case .noFilter:
-//            // get all buildings
-//            self.buildings = try await BuildingsManager.shared.getAllBuildings()
-//            break
-//        case .G1, .G2, .G3, .R1, .R2:
-//            // query sorted buildings and assign to buildings list
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsByGroup(descending: false, filter: option.rawValue)
-//            break
-//        case .isLibrary:
-//            // query sorted buildings and assign to buildings list
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsFilteredByIsLibrary()
-//            break
-//        case.isResHall:
-//            // query sorted buildings and assign to buildings list
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsFilteredByIsResHall()
-//            break
-//        }
-        
         // set filter option
         self.selectedFilter = option
         // get buildings again
@@ -110,12 +79,12 @@ final class BuildingsViewModel: ObservableObject {
         }
     }
     
-//    // get Buildings by ex. "Rating" with pagination
-//    func getBuildingsByCoordinates() {
-//        Task {
-//            let (newBuildings, lastDocument) = try await BuildingsManager.shared.getBuildingsByCoordinates(count: 3, lastDocument: lastDocument)
-//            self.buildings.append(contentsOf: newBuildings)
-//            self.lastDocument = lastDocument
-//        }
-//    }
+    func addUserBuilding(buildingId: String) {
+        Task {
+            // get current users authData
+            let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
+            // create userBuilding
+            try? await UserManager.shared.addUserBuilding(userId: authDataResult.uid, buildingId: buildingId)
+        }
+    }
 }

@@ -186,4 +186,64 @@ final class UserManager {
         // pass dictionary and update the key:value pairs for that user
         try await userDocument(userId: userId).updateData(data as [AnyHashable : Any])
     }
+    
+    // MARK: BOOTCAMP #15 TUTORIAL: sub-collections
+    struct UserBuilding: Codable {
+        let id: String
+        let buildingId: String
+        let dateAssigned: Date
+        
+        enum CodingKeys: String, CodingKey {
+            case id = "id"
+            case buildingId = "building_id"
+            case dateAssigned = "date_assigned"
+        }
+        
+        init(from decoder: Decoder) throws {
+            let container: KeyedDecodingContainer<UserManager.UserBuilding.CodingKeys> = try decoder.container(keyedBy: UserManager.UserBuilding.CodingKeys.self)
+            self.id = try container.decode(String.self, forKey: UserManager.UserBuilding.CodingKeys.id)
+            self.buildingId = try container.decode(String.self, forKey: UserManager.UserBuilding.CodingKeys.buildingId)
+            self.dateAssigned = try container.decode(Date.self, forKey: UserManager.UserBuilding.CodingKeys.dateAssigned)
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: UserManager.UserBuilding.CodingKeys.self)
+            try container.encode(self.id, forKey: UserManager.UserBuilding.CodingKeys.id)
+            try container.encode(self.buildingId, forKey: UserManager.UserBuilding.CodingKeys.buildingId)
+            try container.encode(self.dateAssigned, forKey: UserManager.UserBuilding.CodingKeys.dateAssigned)
+        }
+    }
+    
+    private func userBuildingsCollection(userId: String) -> CollectionReference {
+        userDocument(userId: userId).collection("user_buildings")
+    }
+    
+    private func userBuildingDocument(userId: String, userBuildingId: String) -> DocumentReference {
+        userBuildingsCollection(userId: userId).document(userBuildingId)
+    }
+    
+    func addUserBuilding(userId: String, buildingId: String) async throws {
+        // create auto-generated document in sub-collection
+        let document = userBuildingsCollection(userId: userId).document()
+        // get document id
+        let documentId = document.documentID
+        
+        // create dictionary to push
+        let data: [String:Any] = [
+            UserBuilding.CodingKeys.id.rawValue : documentId,
+            UserBuilding.CodingKeys.buildingId.rawValue : buildingId,
+            UserBuilding.CodingKeys.dateAssigned.rawValue : Timestamp()
+        ]
+        
+        // set data to new document (this does allow multiple of the same uilding be added to a single user)
+        try await document.setData(data, merge: false)
+    }
+    
+    func removeUserBuilding(userId: String, userBuildingId: String) async throws {
+        try await userBuildingDocument(userId: userId, userBuildingId: userBuildingId).delete()
+    }
+    
+    func getAllUserBuildings(userId: String) async throws -> [UserBuilding] {
+        return try await userBuildingsCollection(userId: userId).getDocuments(as: UserBuilding.self)
+    }
 }
