@@ -6,20 +6,31 @@
 //
 
 import Foundation
+import Combine
 
 @MainActor
 final class UserBuildingsViewModel: ObservableObject {
     
     @Published private(set) var userBuildings: [UserBuilding] = []
+    private var cancellables = Set<AnyCancellable>()
     
     func addListenerForUserBuildings() {
         guard let authDataResult = try? AuthenticationManager.shared.getAuthenticatedUser() else { return }
         
-        UserManager.shared.addListenerForAllUserBuildings(userId: authDataResult.uid) { [weak self] buildings in
-            // hard reference to self disallows this class from being de-allocate because the function is alive and we are waiting for the result to come back
-            // weak references tells compiler to not do anything if self is nil when this returns
-            self?.userBuildings = buildings
-        }
+        UserManager.shared.addListenerForAllUserBuildings(userId: authDataResult.uid)
+            // combine completions
+            .sink { completion in
+                
+            } receiveValue: { [weak self] buildings in
+                self?.userBuildings = buildings
+            }
+            .store(in: &cancellables)
+        
+//        UserManager.shared.addLaistenerForAllUserBuildings(userId: authDataResult.uid) { [weak self] buildings in
+//            // hard reference to self disallows this class from being de-allocate because the function is alive and we are waiting for the result to come back
+//            // weak references tells compiler to not do anything if self is nil when this returns
+//            self?.userBuildings = buildings
+//        }
     }
     
 //    func getUserBuildings() {
