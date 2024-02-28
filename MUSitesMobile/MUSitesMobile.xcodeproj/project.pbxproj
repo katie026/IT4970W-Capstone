@@ -336,7 +336,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MUSitesMobile/Preview Content\"";
-				DEVELOPMENT_TEAM = YKMF2X3J6U;
+				DEVELOPMENT_TEAM = 885488RMJY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This application requires your location";
@@ -367,7 +367,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MUSitesMobile/Preview Content\"";
-				DEVELOPMENT_TEAM = YKMF2X3J6U;
+				DEVELOPMENT_TEAM = 885488RMJY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This application requires your location";
