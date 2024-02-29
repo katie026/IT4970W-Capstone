@@ -22,7 +22,7 @@ struct Address: Codable {
     }
 }
 
-struct Building: Identifiable, Codable { // allow encoding and decoding
+struct Building: Identifiable, Codable, Equatable { // allow encoding and decoding
     let id: String
     let name: String?
     let address: Address?
@@ -81,6 +81,11 @@ struct Building: Identifiable, Codable { // allow encoding and decoding
         try container.encodeIfPresent(self.isReshall, forKey: .isReshall)
         try container.encodeIfPresent(self.siteGroup, forKey: .siteGroup)
     }
+    
+    static func == (lhs:Building, rhs: Building) -> Bool {
+        // if two buildings have the same ID, we're going to say they're equal to eachother
+        return lhs.id == rhs.id
+    }
 }
 
 final class BuildingsManager {    
@@ -120,78 +125,56 @@ final class BuildingsManager {
     }
     
     // fetch building collection onto local device
-    private func getAllBuildings() async throws -> [Building] {
-        try await buildingsCollection.getDocuments(as: Building.self)
+    private func getAllBuildingsQuery() -> Query {
+        buildingsCollection
     }
     
-    // get buildings by Group and/or Name
-    func getAllBuildings(descending: Bool?, group: String?) async throws -> [Building] {
-        // if given a Group and nameSort
-        if let descending, let group {
-            // filter and sort collection
-            return try await getAllBuildingsByGroupAndName(nameDescending: descending, group: group)
-        // if given sort
-        } else if let descending {
-            // sort whole collection
-            return try await getAllBuildingsSortedByName(descending: descending)
-        // if given filter
-        } else if let group {
-            // filter whole collection
-            return try await getAllBuildingsFilteredByGroup(siteGroup: group)
-        }
-        
-        // else return all
-        return try await getAllBuildings()
+    // get buildings sorted by Name
+    private func getAllBuildingsSortedByNameQuery(descending: Bool) -> Query {
+        buildingsCollection
+            .order(by: Building.CodingKeys.name.rawValue, descending: descending)
     }
     
-    // get buildings by group & name
-    private func getAllBuildingsByGroupAndName(nameDescending: Bool, group: String) async throws -> [Building] {
-        try await buildingsCollection
+    // get buildings filtered by Group
+    private func getAllBuildingsFilteredByGroupQuery(siteGroup: String) -> Query {
+        buildingsCollection
+            .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: siteGroup)
+    }
+    
+    // get buildings filtered by group & sorted name
+    private func getAllBuildingsByGroupAndNameQuery(nameDescending: Bool, group: String) -> Query {
+        buildingsCollection
             // filter by group
             .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: group)
             // sort by name
             .order(by: Building.CodingKeys.siteGroup.rawValue, descending: nameDescending)
-            .getDocuments(as: Building.self)
     }
     
-    // get buildings sorted by Name
-    private func getAllBuildingsSortedByName(descending: Bool) async throws -> [Building] {
-        try await buildingsCollection.order(by: Building.CodingKeys.name.rawValue, descending: descending).getDocuments(as: Building.self)
-    }
-    
-    // get buildings sorted by Group
-    private func getAllBuildingsSortedByGroup(descending: Bool) async throws -> [Building] {
-        try await buildingsCollection.order(by: Building.CodingKeys.siteGroup.rawValue, descending: descending).getDocuments(as: Building.self) // order by: document fields
-    }
-    
-    // get buildings filtered by Group
-    private func getAllBuildingsFilteredByGroup(siteGroup: String) async throws -> [Building] {
-        try await buildingsCollection.whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: siteGroup).getDocuments(as: Building.self)
-    }
-    
-    // get buildings filtered by isResHall
-    func getAllBuildingsFilteredByIsResHall() async throws -> [Building] {
-        return try await buildingsCollection.whereField(Building.CodingKeys.isReshall.rawValue, isEqualTo: true).getDocuments(as: Building.self)
-    }
-    
-    // get buildings filtered by isLibrary
-    func getAllBuildingsFilteredByIsLibrary() async throws -> [Building] {
-        return try await buildingsCollection.whereField(Building.CodingKeys.isLibrary.rawValue, isEqualTo: true).getDocuments(as: Building.self)
-    }
-}
-
-extension Query {
-    // using generics
-    // given any Decodable type, return an array of that type
-    func getDocuments<T> (as type: T.Type) async throws -> [T] where T: Decodable {
-        // we can get a collection of documents, BUT they will count against our fetching quota, so if it is a large collection, we should query first
+    // get buildings by Group and/or Name
+    func getAllBuildings(descending: Bool?, group: String?) async throws -> [Building] {
+        var query: Query = getAllBuildingsQuery()
         
-        // fetch a snapshot of the collection from Firestore
-        let snapshot = try await self.getDocuments()
+        // if given a Group and nameSort
+        if let descending, let group {
+            // filter and sort collection
+            query = getAllBuildingsByGroupAndNameQuery(nameDescending: descending, group: group)
+        // if given sort
+        } else if let descending {
+            // sort whole collection
+            query = getAllBuildingsSortedByNameQuery(descending: descending)
+        // if given filter
+        } else if let group {
+            // filter whole collection
+            query = getAllBuildingsFilteredByGroupQuery(siteGroup: group)
+        }
         
-        // map the documents in snapshot as an array of type T and return the array
-        return try snapshot.documents.map({ document in
-            try document.data(as: T.self)
-        })
+        return try await query
+            .getDocuments(as: Building.self) // query buildings collection
+    }
+    
+    // get count of all buildings
+    // we can use this to determine if we need to use pagination
+    func allBuildingsCount() async throws -> Int {
+        try await buildingsCollection.aggregateCount()
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 @MainActor
 final class BuildingsViewModel: ObservableObject {
@@ -58,55 +59,32 @@ final class BuildingsViewModel: ObservableObject {
     }
     
     func sortSelected(option: SortOption) async throws {
-//        switch option {
-//        case .noSort:
-//            self.buildings = try await BuildingsManager.shared.getAllBuildings()
-//            break
-//        case .nameAscending:
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsSortedByName(descending: false)
-//            break
-//        case .nameDescending:
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsSortedByName(descending: true)
-//            break
-//        }
-        
         // set sort option
         self.selectedSort = option
-        print("selectedSort = \(option)")
+        // get buildings again
         self.getBuildings()
     }
     
     func filterSelected(option: FilterOption) async throws {
-//        switch option {
-//        case .noFilter:
-//            // get all buildings
-//            self.buildings = try await BuildingsManager.shared.getAllBuildings()
-//            break
-//        case .G1, .G2, .G3, .R1, .R2:
-//            // query sorted buildings and assign to buildings list
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsByGroup(descending: false, filter: option.rawValue)
-//            break
-//        case .isLibrary:
-//            // query sorted buildings and assign to buildings list
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsFilteredByIsLibrary()
-//            break
-//        case.isResHall:
-//            // query sorted buildings and assign to buildings list
-//            self.buildings = try await BuildingsManager.shared.getAllBuildingsFilteredByIsResHall()
-//            break
-//        }
-        
         // set filter option
         self.selectedFilter = option
-        print("selectedFilter = \(option)")
+        // get buildings again
         self.getBuildings()
         
     }
     
     func getBuildings() {
         Task {
-            print("selectedSort = \(selectedSort?.rawValue ?? "N/A")", "selectedFilter = \(selectedFilter?.rawValue ?? "N/A")")
             self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: selectedSort?.sortDescending, group: selectedFilter?.filterKey)
+        }
+    }
+    
+    func addUserBuilding(buildingId: String) {
+        Task {
+            // get current users authData
+            let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
+            // create userBuilding
+            try? await UserManager.shared.addUserBuilding(userId: authDataResult.uid, buildingId: buildingId)
         }
     }
 }

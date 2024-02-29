@@ -16,11 +16,7 @@ struct RootView: View {
         ZStack {
             // if user is logged in, show the Settings View
             if !showSignInView {
-                NavigationStack {
-                    BuildingsView()
-                    //ProfileView(showSignInView: $showSignInView)
-                    // pass and bind showSignInView variable to the SettingsView, so that it can change this value
-                }
+                TabBarView(showSignInView: $showSignInView)
             }
         }
         // FIRST check if the user is authenticated

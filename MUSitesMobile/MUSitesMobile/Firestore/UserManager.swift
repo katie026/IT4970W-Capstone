@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
+import Combine
 
 struct ChairReport: Codable {
     let chairType: String
@@ -118,6 +119,9 @@ final class UserManager {
         return decoder
     }()
     
+    // create a var to hold UserBuilding listener
+    private var userBuildingsListener : ListenerRegistration? = nil
+    
     // get a user from Firestore as DBUser struct
     func getUser(userId: String) async throws -> DBUser {
         try await userDocument(userId: userId).getDocument(as: DBUser.self)
@@ -185,5 +189,146 @@ final class UserManager {
         
         // pass dictionary and update the key:value pairs for that user
         try await userDocument(userId: userId).updateData(data as [AnyHashable : Any])
+    }
+    
+    // MARK: BOOTCAMP #15 TUTORIAL: sub-collections
+    private func userBuildingsCollection(userId: String) -> CollectionReference {
+        userDocument(userId: userId).collection("user_buildings")
+    }
+    
+    private func userBuildingDocument(userId: String, userBuildingId: String) -> DocumentReference {
+        userBuildingsCollection(userId: userId).document(userBuildingId)
+    }
+    
+    func addUserBuilding(userId: String, buildingId: String) async throws {
+        // create auto-generated document in sub-collection
+        let document = userBuildingsCollection(userId: userId).document()
+        // get document id
+        let documentId = document.documentID
+        
+        // create dictionary to push
+        let data: [String:Any] = [
+            UserBuilding.CodingKeys.id.rawValue : documentId,
+            UserBuilding.CodingKeys.buildingId.rawValue : buildingId,
+            UserBuilding.CodingKeys.dateAssigned.rawValue : Timestamp()
+        ]
+        
+        // set data to new document (this does allow multiple of the same uilding be added to a single user)
+        try await document.setData(data, merge: false)
+    }
+    
+    func removeUserBuilding(userId: String, userBuildingId: String) async throws {
+        try await userBuildingDocument(userId: userId, userBuildingId: userBuildingId).delete()
+    }
+    
+    func getAllUserBuildings(userId: String) async throws -> [UserBuilding] {
+        return try await userBuildingsCollection(userId: userId).getDocuments(as: UserBuilding.self)
+    }
+    
+    func removeListenerForAllUserBuildings() {
+        self.userBuildingsListener?.remove()
+    }
+    
+    func addListenerForAllUserBuildings(userId: String, completion: @escaping (_ buildings: [UserBuilding]) -> Void) {
+        // add listner
+        self.userBuildingsListener = userBuildingsCollection(userId: userId).addSnapshotListener { querySnapshot, error in
+            // this closure will continuouslly execute over time for the rest of its lifespan, any time there is a change at this collection, this snapshot listener will execute
+            // needs @escaping because the completion handler will be outliving the original call for addListenerForAllUserBuildings() function
+            
+            // get snapshot of all userBuildings as documents fot a user
+            guard let documents = querySnapshot?.documents else {
+                print("No Documents")
+                return
+            }
+            
+            // convert documents to Buildings
+//            // compactMap means if any do not convert, we just ignore and move on
+//            let buildings: [UserBuilding] = documents.compactMap { documentSnapshot in
+//                return try? documentSnapshot.data(as: UserBuilding.self)
+//                // try? makes it optinoal meaning compact map will remove it from the array if nil
+//            }
+            
+            // decode the snapshot's documents into an array of UserBuildings
+            let buildings: [UserBuilding] = documents.compactMap({ try? $0.data(as: UserBuilding.self) })
+            // completion handler gets called on the "way back"
+            completion(buildings)
+            
+            // be notified on what is changing
+            querySnapshot?.documentChanges.forEach { diff in
+                if (diff.type == .added) {
+                    print("New user_building: \(diff.document.data())")
+                }
+                if (diff.type == .modified) {
+                    print("Modified user_building: \(diff.document.data())")
+                }
+                if (diff.type == .removed) {
+                    print("Removed user_building: \(diff.document.data())")
+                }
+            }
+        }
+    }
+    
+    // use combine to convert the listener into a Publisher
+//    func addListenerForAllUserBuildings(userId: String) -> AnyPublisher<[UserBuilding], Error> {
+//        // create a publisher
+//        let publisher = PassthroughSubject<[UserBuilding], Error>() // [UserBuilding] will be published back to this app
+//        // CurrentValueSubject is a publisher that will produce values over time and has a value at the current state
+//            // PassthroughSubject is a publisher that does not have a starting value and only publishes through the publisher
+//        
+//        // execute a Query snapshot listener, closure is async and will return at a later point in time
+//        self.userBuildingsListener = userBuildingsCollection(userId: userId).addSnapshotListener { querySnapshot, error in
+//            // this closure will continuouslly execute over time for the rest of its lifespan, any time there is a change at this collection, this snapshot listener will execute
+//            // needs @escaping because the completion handler will be outliving the original call for addListenerForAllUserBuildings() function
+//            
+//            // get snapshot of all userBuildings as documents fot a user
+//            guard let documents = querySnapshot?.documents else {
+//                print("No Documents")
+//                return
+//            }
+//            
+//            // decode the snapshot's documents into an array of UserBuildings
+//            let buildings: [UserBuilding] = documents.compactMap({ try? $0.data(as: UserBuilding.self) })
+//            
+//            // instead of calling completion handler, access the Publisher above and send an input [UserBuilding] into it
+//            publisher.send(buildings)
+//        }
+//        
+//        // return publisher back to app immediately, so the view can simply listen to the publisher
+//        return publisher.eraseToAnyPublisher()
+//    }
+    
+    func addListenerForAllUserBuildings(userId: String) -> AnyPublisher<[UserBuilding], Error> {
+        // create a publisher
+        let (publisher, listener) = userBuildingsCollection(userId: userId)
+            .addSnapshotListener(as: UserBuilding.self)
+        
+        self.userBuildingsListener = listener
+        return publisher
+    }
+}
+
+struct UserBuilding: Codable {
+    let id: String
+    let buildingId: String
+    let dateAssigned: Date
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case buildingId = "building_id"
+        case dateAssigned = "date_assigned"
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container: KeyedDecodingContainer<UserBuilding.CodingKeys> = try decoder.container(keyedBy: UserBuilding.CodingKeys.self)
+        self.id = try container.decode(String.self, forKey: UserBuilding.CodingKeys.id)
+        self.buildingId = try container.decode(String.self, forKey: UserBuilding.CodingKeys.buildingId)
+        self.dateAssigned = try container.decode(Date.self, forKey: UserBuilding.CodingKeys.dateAssigned)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: UserBuilding.CodingKeys.self)
+        try container.encode(self.id, forKey: UserBuilding.CodingKeys.id)
+        try container.encode(self.buildingId, forKey: UserBuilding.CodingKeys.buildingId)
+        try container.encode(self.dateAssigned, forKey: UserBuilding.CodingKeys.dateAssigned)
     }
 }
