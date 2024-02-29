@@ -39,6 +39,10 @@
 		6EA65F552B872D6A000766C7 /* BuildingCellViewBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F542B872D6A000766C7 /* BuildingCellViewBuilder.swift */; };
 		6EA65F582B8E7564000766C7 /* Query+EXT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F572B8E7564000766C7 /* Query+EXT.swift */; };
 		6EA65F5C2B8E75E5000766C7 /* OnFirstAppearViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F5B2B8E75E5000766C7 /* OnFirstAppearViewModifier.swift */; };
+		6EA65F5F2B911B34000766C7 /* SitesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F5E2B911B33000766C7 /* SitesManager.swift */; };
+		6EA65F612B91204D000766C7 /* SitesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F602B91204D000766C7 /* SitesView.swift */; };
+		6EA65F632B912058000766C7 /* SitesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F622B912058000766C7 /* SitesViewModel.swift */; };
+		6EA65F662B9120E0000766C7 /* SiteCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F652B9120E0000766C7 /* SiteCellView.swift */; };
 		6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */; };
 		6EE110712B7B57F700747F04 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110702B7B57F700747F04 /* ContentView.swift */; };
 		6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110722B7B57FA00747F04 /* Assets.xcassets */; };
@@ -72,6 +76,10 @@
 		6EA65F542B872D6A000766C7 /* BuildingCellViewBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingCellViewBuilder.swift; sourceTree = "<group>"; };
 		6EA65F572B8E7564000766C7 /* Query+EXT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Query+EXT.swift"; sourceTree = "<group>"; };
 		6EA65F5B2B8E75E5000766C7 /* OnFirstAppearViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnFirstAppearViewModifier.swift; sourceTree = "<group>"; };
+		6EA65F5E2B911B33000766C7 /* SitesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitesManager.swift; sourceTree = "<group>"; };
+		6EA65F602B91204D000766C7 /* SitesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitesView.swift; sourceTree = "<group>"; };
+		6EA65F622B912058000766C7 /* SitesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitesViewModel.swift; sourceTree = "<group>"; };
+		6EA65F652B9120E0000766C7 /* SiteCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCellView.swift; sourceTree = "<group>"; };
 		6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MUSitesMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileApp.swift; sourceTree = "<group>"; };
 		6EE110702B7B57F700747F04 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -118,6 +126,7 @@
 				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
 				6E3329752B7F6363009FCD14 /* Authentication */,
 				6E3329722B7F62A7009FCD14 /* Settings */,
+				6EA65F5D2B911B0C000766C7 /* Sites */,
 				6E6858342B84468400896B16 /* Buildings */,
 			);
 			path = Core;
@@ -165,6 +174,7 @@
 			children = (
 				6E3329802B7F699F009FCD14 /* UserManager.swift */,
 				6E68583B2B84498A00896B16 /* BuildingsManager.swift */,
+				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
 			);
 			path = Firestore;
 			sourceTree = "<group>";
@@ -246,6 +256,24 @@
 				6EA65F5B2B8E75E5000766C7 /* OnFirstAppearViewModifier.swift */,
 			);
 			path = ViewModifiers;
+			sourceTree = "<group>";
+		};
+		6EA65F5D2B911B0C000766C7 /* Sites */ = {
+			isa = PBXGroup;
+			children = (
+				6EA65F602B91204D000766C7 /* SitesView.swift */,
+				6EA65F622B912058000766C7 /* SitesViewModel.swift */,
+				6EA65F642B9120CF000766C7 /* Subviews */,
+			);
+			path = Sites;
+			sourceTree = "<group>";
+		};
+		6EA65F642B9120CF000766C7 /* Subviews */ = {
+			isa = PBXGroup;
+			children = (
+				6EA65F652B9120E0000766C7 /* SiteCellView.swift */,
+			);
+			path = Subviews;
 			sourceTree = "<group>";
 		};
 		6EE110622B7B57F600747F04 = {
@@ -394,8 +422,10 @@
 			files = (
 				6E68583C2B84498A00896B16 /* BuildingsManager.swift in Sources */,
 				6E3329772B7F6389009FCD14 /* AuthenticationViewModel.swift in Sources */,
+				6EA65F5F2B911B34000766C7 /* SitesManager.swift in Sources */,
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */,
+				6EA65F612B91204D000766C7 /* SitesView.swift in Sources */,
 				6E3329812B7F699F009FCD14 /* UserManager.swift in Sources */,
 				6E8C572A2B7CC35100B5BF59 /* RootView.swift in Sources */,
 				6EA65F492B8476E9000766C7 /* BuildingCellView.swift in Sources */,
@@ -404,6 +434,7 @@
 				6E33297A2B7F640D009FCD14 /* SignInEmailViewModel.swift in Sources */,
 				6E8C57392B7ED9DF00B5BF59 /* SignInGoogleHelper.swift in Sources */,
 				6E68583A2B84479100896B16 /* BuildingsViewModel.swift in Sources */,
+				6EA65F632B912058000766C7 /* SitesViewModel.swift in Sources */,
 				6EA65F532B871583000766C7 /* UserBuildingsViewModel.swift in Sources */,
 				6E8C57282B7CB39D00B5BF59 /* AuthenticationManager.swift in Sources */,
 				6EA65F512B8714FC000766C7 /* UserBuildingsView.swift in Sources */,
@@ -412,6 +443,7 @@
 				6EA65F552B872D6A000766C7 /* BuildingCellViewBuilder.swift in Sources */,
 				6E8C57372B7CF32100B5BF59 /* Utilities.swift in Sources */,
 				6E3329742B7F62D9009FCD14 /* SettingsViewModel.swift in Sources */,
+				6EA65F662B9120E0000766C7 /* SiteCellView.swift in Sources */,
 				6EA65F4E2B871156000766C7 /* TabBarView.swift in Sources */,
 				6EA65F582B8E7564000766C7 /* Query+EXT.swift in Sources */,
 				6E6858382B84470600896B16 /* ProfileViewModel.swift in Sources */,
