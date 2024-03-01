@@ -12,6 +12,14 @@ struct BuildingsView: View {
     @StateObject private var viewModel = BuildingsViewModel()
     
     var body: some View {
+        //testing button for the buildingId query
+        Button("Fetch Building") {
+            viewModel.fetchBuilding(withID: "4NqNXGqU9iItZaVg3V2h")
+        }
+        if let building = viewModel.building {
+            Text("Building Name: \(building.name ?? "Unkown")")
+        }
+        //end of test
         List {
             ForEach(viewModel.buildings) { building in
                 BuildingCellView(building: building)

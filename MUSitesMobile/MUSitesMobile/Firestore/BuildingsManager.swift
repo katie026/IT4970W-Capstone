@@ -118,6 +118,20 @@ final class BuildingsManager {
         try await buildingDocument(buildingId: buildingId).getDocument(as: Building.self)
     }
     
+    //query for getting buildings with specific ids
+    func getBuildingWithQuery(buildingId: String) async throws -> Building? {
+        let query = buildingsCollection.whereField("id", isEqualTo: buildingId)
+        
+        let querySnapshot = try await query.getDocuments()
+        
+        if let document = querySnapshot.documents.first {
+            return try document.data(as: Building.self)
+        }
+        else{
+            return nil
+        }
+    }
+    
     // create a new building in Firestore
     func createBuilding(building: Building) async throws {
         // connect to Firestore and create a new document from codable Building struct

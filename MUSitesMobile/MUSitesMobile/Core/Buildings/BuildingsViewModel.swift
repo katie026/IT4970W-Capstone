@@ -16,6 +16,10 @@ final class BuildingsViewModel: ObservableObject {
     @Published var selectedSort: SortOption? = nil
     @Published var selectedFilter: FilterOption? = nil
     
+    //temp
+    private var buildingsManager = BuildingsManager.shared
+    @Published var building: Building?
+    
     enum SortOption: String, CaseIterable {
         // CaseIterable so we can loop through them
         case noSort
@@ -56,6 +60,17 @@ final class BuildingsViewModel: ObservableObject {
         // Physics ID: vefZkRvjBxS1H1vSzR60
         // use authData to get user data from Firestore as Building struct
         self.buildingTest = try await BuildingsManager.shared.getBuilding(buildingId: id)
+    }
+    //function to run the query, made it fetchBuilding to change it up from getBuilding
+    func fetchBuilding(withID buildingId: String) {
+        Task {
+            do {
+                building = try await buildingsManager.getBuildingWithQuery(buildingId: buildingId)
+            }
+            catch {
+                print("Error fetching building: \(error)")
+            }
+        }
     }
     
     func sortSelected(option: SortOption) async throws {
