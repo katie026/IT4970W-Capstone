@@ -11,43 +11,45 @@ struct SiteCellView: View {
     let site: Site
     
     var body: some View {
-        HStack(alignment: .top) {
-            // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
-            AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 50, height: 50)
-                    .cornerRadius(8)
-            } placeholder: {
-                ProgressView()
-            }
-            .frame(width: 60, height: 60)
-            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-            
-            VStack(alignment: .leading) {
-                Text("\(site.name ?? "N/A")")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                Text("ID: \(site.id)")
-                Text("\(site.buildingId ?? "N/A")")
-                HStack {
-                    if site.hasClock == true {
-                        Text("Clock")
-                            .font(.callout)
-                            .foregroundStyle(.orange)
-                    }
-                    
-                    if site.hasInventory == true {
-                        Text("Inventory")
-                            .font(.callout)
-                            .foregroundStyle(.green)
+        NavigationLink(destination: DetailedSiteView(site: site)) {
+            HStack(alignment: .top) {
+                // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
+                AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 50, height: 50)
+                        .cornerRadius(8)
+                } placeholder: {
+                    ProgressView()
+                }
+                .frame(width: 60, height: 60)
+                .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                
+                VStack(alignment: .leading) {
+                    Text("\(site.name ?? "N/A")")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Text("ID: \(site.id)")
+                    Text("\(site.buildingId ?? "N/A")")
+                    HStack {
+                        if site.hasClock == true {
+                            Text("Clock")
+                                .font(.callout)
+                                .foregroundStyle(.orange)
+                        }
+                        
+                        if site.hasInventory == true {
+                            Text("Inventory")
+                                .font(.callout)
+                                .foregroundStyle(.green)
+                        }
                     }
                 }
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                
             }
-            .font(.callout)
-            .foregroundStyle(.secondary)
-            
         }
     }
 }
