@@ -8,53 +8,84 @@
 import SwiftUI
 import MapKit
 
+struct SitesMap: View {
+    @State private var buildings: [Building] = []
+    
+    var body: some View {
+        ZStack {
+            MapView(buildings: buildings)
+                .edgesIgnoringSafeArea(.all)
+            
+            VStack {
+                Spacer()
+                Button(action: {
+                    fetchBuildingsFromFirestore()
+                }) {
+                    Text("Refresh Buildings")
+                }
+                .padding()
+            }
+        }
+    }
+    
+    private func fetchBuildingsFromFirestore() {
+        Task {
+            do {
+                let fetchedBuildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: nil)
+                DispatchQueue.main.async {
+                    self.buildings = fetchedBuildings
+                }
+            } catch {
+                print("Error fetching buildings: \(error)")
+            }
+        }
+    }
+}
+
 struct MapView: UIViewRepresentable {
     @State private var userTrackingMode: MKUserTrackingMode = .follow
     private let locationManager = CLLocationManager()
-    let universityLocation = CLLocationCoordinate2D(latitude: 38.9407, longitude: -92.3279)
-    let locations: [(CLLocationCoordinate2D, String, String)] = [
-        (CLLocationCoordinate2D(latitude: 38.9407, longitude: -92.3279), "Mizzou", "University of Missouri"),
-        (CLLocationCoordinate2D(latitude: 38.944356912417696, longitude: -92.32648961697893), "Ellis Library", "University of Missouri")
-    ]
+    
+    let buildings: [Building]
     
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
-        mapView.delegate = context.coordinator // Set delegate for map view
+        mapView.delegate = context.coordinator
         
-        mapView.userTrackingMode = userTrackingMode // Set initial user tracking mode
+        mapView.userTrackingMode = userTrackingMode
         
-        // Set initial region
-        let region = MKCoordinateRegion(center: universityLocation, latitudinalMeters: 500, longitudinalMeters: 1000)
-        mapView.setRegion(region, animated: true)
+        locationManager.delegate = context.coordinator
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = 10
         
-        locationManager.delegate = context.coordinator // Set delegate for location updates
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest // Get best accuracy possible
-        locationManager.distanceFilter = 10 // Set distance filter for updates
-        
-        // Show user's location on map
         mapView.showsUserLocation = true
-        
-        // Request location authorization
         locationManager.requestWhenInUseAuthorization()
         
-        // Add annotations for each location
-        for location in locations {
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = location.0
-            annotation.title = location.1
-            annotation.subtitle = location.2
-            mapView.addAnnotation(annotation)
-        }
+        addAnnotations(to: mapView)
         
         return mapView
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
         uiView.userTrackingMode = userTrackingMode
+        addAnnotations(to: uiView)
     }
     
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
+    }
+    
+    private func addAnnotations(to mapView: MKMapView) {
+        mapView.removeAnnotations(mapView.annotations)
+        
+        for building in buildings {
+            if let coordinates = building.coordinates {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude)
+                annotation.title = building.name ?? ""
+                mapView.addAnnotation(annotation)
+            }
+        }
     }
     
     class Coordinator: NSObject, CLLocationManagerDelegate, MKMapViewDelegate {
@@ -72,69 +103,9 @@ struct MapView: UIViewRepresentable {
     }
 }
 
-struct SitesMap: View {
-    @State private var showLegend = false
-    
-    var body: some View {
-        ZStack {
-            MapView()
-                .edgesIgnoringSafeArea(.all)
-            
-            if showLegend {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: 20) {
-                            LegendItem(color: .red, label: "G1")
-                            LegendItem(color: .blue, label: "G2")
-                            LegendItem(color: .green, label: "G3")
-                            LegendItem(color: .orange, label: "R1")
-                            LegendItem(color: .purple, label: "R2")
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.8))
-                        .cornerRadius(10)
-                    }
-                }
-                .padding(.bottom, 50)
-                .padding(.trailing, 20)
-            }
-            
-            VStack {
-                Spacer()
-                Button(action: {
-                    withAnimation {
-                        showLegend.toggle()
-                    }
-                }) {
-                    Text(showLegend ? "Hide Legend" : "Show Legend")
-                }
-                .padding()
-            }
-        }
-    }
-}
-
-
-
-struct LegendItem: View {
-    let color: Color
-    let label: String
-    
-    var body: some View {
-        HStack {
-            Circle()
-                .fill(color)
-                .frame(width: 20, height: 20)
-                .padding(.trailing, 5)
-            Text(label)
-        }
-    }
-}
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         SitesMap()
     }
 }
+
