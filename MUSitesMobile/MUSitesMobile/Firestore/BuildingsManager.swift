@@ -93,6 +93,8 @@ final class BuildingsManager {
     static let shared = BuildingsManager()
     private init() { }
     
+    private var Buildings: [Building] = []
+    
     // get the 'buildings' collection as CollectionReference
     private let buildingsCollection: CollectionReference = Firestore.firestore().collection("buildings")
     

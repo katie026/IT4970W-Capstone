@@ -43,7 +43,7 @@ struct DetailedSiteView: View {
     
     private var site: Site
     @State private var section1Expanded: Bool = true
-    @State private var section2Expanded: Bool = true
+    @State private var section2Expanded: Bool = false
 
     init(site: Site) {
         self.site = site
@@ -88,7 +88,6 @@ struct DetailedSiteView: View {
                     )
                 }
             }
-            Text("Site Name: \(site.name ?? "N/A")")
         }
         .navigationTitle(site.name ?? "N/A")
         .onAppear {

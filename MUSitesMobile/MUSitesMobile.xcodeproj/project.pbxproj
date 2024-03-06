@@ -45,6 +45,12 @@
 		6EA65F662B9120E0000766C7 /* SiteCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F652B9120E0000766C7 /* SiteCellView.swift */; };
 		6EA65F682B96EF0B000766C7 /* DetailedSiteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F672B96EF0B000766C7 /* DetailedSiteView.swift */; };
 		6EA65F6A2B96F028000766C7 /* DetailedSiteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F692B96F028000766C7 /* DetailedSiteViewModel.swift */; };
+		6EA65F6D2B98EF70000766C7 /* InventorySitesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F6C2B98EF6F000766C7 /* InventorySitesManager.swift */; };
+		6EA65F6F2B98F70B000766C7 /* InventorySitesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F6E2B98F70B000766C7 /* InventorySitesView.swift */; };
+		6EA65F712B98FAD3000766C7 /* InventoryTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F702B98FAD2000766C7 /* InventoryTypeManager.swift */; };
+		6EA65F732B98FF34000766C7 /* KeyTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */; };
+		6EA65F762B9902BE000766C7 /* InventorySiteCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F752B9902BE000766C7 /* InventorySiteCellView.swift */; };
+		6EA65F782B990423000766C7 /* DetailedInventorySiteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EA65F772B990423000766C7 /* DetailedInventorySiteView.swift */; };
 		6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */; };
 		6EE110712B7B57F700747F04 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110702B7B57F700747F04 /* ContentView.swift */; };
 		6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110722B7B57FA00747F04 /* Assets.xcassets */; };
@@ -84,6 +90,12 @@
 		6EA65F652B9120E0000766C7 /* SiteCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCellView.swift; sourceTree = "<group>"; };
 		6EA65F672B96EF0B000766C7 /* DetailedSiteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedSiteView.swift; sourceTree = "<group>"; };
 		6EA65F692B96F028000766C7 /* DetailedSiteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedSiteViewModel.swift; sourceTree = "<group>"; };
+		6EA65F6C2B98EF6F000766C7 /* InventorySitesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InventorySitesManager.swift; path = MUSitesMobile/Firestore/InventorySitesManager.swift; sourceTree = SOURCE_ROOT; };
+		6EA65F6E2B98F70B000766C7 /* InventorySitesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventorySitesView.swift; sourceTree = "<group>"; };
+		6EA65F702B98FAD2000766C7 /* InventoryTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryTypeManager.swift; sourceTree = "<group>"; };
+		6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyTypeManager.swift; sourceTree = "<group>"; };
+		6EA65F752B9902BE000766C7 /* InventorySiteCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventorySiteCellView.swift; sourceTree = "<group>"; };
+		6EA65F772B990423000766C7 /* DetailedInventorySiteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedInventorySiteView.swift; sourceTree = "<group>"; };
 		6EE1106B2B7B57F700747F04 /* MUSitesMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MUSitesMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileApp.swift; sourceTree = "<group>"; };
 		6EE110702B7B57F700747F04 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -128,6 +140,7 @@
 				6EA65F4A2B8710DC000766C7 /* TabBarView */,
 				6E33297B2B7F6442009FCD14 /* Profile */,
 				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
+				6EA65F6B2B98EEF3000766C7 /* Inventory */,
 				6E3329752B7F6363009FCD14 /* Authentication */,
 				6E3329722B7F62A7009FCD14 /* Settings */,
 				6EA65F5D2B911B0C000766C7 /* Sites */,
@@ -178,6 +191,9 @@
 			children = (
 				6E3329802B7F699F009FCD14 /* UserManager.swift */,
 				6E68583B2B84498A00896B16 /* BuildingsManager.swift */,
+				6EA65F6C2B98EF6F000766C7 /* InventorySitesManager.swift */,
+				6EA65F702B98FAD2000766C7 /* InventoryTypeManager.swift */,
+				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
 				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
 			);
 			path = Firestore;
@@ -278,6 +294,24 @@
 			isa = PBXGroup;
 			children = (
 				6EA65F652B9120E0000766C7 /* SiteCellView.swift */,
+			);
+			path = Subviews;
+			sourceTree = "<group>";
+		};
+		6EA65F6B2B98EEF3000766C7 /* Inventory */ = {
+			isa = PBXGroup;
+			children = (
+				6EA65F6E2B98F70B000766C7 /* InventorySitesView.swift */,
+				6EA65F742B9902AA000766C7 /* Subviews */,
+				6EA65F772B990423000766C7 /* DetailedInventorySiteView.swift */,
+			);
+			path = Inventory;
+			sourceTree = "<group>";
+		};
+		6EA65F742B9902AA000766C7 /* Subviews */ = {
+			isa = PBXGroup;
+			children = (
+				6EA65F752B9902BE000766C7 /* InventorySiteCellView.swift */,
 			);
 			path = Subviews;
 			sourceTree = "<group>";
@@ -432,6 +466,7 @@
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */,
 				6EA65F612B91204D000766C7 /* SitesView.swift in Sources */,
+				6EA65F712B98FAD3000766C7 /* InventoryTypeManager.swift in Sources */,
 				6E3329812B7F699F009FCD14 /* UserManager.swift in Sources */,
 				6E8C572A2B7CC35100B5BF59 /* RootView.swift in Sources */,
 				6EA65F492B8476E9000766C7 /* BuildingCellView.swift in Sources */,
@@ -442,8 +477,10 @@
 				6E68583A2B84479100896B16 /* BuildingsViewModel.swift in Sources */,
 				6EA65F632B912058000766C7 /* SitesViewModel.swift in Sources */,
 				6EA65F532B871583000766C7 /* UserBuildingsViewModel.swift in Sources */,
+				6EA65F732B98FF34000766C7 /* KeyTypeManager.swift in Sources */,
 				6E8C57282B7CB39D00B5BF59 /* AuthenticationManager.swift in Sources */,
 				6EA65F512B8714FC000766C7 /* UserBuildingsView.swift in Sources */,
+				6EA65F6F2B98F70B000766C7 /* InventorySitesView.swift in Sources */,
 				6E8C572C2B7CC76800B5BF59 /* SettingsView.swift in Sources */,
 				6EA65F6A2B96F028000766C7 /* DetailedSiteViewModel.swift in Sources */,
 				6E6858362B8446C300896B16 /* BuildingsView.swift in Sources */,
@@ -451,12 +488,15 @@
 				6EA65F682B96EF0B000766C7 /* DetailedSiteView.swift in Sources */,
 				6E8C57372B7CF32100B5BF59 /* Utilities.swift in Sources */,
 				6E3329742B7F62D9009FCD14 /* SettingsViewModel.swift in Sources */,
+				6EA65F782B990423000766C7 /* DetailedInventorySiteView.swift in Sources */,
 				6EA65F662B9120E0000766C7 /* SiteCellView.swift in Sources */,
 				6EA65F4E2B871156000766C7 /* TabBarView.swift in Sources */,
 				6EA65F582B8E7564000766C7 /* Query+EXT.swift in Sources */,
 				6E6858382B84470600896B16 /* ProfileViewModel.swift in Sources */,
 				6E8C573B2B7F068600B5BF59 /* SignInAppleHelper.swift in Sources */,
+				6EA65F762B9902BE000766C7 /* InventorySiteCellView.swift in Sources */,
 				6E33297D2B7F6458009FCD14 /* ProfileView.swift in Sources */,
+				6EA65F6D2B98EF70000766C7 /* InventorySitesManager.swift in Sources */,
 				6E8C57262B7CADBE00B5BF59 /* SignInEmailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

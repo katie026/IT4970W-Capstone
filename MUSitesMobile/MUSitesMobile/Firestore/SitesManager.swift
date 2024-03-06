@@ -139,7 +139,7 @@ final class SitesManager {
         try await siteDocument(siteId: siteId).getDocument(as: Site.self)
     }
     
-    // create a new building in Firestore from struct
+    // create a new site in Firestore from struct
     func createSite(site: Site) async throws {
         // connect to Firestore and create a new document from codable struct
         try siteDocument(siteId: site.id).setData(from: site, merge: false)
@@ -156,7 +156,7 @@ final class SitesManager {
             .order(by: Site.CodingKeys.name.rawValue, descending: descending)
     }
     
-    // get buildings by name
+    // get sites by name
     func getAllSites(descending: Bool?) async throws -> [Site] {
         let query: Query = getAllSitesQuery()
         
