@@ -30,6 +30,13 @@ struct TabBarView: View {
                 Image(systemName: "building.fill")
                 Text("Sites")
             }
+            NavigationStack {
+                SitesMap()
+            }
+            .tabItem {
+                Image(systemName: "map")
+                Text("Sites Map")
+            }
             
             // UserTasks View
             NavigationStack {
