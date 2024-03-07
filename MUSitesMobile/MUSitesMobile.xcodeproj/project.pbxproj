@@ -302,8 +302,8 @@
 			isa = PBXGroup;
 			children = (
 				6EA65F6E2B98F70B000766C7 /* InventorySitesView.swift */,
-				6EA65F742B9902AA000766C7 /* Subviews */,
 				6EA65F772B990423000766C7 /* DetailedInventorySiteView.swift */,
+				6EA65F742B9902AA000766C7 /* Subviews */,
 			);
 			path = Inventory;
 			sourceTree = "<group>";
