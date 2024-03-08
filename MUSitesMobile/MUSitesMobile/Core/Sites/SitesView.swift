@@ -19,7 +19,7 @@ struct SitesView: View {
         .navigationTitle("Sites")
         .onAppear {
             Task {
-                try? await viewModel.getSites()
+                viewModel.getSites()
 //                try? await viewModel.getSite(id: "6tYFeMv41IXzfXkwbbh6")
             }
         }

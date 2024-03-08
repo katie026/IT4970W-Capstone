@@ -1,17 +1,17 @@
 //
-//  InventorySitesView.swift
+//  KeySetsView.swift
 //  MUSitesMobile
 //
-//  Created by Katie Jackson on 3/6/24.
+//  Created by Katie Jackson on 3/7/24.
 //
 
 import SwiftUI
 
 @MainActor
-final class InventorySitesViewModel: ObservableObject {
+final class KeySetsViewModel: ObservableObject {
     
-    @Published private(set) var inventorySites: [InventorySite] = []
-    @Published private(set) var inventorySiteTest: InventorySite? = nil
+    @Published private(set) var keySets: [KeySet] = []
+    @Published private(set) var keySetType: KeySet? = nil
     @Published var selectedSort: SortOption? = nil
     
     enum SortOption: String, CaseIterable {
@@ -47,47 +47,42 @@ final class InventorySitesViewModel: ObservableObject {
 //        // use authData to get user data from Firestore as struct
 //        self.siteTest = try await SitesManager.shared.getSite(siteId: id)
 //    }
-//    
+//
 //    func sortSelected(option: SortOption) async throws {
 //        // set sort option
 //        self.selectedSort = option
 //        // get sites again
 //        self.getSites()
 //    }
-//    
-    func getInventorySites() {
+
+    func getKeySets() {
         Task {
-            self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: selectedSort?.sortDescending)
+            self.keySets = try await KeySetManager.shared.getAllKeySets(descending: selectedSort?.sortDescending)
         }
     }
 }
 
 
-struct InventorySitesView: View {
-    @StateObject private var viewModel = InventorySitesViewModel()
+struct KeySetsView: View {
+    @StateObject private var viewModel = KeySetsViewModel()
     
     var body: some View {
         List {
-            ForEach(viewModel.inventorySites) { inventorySite in
-                InventorySiteCellView(inventorySite: inventorySite)
+            ForEach(viewModel.keySets) { keySet in
+                KeySetCellView(keySet: keySet)
             }
-//            if let site = viewModel.siteTest {
-//                SiteCellView(site: site)
-//            }
         }
-        .navigationTitle("Inventory Sites")
+        .navigationTitle("Key Sets")
         .onAppear {
             Task {
-                viewModel.getInventorySites()
-//                try? await viewModel.getSite(id: "6tYFeMv41IXzfXkwbbh6")
+                viewModel.getKeySets()
             }
         }
     }
 }
 
 #Preview {
-    NavigationStack {
-        InventorySitesView()
-//        RootView()
+    NavigationView {
+        KeySetsView()
     }
 }
