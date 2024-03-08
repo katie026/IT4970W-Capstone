@@ -103,7 +103,6 @@ struct DetailedInventorySiteView: View {
                             .padding()
                             .background(RoundedRectangle(cornerRadius: 10).fill(Color.blue))
                     }
-                    .frame(width: .infinity)
                     Spacer()
                 }
                 .padding(.top, 30.0)

@@ -14,7 +14,7 @@ struct RootView: View {
     
     var body: some View {
         ZStack {
-            // if user is logged in, show the Settings View
+            // if user is logged in, show the Tab Bar View
             if !showSignInView {
                 TabBarView(showSignInView: $showSignInView)
             }
