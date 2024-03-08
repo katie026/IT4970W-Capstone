@@ -60,7 +60,7 @@ struct BuildingsView: View {
         })
         .onAppear {
             Task {
-                try? await viewModel.getBuildings()
+                viewModel.getBuildings()
             }
         }
     }

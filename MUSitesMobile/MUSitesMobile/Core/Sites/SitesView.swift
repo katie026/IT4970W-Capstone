@@ -15,14 +15,11 @@ struct SitesView: View {
             ForEach(viewModel.sites) { site in
                 SiteCellView(site: site)
             }
-//            if let site = viewModel.siteTest {
-//                SiteCellView(site: site)
-//            }
         }
         .navigationTitle("Sites")
         .onAppear {
             Task {
-                try? await viewModel.getSites()
+                viewModel.getSites()
 //                try? await viewModel.getSite(id: "6tYFeMv41IXzfXkwbbh6")
             }
         }

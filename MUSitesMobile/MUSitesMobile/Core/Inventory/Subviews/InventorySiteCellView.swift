@@ -1,17 +1,17 @@
 //
-//  SiteCellView.swift
+//  InventorySiteCellView.swift
 //  MUSitesMobile
 //
-//  Created by J Kim on 2/29/24.
+//  Created by J Kim on 3/6/24.
 //
 
 import SwiftUI
 
-struct SiteCellView: View {
-    let site: Site
+struct InventorySiteCellView: View {
+    let inventorySite: InventorySite
     
     var body: some View {
-        NavigationLink(destination: DetailedSiteView(site: site)) {
+        NavigationLink(destination: DetailedInventorySiteView(inventorySite: inventorySite)) {
             HStack(alignment: .top) {
                 // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
                 AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in
@@ -27,22 +27,16 @@ struct SiteCellView: View {
                 .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
                 
                 VStack(alignment: .leading) {
-                    Text("\(site.name ?? "N/A")")
+                    Text("\(inventorySite.name ?? "N/A")")
                         .font(.headline)
                         .foregroundStyle(.primary)
-                    Text("ID: \(site.id)")
-                    Text("\(site.buildingId ?? "N/A")")
+                    Text("ID: \(inventorySite.id)")
+                    Text("\(inventorySite.buildingId ?? "N/A")")
                     HStack {
-                        if site.hasClock == true {
-                            Text("Clock")
+                        if inventorySite.inventoryTypeIds?.count ?? 0 > 0 {
+                            Text("has tyepIds")
                                 .font(.callout)
                                 .foregroundStyle(.orange)
-                        }
-                        
-                        if site.hasInventory == true {
-                            Text("Inventory")
-                                .font(.callout)
-                                .foregroundStyle(.green)
                         }
                     }
                 }
@@ -55,5 +49,5 @@ struct SiteCellView: View {
 }
 
 #Preview {
-    SiteCellView(site: Site(id: "001", name: "Naka", buildingId: "EBW", nearestInventoryId: "Naka", chairCounts: [ChairCount(count: 4, type: "black_physics")], hasClock: true, hasInventory: true, hasWhiteboard: true, namePatternMac: "NAKA-MAC-##", namePatternPc: "NAKA-PC-##", namePatternPrinter: "Naka Printer #"))
+    InventorySiteCellView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "BCC 122", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
 }
