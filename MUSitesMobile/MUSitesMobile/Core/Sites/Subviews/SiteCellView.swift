@@ -34,15 +34,15 @@ struct SiteCellView: View {
                     Text("\(site.buildingId ?? "N/A")")
                     HStack {
                         if site.hasClock == true {
-                            Text("Clock")
-                                .font(.callout)
-                                .foregroundStyle(.orange)
+                            Image(systemName: "clock")
+                              .foregroundColor(.orange)
                         }
                         
                         if site.hasInventory == true {
-                            Text("Inventory")
-                                .font(.callout)
-                                .foregroundStyle(.green)
+                          HStack {
+                              Image(systemName: "cabinet")
+                                .foregroundColor(.green)
+                          }
                         }
                     }
                 }
@@ -56,4 +56,5 @@ struct SiteCellView: View {
 
 #Preview {
     SiteCellView(site: Site(id: "001", name: "Naka", buildingId: "EBW", nearestInventoryId: "Naka", chairCounts: [ChairCount(count: 4, type: "black_physics")], hasClock: true, hasInventory: true, hasWhiteboard: true, namePatternMac: "NAKA-MAC-##", namePatternPc: "NAKA-PC-##", namePatternPrinter: "Naka Printer #"))
+
 }
