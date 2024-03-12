@@ -86,10 +86,15 @@ final class AuthenticationManager {
     
     // delete current user
     func deleteCurrentUser() async throws {
+        // get current user
         guard let user = Auth.auth().currentUser else {
             throw URLError(.badURL)
         }
         
+        // update user document's auth status
+        try await UserManager.shared.updateUserHasAuthentication(userId: user.uid, hasAuthentication: false)
+        
+        // delete user auth
         try await user.delete()
     }
 }

@@ -42,6 +42,7 @@ struct ProfileView: View {
                 // if user has key_set, display it
                 if let keySet = viewModel.keySet {
                     Text("Key Set: \(viewModel.keySet?.name ?? "N/A")")
+                    // for each key in key_set, display
                 }
                 
                 // toggle clock in status

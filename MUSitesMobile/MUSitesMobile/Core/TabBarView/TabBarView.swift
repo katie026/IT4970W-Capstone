@@ -64,6 +64,15 @@ struct TabBarView: View {
                 Image(systemName: "person.crop.circle")
                 Text("Profile")
             }
+            
+            // NonAuthUser View
+            NavigationStack {
+                NonAuthUsersView()
+            }
+            .tabItem {
+                Image(systemName: "person.circle")
+                Text("Non-Auth Users")
+            }
         }
     }
 }
