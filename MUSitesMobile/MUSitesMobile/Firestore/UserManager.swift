@@ -19,6 +19,7 @@ struct DBUser: Codable { // allow encoding and decoding
     let userId: String
     let isAnonymous: Bool?
     let email: String?
+    let fullName: String?
     let photoURL: String?
     let dateCreated: Date?
     let isClockedIn: Bool?
@@ -30,6 +31,7 @@ struct DBUser: Codable { // allow encoding and decoding
         userId: String,
         isAnonymous: Bool? = nil,
         email: String? = nil,
+        fullName: String? = nil,
         photoURL: String? = nil,
         dateCreated: Date? = nil,
         isClockedIn: Bool? = nil,
@@ -39,6 +41,7 @@ struct DBUser: Codable { // allow encoding and decoding
         self.userId = userId
         self.isAnonymous = isAnonymous
         self.email = email
+        self.fullName = fullName
         self.photoURL = photoURL
         self.dateCreated = dateCreated
         self.isClockedIn = isClockedIn
@@ -51,6 +54,7 @@ struct DBUser: Codable { // allow encoding and decoding
         self.userId = auth.uid
         self.isAnonymous = auth.isAnonymous
         self.email = auth.email
+        self.fullName = auth.name
         self.photoURL = auth.photoURL
         self.dateCreated = Date()
         self.isClockedIn = false
@@ -58,10 +62,26 @@ struct DBUser: Codable { // allow encoding and decoding
         self.chairReport = nil
     }
     
+    // computed property to extract the first name
+    var firstName: String? {
+        guard let fullName = fullName else { return nil }
+        return fullName.components(separatedBy: " ").first
+    }
+    
+    // computed property to extract the last name
+    var lastName: String? {
+        guard let fullName = fullName else { return nil }
+        let components = fullName.components(separatedBy: " ").dropFirst()
+        return components.isEmpty ? nil : components.joined(separator: " ")
+    }
+    
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case isAnonymous = "is_anonymous"
         case email = "email"
+        case fullName = "full_name"
+        case firstName = "first_name"
+        case lastName = "last_name"
         case photoURL = "photo_url"
         case dateCreated = "date_created"
         case isClockedIn = "is_clocked_in"
@@ -74,6 +94,7 @@ struct DBUser: Codable { // allow encoding and decoding
         self.userId = try container.decode(String.self, forKey: .userId)
         self.isAnonymous = try container.decodeIfPresent(Bool.self, forKey: .isAnonymous)
         self.email = try container.decodeIfPresent(String.self, forKey: .email)
+        self.fullName = try container.decodeIfPresent(String.self, forKey: .fullName)
         self.photoURL = try container.decodeIfPresent(String.self, forKey: .photoURL)
         self.dateCreated = try container.decodeIfPresent(Date.self, forKey: .dateCreated)
         self.isClockedIn = try container.decodeIfPresent(Bool.self, forKey: .isClockedIn)
@@ -86,6 +107,7 @@ struct DBUser: Codable { // allow encoding and decoding
         try container.encode(self.userId, forKey: .userId)
         try container.encodeIfPresent(self.isAnonymous, forKey: .isAnonymous)
         try container.encodeIfPresent(self.email, forKey: .email)
+        try container.encodeIfPresent(self.fullName, forKey: .fullName)
         try container.encodeIfPresent(self.photoURL, forKey: .photoURL)
         try container.encodeIfPresent(self.dateCreated, forKey: .dateCreated)
         try container.encodeIfPresent(self.isClockedIn, forKey: .isClockedIn)

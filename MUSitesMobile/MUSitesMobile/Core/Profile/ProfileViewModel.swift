@@ -11,12 +11,15 @@ import Foundation
 final class ProfileViewModel: ObservableObject {
     // ObservableObject means any changes to ProfileViewModel will trigger re-rendering of associated views
     @Published private(set) var user: DBUser? = nil
+    @Published private(set) var keySet: KeySet? = nil
     
     func loadCurrentUser() async throws {
         // get authData for current user
         let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
         // use authData to get user data from Firestore as DBUser struct
         self.user = try await UserManager.shared.getUser(userId: authDataResult.uid)
+        // get optional key set
+        self.keySet = try await KeySetManager.shared.getKeySetForUser(userId: authDataResult.uid)
     }
     
     func toggleClockInStatus() {

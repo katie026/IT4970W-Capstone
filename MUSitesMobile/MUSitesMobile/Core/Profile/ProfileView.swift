@@ -24,9 +24,24 @@ struct ProfileView: View {
             if let user = viewModel.user {
                 Text("UserId: \(user.userId)")
                 
+                // if user has name, display it
+                if let name = user.fullName {
+                    Text("Name: \(name)")
+                }
+                
+                // photo url
+                if let photoURL = user.photoURL {
+                    AsyncImage(url: URL(string: photoURL))
+                }
+                
                 // if user has email, display it
                 if let email = user.email {
                     Text("Email: \(email)")
+                }
+                
+                // if user has key_set, display it
+                if let keySet = viewModel.keySet {
+                    Text("Key Set: \(viewModel.keySet?.name ?? "N/A")")
                 }
                 
                 // toggle clock in status
