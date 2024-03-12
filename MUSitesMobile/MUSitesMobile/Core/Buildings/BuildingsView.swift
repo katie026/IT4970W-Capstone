@@ -17,7 +17,7 @@ struct BuildingsView: View {
             viewModel.fetchBuilding(withID: "4NqNXGqU9iItZaVg3V2h")
         }
         if let building = viewModel.building {
-            Text("Building Name: \(building.name ?? "Unkown")")
+            Text("Building Name: \(building.name ?? "Unknown")")
         }
         //end of test
         List {
