@@ -66,23 +66,18 @@ struct ProfileView: View {
                     .listRowInsets(EdgeInsets())
                     
                     Section {
-                        Text("ID: \(user.userId)")
+                        Text("**ID:** \(user.userId)")
                         
                         // if user has email, display it
-                        if let email = user.email {
-                            Text("Email: \(email)")
-                        }
+                        Text("**Email:** \(user.email ?? "N/A")")
                         
-                        // if user has key_set, display it
-                        if let keySet = viewModel.keySet {
-                            Text("Key Set: \(viewModel.keySet?.name ?? "N/A")")
-                            // for each key in key_set, display
-                        }
-                        
-                        DisclosureGroup(viewModel.keySet?.name ?? "N/A", isExpanded: $keySetExpanded) {
-                            Text("Dropdown Item 1")
-                            Text("Dropdown Item 2")
-                            Text("Dropdown Item 3")
+                        DisclosureGroup(isExpanded: $keySetExpanded) {
+                            ForEach(viewModel.keyTypeCodeMap.sorted(by: { $0.key < $1.key }), id: \.key) { keyValuePair in
+                                let (keyTypeId, keyCode) = keyValuePair
+                                Text("\(keyTypeId): \(keyCode)")
+                            }
+                        } label: {
+                            Text("**Key Set:** \(viewModel.keySet?.name ?? "N/A")")
                         }
                         
                         // toggle clock in status
@@ -90,11 +85,13 @@ struct ProfileView: View {
                             print("Toggle time-clock")
                             viewModel.toggleClockInStatus()
                         } label: {
-                            Text("User is clocked in: \((user.isClockedIn ?? false).description.capitalized)")
+                            Text("**Clocked In:** \((user.isClockedIn ?? false).description.capitalized)")
                         }
                         
                         // add and remove positions from a user
                         VStack {
+                            Text("Positions: \((user.positions ?? []).joined(separator: ", "))")
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             HStack {
                                 // make a button for each position option above
                                 // positionOptions conforms to hashable (using id: \.self)
@@ -115,9 +112,6 @@ struct ProfileView: View {
                                     .tint(userHasPosition(text: string) ? .green : .red)
                                 }
                             }
-                            
-                            Text("User Positions: \((user.positions ?? []).joined(separator: ", "))")
-                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         
                         // change map
@@ -128,7 +122,7 @@ struct ProfileView: View {
                                 viewModel.removeChairReport()
                             }
                         } label: {
-                            Text("Chair Count: \(user.chairReport?.chairType ?? "N/A") - \(user.chairReport?.chairCount != nil ? String(user.chairReport!.chairCount) : "N/A")")
+                            Text("**Chair Count:** \(user.chairReport?.chairType ?? "N/A") - \(user.chairReport?.chairCount != nil ? String(user.chairReport!.chairCount) : "N/A")")
                         }
                     }
                 }
