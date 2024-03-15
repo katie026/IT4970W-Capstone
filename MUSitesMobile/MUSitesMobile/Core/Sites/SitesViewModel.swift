@@ -7,15 +7,13 @@
 
 import Foundation
 
-import FirebaseFirestore
-
-@MainActor
 final class SitesViewModel: ObservableObject {
     
     @Published private(set) var sites: [Site] = []
     @Published private(set) var siteTest: Site? = nil
     @Published var selectedSort: SortOption? = nil
     @Published var selectedFilter: FilterOption? = nil
+    @Published private(set) var buildings: [Building] = [] // Add buildings property
     
     enum SortOption: String, CaseIterable {
         // CaseIterable so we can loop through them
@@ -45,13 +43,11 @@ final class SitesViewModel: ObservableObject {
         }
     }
     
-//    func getAllBuildings() async throws {
-//        self.buildings = try await BuildingsManager.shared.getAllBuildings()
-//    }
+    func getAllBuildings() async throws {
+        self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: nil)
+    }
     
     func getSite(id: String) async throws {
-        // Clark ID: 6tYFeMv41IXzfXkwbbh6
-        // use authData to get user data from Firestore as struct
         self.siteTest = try await SitesManager.shared.getSite(siteId: id)
     }
     
