@@ -56,6 +56,8 @@
 		6EE110712B7B57F700747F04 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110702B7B57F700747F04 /* ContentView.swift */; };
 		6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110722B7B57FA00747F04 /* Assets.xcassets */; };
 		6EE110762B7B57FA00747F04 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110752B7B57FA00747F04 /* Preview Assets.xcassets */; };
+		E59C91972BA75DD400509FF8 /* InventorySubmissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59C91962BA75DD400509FF8 /* InventorySubmissionView.swift */; };
+		E59C91992BA75E3500509FF8 /* InventorySubmissionViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59C91982BA75E3500509FF8 /* InventorySubmissionViewManager.swift */; };
 		F668B1E32B9AB392000B2886 /* KeySetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E22B9AB392000B2886 /* KeySetManager.swift */; };
 		F668B1E62B9AB688000B2886 /* KeySetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E52B9AB688000B2886 /* KeySetsView.swift */; };
 		F668B1E82B9AB79C000B2886 /* KeySetCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */; };
@@ -109,6 +111,8 @@
 		6EE1107F2B7B57FA00747F04 /* MUSitesMobileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileTests.swift; sourceTree = "<group>"; };
 		6EE110892B7B57FA00747F04 /* MUSitesMobileUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileUITests.swift; sourceTree = "<group>"; };
 		6EE1108B2B7B57FA00747F04 /* MUSitesMobileUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		E59C91962BA75DD400509FF8 /* InventorySubmissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventorySubmissionView.swift; sourceTree = "<group>"; };
+		E59C91982BA75E3500509FF8 /* InventorySubmissionViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventorySubmissionViewManager.swift; sourceTree = "<group>"; };
 		F668B1E22B9AB392000B2886 /* KeySetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetManager.swift; sourceTree = "<group>"; };
 		F668B1E52B9AB688000B2886 /* KeySetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetsView.swift; sourceTree = "<group>"; };
 		F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetCellView.swift; sourceTree = "<group>"; };
@@ -150,6 +154,7 @@
 		6E3329712B7F6253009FCD14 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				E59C91952BA75DC300509FF8 /* InventorySubmissionView */,
 				6E8C57292B7CC35100B5BF59 /* RootView.swift */,
 				F668B1E42B9AB638000B2886 /* Keys */,
 				26EC33B52B966B33001F0AEE /* Apple Maps */,
@@ -214,6 +219,7 @@
 				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
 				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
 				F668B1E22B9AB392000B2886 /* KeySetManager.swift */,
+				E59C91982BA75E3500509FF8 /* InventorySubmissionViewManager.swift */,
 			);
 			path = Firestore;
 			sourceTree = "<group>";
@@ -395,6 +401,14 @@
 			path = MUSitesMobileUITests;
 			sourceTree = "<group>";
 		};
+		E59C91952BA75DC300509FF8 /* InventorySubmissionView */ = {
+			isa = PBXGroup;
+			children = (
+				E59C91962BA75DD400509FF8 /* InventorySubmissionView.swift */,
+			);
+			path = InventorySubmissionView;
+			sourceTree = "<group>";
+		};
 		F668B1E42B9AB638000B2886 /* Keys */ = {
 			isa = PBXGroup;
 			children = (
@@ -532,8 +546,10 @@
 				6EA65F4E2B871156000766C7 /* TabBarView.swift in Sources */,
 				6EA65F582B8E7564000766C7 /* Query+EXT.swift in Sources */,
 				6E6858382B84470600896B16 /* ProfileViewModel.swift in Sources */,
+				E59C91972BA75DD400509FF8 /* InventorySubmissionView.swift in Sources */,
 				F668B1E82B9AB79C000B2886 /* KeySetCellView.swift in Sources */,
 				6E8C573B2B7F068600B5BF59 /* SignInAppleHelper.swift in Sources */,
+				E59C91992BA75E3500509FF8 /* InventorySubmissionViewManager.swift in Sources */,
 				6EA65F762B9902BE000766C7 /* InventorySiteCellView.swift in Sources */,
 				6E33297D2B7F6458009FCD14 /* ProfileView.swift in Sources */,
 				6EA65F6D2B98EF70000766C7 /* InventorySitesManager.swift in Sources */,
