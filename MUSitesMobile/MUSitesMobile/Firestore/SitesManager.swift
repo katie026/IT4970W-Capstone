@@ -25,6 +25,7 @@ struct Site: Identifiable, Codable, Equatable {
     let buildingId: String?
     let nearestInventoryId: String?
     let chairCounts: [ChairCount]?
+    let siteType: String?
     let hasClock: Bool?
     let hasInventory: Bool?
     let hasWhiteboard: Bool?
@@ -39,6 +40,7 @@ struct Site: Identifiable, Codable, Equatable {
         buildingId: String? = nil,
         nearestInventoryId: String? = nil,
         chairCounts: [ChairCount]? = nil,
+        siteType: String? = nil,
         hasClock: Bool? = nil,
         hasInventory: Bool? = nil,
         hasWhiteboard: Bool? = nil,
@@ -51,6 +53,7 @@ struct Site: Identifiable, Codable, Equatable {
         self.buildingId = buildingId
         self.nearestInventoryId = nearestInventoryId
         self.chairCounts = chairCounts
+        self.siteType = siteType
         self.hasClock = hasClock
         self.hasInventory = hasInventory
         self.hasWhiteboard = hasWhiteboard
@@ -65,6 +68,7 @@ struct Site: Identifiable, Codable, Equatable {
         case buildingId = "building"
         case nearestInventoryId = "nearest_inventory"
         case chairCounts = "chair_counts"
+        case siteType = "site_type"
         case hasClock = "has_clock"
         case hasInventory = "has_inventory"
         case hasWhiteboard = "has_whiteboard"
@@ -80,6 +84,7 @@ struct Site: Identifiable, Codable, Equatable {
         self.buildingId = try container.decodeIfPresent(String.self, forKey: .buildingId)
         self.nearestInventoryId = try container.decodeIfPresent(String.self, forKey: .nearestInventoryId)
         self.chairCounts = try container.decodeIfPresent([ChairCount].self, forKey: .chairCounts)
+        self.siteType = try container.decodeIfPresent(String.self, forKey: .siteType)
         self.hasClock = try container.decodeIfPresent(Bool.self, forKey: .hasClock)
         self.hasInventory = try container.decodeIfPresent(Bool.self, forKey: .hasInventory)
         self.hasWhiteboard = try container.decodeIfPresent(Bool.self, forKey: .hasWhiteboard)
@@ -95,6 +100,7 @@ struct Site: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(self.buildingId, forKey: .buildingId)
         try container.encodeIfPresent(self.nearestInventoryId, forKey: .nearestInventoryId)
         try container.encodeIfPresent(self.chairCounts, forKey: .chairCounts)
+        try container.encodeIfPresent(self.siteType, forKey: .siteType)
         try container.encodeIfPresent(self.hasClock, forKey: .hasClock)
         try container.encodeIfPresent(self.hasInventory, forKey: .hasInventory)
         try container.encodeIfPresent(self.hasWhiteboard, forKey: .hasWhiteboard)

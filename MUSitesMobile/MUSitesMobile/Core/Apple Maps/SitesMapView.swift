@@ -1,5 +1,5 @@
 //
-//  SitesMap.swift
+//  SitesMapView.swift
 //  MUSitesMobile
 //
 //  Created by Tristan Winship on 2/17/24.
@@ -8,7 +8,7 @@
 import SwiftUI
 import MapKit
 
-struct SitesMap: View {
+struct SitesMapView: View {
     @State private var buildings: [Building] = []
     
     var body: some View {
@@ -125,9 +125,6 @@ struct MapView: UIViewRepresentable {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        SitesMap()
-    }
+#Preview {
+    SitesMapView()
 }
-

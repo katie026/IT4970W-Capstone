@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MapKit
 
 @MainActor
 final class DetailedInventorySiteViewModel: ObservableObject {
@@ -46,87 +47,119 @@ struct DetailedInventorySiteView: View {
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
     
     private var inventorySite: InventorySite
-
+    
     init(inventorySite: InventorySite) {
         self.inventorySite = inventorySite
     }
     
     var body: some View {
         ZStack {
-            // Backround
-            VStack {
-                // Gradient rectangle
-                Rectangle()
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(stops: [
-                                .init(color: .green, location: 0.0),
-                                .init(color: .clear, location: 1)
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .edgesIgnoringSafeArea(.top)
-                    .frame(height: 100)
-                Spacer()
-            }
+            // Background
+            LinearGradient(
+                gradient: Gradient(colors: [.green, .white]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.top)
             
-            // Text Content
-            VStack(alignment: .leading) {
+            VStack(spacing: 16) {
                 // Header
-                HStack {
-                    Text(inventorySite.name ?? "N/A")
-                        .font(.system(size: 25))
-                        .fontWeight(.semibold)
-                    Spacer()
-                }
+                Text("Inventory")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
                 
-                // Basic Info
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("**Group:** \(viewModel.building?.siteGroup ?? "N/A")")
-                    Text("**Building:** \(viewModel.building?.name ?? "N/A")")
-                    Text("**Types:** \(viewModel.inventoryTypes.map { $0.name }.joined(separator: ", "))")
-                    Text("**Keys:** \(viewModel.keyTypes.map { $0.name }.joined(separator: ", "))")
-                }
-                .padding(.top, 20)
+                Text(inventorySite.name ?? "N/A")
+                    .font(.headline)
+                    .foregroundColor(.white)
                 
-                // Submit Inventory
-                HStack {
-                    Button(action: {
-                        // button action
-                    }) {
-                        Text("Submit Inventory")
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.leading)
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 10).fill(Color.blue))
-                    }
-                    Spacer()
+                // Site Information
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Group: \(viewModel.building?.siteGroup ?? "N/A")")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Building: \(viewModel.building?.name ?? "N/A")")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Type: \(viewModel.inventoryTypes.map { $0.name }.joined(separator: ", "))")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Keys: \(viewModel.keyTypes.map { $0.name }.joined(separator: ", "))")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
-                .padding(.top, 30.0)
+                .padding(.horizontal)
+                
+                // Submit Inventory Button
+                Button(action: {
+                }) {
+                    Text("Submit Inventory Entry")
+                        .foregroundColor(.white)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                }
                 
                 // Map
+                SitesMapView()
+                    .frame(height: 200)
+                    .cornerRadius(8)
+                if let buildingCoordinates = viewModel.building?.coordinates {
+                    SimpleMapView(
+                        coordinates: CLLocationCoordinate2D(
+                            latitude: buildingCoordinates.latitude,
+                            longitude: buildingCoordinates.longitude
+                        ),
+                        label: self.inventorySite.name ?? "N/A"
+                    )
+                    .frame(height: 200)
+                    .cornerRadius(8)
+                } else {
+                    SimpleMapView(
+                        coordinates: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+                        label: self.inventorySite.name ?? "N/A"
+                    )
+                    .frame(height: 200)
+                    .cornerRadius(8)
+                }
                 
                 // Pictures
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(0..<3) { _ in
+                            Image(systemName: "photo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 100)
+                                .padding(4)
+                                .background(Color.gray.opacity(0.3))
+                                .cornerRadius(8)
+                        }
+                    }
+                }
                 
                 Spacer()
             }
-            .padding(.leading, 20)
-            .navigationTitle("Inventory Site")
-            .onAppear {
-                Task {
-                    await viewModel.loadBuilding(buildingId: inventorySite.buildingId ?? "")
-                    await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
-                }
+            .padding()
+        }
+        .navigationTitle("Inventory Site")
+        .onAppear {
+            Task {
+                await viewModel.loadBuilding(buildingId: inventorySite.buildingId ?? "")
+                await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
             }
         }
     }
+    
 }
-
-#Preview {
-    NavigationStack {
-        DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "BCC 122", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
+    
+    #Preview {
+        NavigationStack {
+            DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "Strickland 222", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
+        }
     }
-}
+

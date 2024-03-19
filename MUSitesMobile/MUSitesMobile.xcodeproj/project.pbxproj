@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		26EC33B92B966BC8001F0AEE /* SitesMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EC33B82B966BC8001F0AEE /* SitesMap.swift */; };
+		26EC33B92B966BC8001F0AEE /* SitesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EC33B82B966BC8001F0AEE /* SitesMapView.swift */; };
 		6E33296E2B7F61CD009FCD14 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6E33296D2B7F61CD009FCD14 /* FirebaseFirestore */; };
 		6E3329702B7F61CD009FCD14 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6E33296F2B7F61CD009FCD14 /* FirebaseFirestoreSwift */; };
 		6E3329742B7F62D9009FCD14 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3329732B7F62D9009FCD14 /* SettingsViewModel.swift */; };
@@ -56,13 +56,18 @@
 		6EE110712B7B57F700747F04 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE110702B7B57F700747F04 /* ContentView.swift */; };
 		6EE110732B7B57FA00747F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110722B7B57FA00747F04 /* Assets.xcassets */; };
 		6EE110762B7B57FA00747F04 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110752B7B57FA00747F04 /* Preview Assets.xcassets */; };
+		F6246A7C2BA12FD400828DAE /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6246A7B2BA12FD400828DAE /* KeyManager.swift */; };
+		F6246A7F2BA3BC6A00828DAE /* SimpleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6246A7E2BA3BC6900828DAE /* SimpleMapView.swift */; };
 		F668B1E32B9AB392000B2886 /* KeySetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E22B9AB392000B2886 /* KeySetManager.swift */; };
 		F668B1E62B9AB688000B2886 /* KeySetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E52B9AB688000B2886 /* KeySetsView.swift */; };
 		F668B1E82B9AB79C000B2886 /* KeySetCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */; };
+		F69D742B2BA0E9A20095A817 /* NonAuthUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69D742A2BA0E9A10095A817 /* NonAuthUsersView.swift */; };
+		F69D742D2BA0EAA50095A817 /* NonAuthUserCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69D742C2BA0EAA50095A817 /* NonAuthUserCellView.swift */; };
+		F69D74302BA0EE440095A817 /* DetailedUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69D742F2BA0EE440095A817 /* DetailedUserView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		26EC33B82B966BC8001F0AEE /* SitesMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SitesMap.swift; sourceTree = "<group>"; };
+		26EC33B82B966BC8001F0AEE /* SitesMapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SitesMapView.swift; sourceTree = "<group>"; };
 		6E3329732B7F62D9009FCD14 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		6E3329762B7F6389009FCD14 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
 		6E3329792B7F640D009FCD14 /* SignInEmailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInEmailViewModel.swift; sourceTree = "<group>"; };
@@ -109,9 +114,14 @@
 		6EE1107F2B7B57FA00747F04 /* MUSitesMobileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileTests.swift; sourceTree = "<group>"; };
 		6EE110892B7B57FA00747F04 /* MUSitesMobileUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileUITests.swift; sourceTree = "<group>"; };
 		6EE1108B2B7B57FA00747F04 /* MUSitesMobileUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		F6246A7B2BA12FD400828DAE /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
+		F6246A7E2BA3BC6900828DAE /* SimpleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleMapView.swift; sourceTree = "<group>"; };
 		F668B1E22B9AB392000B2886 /* KeySetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetManager.swift; sourceTree = "<group>"; };
 		F668B1E52B9AB688000B2886 /* KeySetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetsView.swift; sourceTree = "<group>"; };
 		F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetCellView.swift; sourceTree = "<group>"; };
+		F69D742A2BA0E9A10095A817 /* NonAuthUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonAuthUsersView.swift; sourceTree = "<group>"; };
+		F69D742C2BA0EAA50095A817 /* NonAuthUserCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonAuthUserCellView.swift; sourceTree = "<group>"; };
+		F69D742F2BA0EE440095A817 /* DetailedUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedUserView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,7 +145,8 @@
 		26EC33B52B966B33001F0AEE /* Apple Maps */ = {
 			isa = PBXGroup;
 			children = (
-				26EC33B82B966BC8001F0AEE /* SitesMap.swift */,
+				26EC33B82B966BC8001F0AEE /* SitesMapView.swift */,
+				F6246A7D2BA3BC3900828DAE /* Subviews */,
 			);
 			path = "Apple Maps";
 			sourceTree = "<group>";
@@ -157,6 +168,7 @@
 				6EA65F562B8E754E000766C7 /* Extensions */,
 				6EA65F4A2B8710DC000766C7 /* TabBarView */,
 				6E33297B2B7F6442009FCD14 /* Profile */,
+				F69D74292BA0E9570095A817 /* Users */,
 				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
 				6EA65F6B2B98EEF3000766C7 /* Inventory */,
 				6E3329752B7F6363009FCD14 /* Authentication */,
@@ -208,12 +220,13 @@
 			isa = PBXGroup;
 			children = (
 				6E3329802B7F699F009FCD14 /* UserManager.swift */,
+				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
 				6E68583B2B84498A00896B16 /* BuildingsManager.swift */,
 				6EA65F6C2B98EF6F000766C7 /* InventorySitesManager.swift */,
 				6EA65F702B98FAD2000766C7 /* InventoryTypeManager.swift */,
-				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
-				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
 				F668B1E22B9AB392000B2886 /* KeySetManager.swift */,
+				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
+				F6246A7B2BA12FD400828DAE /* KeyManager.swift */,
 			);
 			path = Firestore;
 			sourceTree = "<group>";
@@ -395,6 +408,14 @@
 			path = MUSitesMobileUITests;
 			sourceTree = "<group>";
 		};
+		F6246A7D2BA3BC3900828DAE /* Subviews */ = {
+			isa = PBXGroup;
+			children = (
+				F6246A7E2BA3BC6900828DAE /* SimpleMapView.swift */,
+			);
+			path = Subviews;
+			sourceTree = "<group>";
+		};
 		F668B1E42B9AB638000B2886 /* Keys */ = {
 			isa = PBXGroup;
 			children = (
@@ -408,6 +429,24 @@
 			isa = PBXGroup;
 			children = (
 				F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */,
+			);
+			path = Subviews;
+			sourceTree = "<group>";
+		};
+		F69D74292BA0E9570095A817 /* Users */ = {
+			isa = PBXGroup;
+			children = (
+				F69D742A2BA0E9A10095A817 /* NonAuthUsersView.swift */,
+				F69D742F2BA0EE440095A817 /* DetailedUserView.swift */,
+				F69D742E2BA0EE270095A817 /* Subviews */,
+			);
+			path = Users;
+			sourceTree = "<group>";
+		};
+		F69D742E2BA0EE270095A817 /* Subviews */ = {
+			isa = PBXGroup;
+			children = (
+				F69D742C2BA0EAA50095A817 /* NonAuthUserCellView.swift */,
 			);
 			path = Subviews;
 			sourceTree = "<group>";
@@ -503,10 +542,13 @@
 				6EE1106F2B7B57F700747F04 /* MUSitesMobileApp.swift in Sources */,
 				6EA65F612B91204D000766C7 /* SitesView.swift in Sources */,
 				6EA65F712B98FAD3000766C7 /* InventoryTypeManager.swift in Sources */,
+				F6246A7C2BA12FD400828DAE /* KeyManager.swift in Sources */,
 				6E3329812B7F699F009FCD14 /* UserManager.swift in Sources */,
 				6E8C572A2B7CC35100B5BF59 /* RootView.swift in Sources */,
 				6EA65F492B8476E9000766C7 /* BuildingCellView.swift in Sources */,
 				6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */,
+				F69D74302BA0EE440095A817 /* DetailedUserView.swift in Sources */,
+				F6246A7F2BA3BC6A00828DAE /* SimpleMapView.swift in Sources */,
 				6EA65F5C2B8E75E5000766C7 /* OnFirstAppearViewModifier.swift in Sources */,
 				6E33297A2B7F640D009FCD14 /* SignInEmailViewModel.swift in Sources */,
 				6E8C57392B7ED9DF00B5BF59 /* SignInGoogleHelper.swift in Sources */,
@@ -515,6 +557,7 @@
 				6EA65F632B912058000766C7 /* SitesViewModel.swift in Sources */,
 				6EA65F532B871583000766C7 /* UserBuildingsViewModel.swift in Sources */,
 				F668B1E32B9AB392000B2886 /* KeySetManager.swift in Sources */,
+				F69D742B2BA0E9A20095A817 /* NonAuthUsersView.swift in Sources */,
 				6EA65F732B98FF34000766C7 /* KeyTypeManager.swift in Sources */,
 				6E8C57282B7CB39D00B5BF59 /* AuthenticationManager.swift in Sources */,
 				6EA65F512B8714FC000766C7 /* UserBuildingsView.swift in Sources */,
@@ -525,7 +568,8 @@
 				6EA65F552B872D6A000766C7 /* BuildingCellViewBuilder.swift in Sources */,
 				6EA65F682B96EF0B000766C7 /* DetailedSiteView.swift in Sources */,
 				6E8C57372B7CF32100B5BF59 /* Utilities.swift in Sources */,
-				26EC33B92B966BC8001F0AEE /* SitesMap.swift in Sources */,
+				26EC33B92B966BC8001F0AEE /* SitesMapView.swift in Sources */,
+				F69D742D2BA0EAA50095A817 /* NonAuthUserCellView.swift in Sources */,
 				6E3329742B7F62D9009FCD14 /* SettingsViewModel.swift in Sources */,
 				6EA65F782B990423000766C7 /* DetailedInventorySiteView.swift in Sources */,
 				6EA65F662B9120E0000766C7 /* SiteCellView.swift in Sources */,

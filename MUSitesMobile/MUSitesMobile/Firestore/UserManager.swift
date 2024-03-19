@@ -15,10 +15,13 @@ struct ChairReport: Codable {
     let chairCount: Int
 }
 
-struct DBUser: Codable { // allow encoding and decoding
+struct DBUser: Codable, Identifiable { // allow encoding and decoding
+    var id: String { userId } // conform to identifiable
     let userId: String
     let isAnonymous: Bool?
+    let hasAuthentication: Bool?
     let email: String?
+    let fullName: String?
     let photoURL: String?
     let dateCreated: Date?
     let isClockedIn: Bool?
@@ -29,7 +32,9 @@ struct DBUser: Codable { // allow encoding and decoding
     init(
         userId: String,
         isAnonymous: Bool? = nil,
+        hasAuthentication: Bool? = nil,
         email: String? = nil,
+        fullName: String? = nil,
         photoURL: String? = nil,
         dateCreated: Date? = nil,
         isClockedIn: Bool? = nil,
@@ -38,7 +43,9 @@ struct DBUser: Codable { // allow encoding and decoding
     ) {
         self.userId = userId
         self.isAnonymous = isAnonymous
+        self.hasAuthentication = hasAuthentication
         self.email = email
+        self.fullName = fullName
         self.photoURL = photoURL
         self.dateCreated = dateCreated
         self.isClockedIn = isClockedIn
@@ -50,7 +57,9 @@ struct DBUser: Codable { // allow encoding and decoding
     init(auth: AuthDataResultModel) {
         self.userId = auth.uid
         self.isAnonymous = auth.isAnonymous
+        self.hasAuthentication = true
         self.email = auth.email
+        self.fullName = auth.name
         self.photoURL = auth.photoURL
         self.dateCreated = Date()
         self.isClockedIn = false
@@ -58,10 +67,27 @@ struct DBUser: Codable { // allow encoding and decoding
         self.chairReport = nil
     }
     
+    // computed property to extract the first name
+    var firstName: String? {
+        guard let fullName = fullName else { return nil }
+        return fullName.components(separatedBy: " ").first
+    }
+    
+    // computed property to extract the last name
+    var lastName: String? {
+        guard let fullName = fullName else { return nil }
+        let components = fullName.components(separatedBy: " ").dropFirst()
+        return components.isEmpty ? nil : components.joined(separator: " ")
+    }
+    
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case isAnonymous = "is_anonymous"
+        case hasAuthentication = "has_authentication"
         case email = "email"
+        case fullName = "full_name"
+        case firstName = "first_name"
+        case lastName = "last_name"
         case photoURL = "photo_url"
         case dateCreated = "date_created"
         case isClockedIn = "is_clocked_in"
@@ -73,7 +99,9 @@ struct DBUser: Codable { // allow encoding and decoding
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.userId = try container.decode(String.self, forKey: .userId)
         self.isAnonymous = try container.decodeIfPresent(Bool.self, forKey: .isAnonymous)
+        self.hasAuthentication = try container.decodeIfPresent(Bool.self, forKey: .hasAuthentication)
         self.email = try container.decodeIfPresent(String.self, forKey: .email)
+        self.fullName = try container.decodeIfPresent(String.self, forKey: .fullName)
         self.photoURL = try container.decodeIfPresent(String.self, forKey: .photoURL)
         self.dateCreated = try container.decodeIfPresent(Date.self, forKey: .dateCreated)
         self.isClockedIn = try container.decodeIfPresent(Bool.self, forKey: .isClockedIn)
@@ -85,7 +113,9 @@ struct DBUser: Codable { // allow encoding and decoding
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.userId, forKey: .userId)
         try container.encodeIfPresent(self.isAnonymous, forKey: .isAnonymous)
+        try container.encodeIfPresent(self.hasAuthentication, forKey: .hasAuthentication)
         try container.encodeIfPresent(self.email, forKey: .email)
+        try container.encodeIfPresent(self.fullName, forKey: .fullName)
         try container.encodeIfPresent(self.photoURL, forKey: .photoURL)
         try container.encodeIfPresent(self.dateCreated, forKey: .dateCreated)
         try container.encodeIfPresent(self.isClockedIn, forKey: .isClockedIn)
@@ -103,7 +133,7 @@ final class UserManager {
     private let userCollection: CollectionReference = Firestore.firestore().collection("users")
     
     // get user's Firestore document as DocumentReference
-    private func userDocument(userId: String) -> DocumentReference {
+    public func userDocument(userId: String) -> DocumentReference {
         userCollection.document(userId)
     }
     
@@ -133,9 +163,41 @@ final class UserManager {
         try userDocument(userId: user.userId).setData(from: user, merge: false)
     }
     
+    // delete a user in Firestore
+    func deleteUser(userId: String) async throws {
+        try await userDocument(userId: userId).delete()
+    }
+    
+    // get non-authenticated DBUsers
+    func getNonAuthenticatedUsers() async throws -> [DBUser] {
+        let query = userCollection.whereField(DBUser.CodingKeys.hasAuthentication.rawValue, isEqualTo: false)
+        
+        do {
+            let querySnapshot = try await query.getDocuments()
+            let users: [DBUser] = try querySnapshot.documents.compactMap {
+                try $0.data(as: DBUser.self)
+            }
+            return users
+        } catch {
+            throw error
+        }
+    }
+    
+    // update user's has-auth status in Firestore
+    func updateUserHasAuthentication(userId: String, hasAuthentication: Bool) async throws {
+        // create dictionary to pass
+        let data: [String:Any] = [
+            // use DBUser object's coding key for dictionary key
+            DBUser.CodingKeys.hasAuthentication.rawValue : hasAuthentication
+        ]
+        
+        // pass dictionary and update the key:value pairs for that user
+        try await userDocument(userId: userId).updateData(data)
+    }
+    
     // update user's clock-in status in Firestore
     func updateUserClockInStatus(userId: String, isClockedIn: Bool) async throws {
-        // create dictioanary to pass
+        // create dictionary to pass
         let data: [String:Any] = [
             // use DBUser object's coding key for dictionary key
             DBUser.CodingKeys.isClockedIn.rawValue : isClockedIn
