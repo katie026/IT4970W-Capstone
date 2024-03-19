@@ -16,6 +16,7 @@ struct SitesMapView: View {
             MapView(buildings: buildings)
                 .edgesIgnoringSafeArea(.all)
             
+            
             VStack {
                 Spacer()
                 Button(action: {
@@ -41,6 +42,8 @@ struct SitesMapView: View {
         }
     }
 }
+
+
 
 struct MapView: UIViewRepresentable {
     @State private var userTrackingMode: MKUserTrackingMode = .follow
@@ -78,15 +81,32 @@ struct MapView: UIViewRepresentable {
     private func addAnnotations(to mapView: MKMapView) {
         mapView.removeAnnotations(mapView.annotations)
         
+        
+        
         for building in buildings {
             if let coordinates = building.coordinates {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude)
-                annotation.title = building.name ?? ""
+                switch building.siteGroup {
+                                case "R1":
+                                    annotation.subtitle = "R1"
+                                case "G1":
+                                    annotation.subtitle = "G1"
+                                case "G2":
+                                    annotation.subtitle = "G2"
+                                case "G3":
+                                    annotation.subtitle = "G3"
+                                // Add more cases as needed
+                                default:
+                                    annotation.subtitle = "No site group"
+                            }
+                annotation.title =  building.name ?? ""
                 mapView.addAnnotation(annotation)
             }
         }
     }
+    
+
     
     class Coordinator: NSObject, CLLocationManagerDelegate, MKMapViewDelegate {
         var parent: MapView
@@ -100,6 +120,8 @@ struct MapView: UIViewRepresentable {
                 manager.startUpdatingLocation()
             }
         }
+        
+        
     }
 }
 

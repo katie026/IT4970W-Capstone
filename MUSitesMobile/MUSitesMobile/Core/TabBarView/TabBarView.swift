@@ -13,6 +13,15 @@ struct TabBarView: View {
     
     var body: some View {
         TabView {
+            // Map View
+            NavigationStack {
+                SitesMapView()
+            }
+            .tabItem {
+                Image(systemName: "map")
+                Text("Map")
+            }
+            
             // Buildings View
             NavigationStack {
                 BuildingsView()
@@ -29,13 +38,6 @@ struct TabBarView: View {
             .tabItem {
                 Image(systemName: "building.fill")
                 Text("Sites")
-            }
-            NavigationStack {
-                SitesMapView()
-            }
-            .tabItem {
-                Image(systemName: "map")
-                Text("Sites Map")
             }
             
             // Inventory Sites View
