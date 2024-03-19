@@ -2,7 +2,7 @@
 //  SiteCellView.swift
 //  MUSitesMobile
 //
-//  Created by J Kim on 2/29/24.
+//  Created by Katie Jackson on 2/29/24.
 //
 
 import SwiftUI
@@ -84,3 +84,4 @@ struct SiteCellView: View {
 
 #Preview {
     SiteCellView(site: Site(id: "001", name: "Naka", buildingId: "EBW", nearestInventoryId: "Naka", chairCounts: [ChairCount(count: 4, type: "black_physics")], hasClock: true, hasInventory: true, hasWhiteboard: true, namePatternMac: "NAKA-MAC-##", namePatternPc: "NAKA-PC-##", namePatternPrinter: "Naka Printer #"))
+}
