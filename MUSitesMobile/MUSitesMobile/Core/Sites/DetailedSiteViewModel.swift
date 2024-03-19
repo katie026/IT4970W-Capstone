@@ -11,25 +11,11 @@ import FirebaseFirestoreSwift
 
 @MainActor
 final class DetailedSiteViewModel: ObservableObject {
-    @Published var site: Site?
     @Published var building: Building?
     
-    func loadSite(siteId: String) async {
+    func loadBuilding(site: Site) async {
         do {
-            self.site = try await SitesManager.shared.getSite(siteId: siteId)
-            // Load the associated building
-            if let buildingId = self.site?.buildingId {
-                try await loadBuilding(buildingId: buildingId)
-            }
-        } catch {
-            print("Error loading site: \(error.localizedDescription)")
-            // Handle the error, e.g., show an alert or update the UI accordingly
-        }
-    }
-
-    func loadBuilding(buildingId: String) async {
-        do {
-            self.building = try await BuildingsManager.shared.getBuilding(buildingId: buildingId)
+            self.building = try await BuildingsManager.shared.getBuilding(buildingId: site.buildingId ?? "")
         } catch {
             print("Error loading building: \(error.localizedDescription)")
             // Handle the error, e.g., show an alert or update the UI accordingly

@@ -31,7 +31,7 @@ struct TabBarView: View {
                 Text("Sites")
             }
             NavigationStack {
-                SitesMap()
+                SitesMapView()
             }
             .tabItem {
                 Image(systemName: "map")
