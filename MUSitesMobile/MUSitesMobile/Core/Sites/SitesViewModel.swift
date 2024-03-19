@@ -7,8 +7,8 @@
 
 import Foundation
 
+@MainActor
 final class SitesViewModel: ObservableObject {
-    
     @Published private(set) var sites: [Site] = []
     @Published private(set) var siteTest: Site? = nil
     @Published var selectedSort: SortOption? = nil
