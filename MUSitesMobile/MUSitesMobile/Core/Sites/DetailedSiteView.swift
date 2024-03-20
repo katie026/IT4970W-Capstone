@@ -183,12 +183,33 @@ struct DetailedSiteView: View {
                     .padding(.top, 10.0)
                     .listRowBackground(Color.clear)
                 }
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(viewModel.imageURLs, id: \.self) { imageUrl in
+                            AsyncImage(url: imageUrl) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 100, height: 100)
+                                    .cornerRadius(10)
+                            } placeholder: {
+                                ProgressView()
+                            }
+                            .frame(width: 150, height: 100)
+                            .cornerRadius(15)
+                            .clipped()
+                        }
+                    }
+                }
+                .padding(.horizontal)
             }
         }
         .navigationTitle(site.name ?? "N/A")
         .onAppear {
             Task {
                 await viewModel.loadBuilding(site: self.site)
+//                await viewModel.loadSite(siteId: site.id)
+                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Default")
             }
         }
     }
