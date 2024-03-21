@@ -19,7 +19,7 @@ final class DetailedSiteViewModel: ObservableObject {
             self.site = try await SitesManager.shared.getSite(siteId: siteId)
             // Load the associated building
             if let buildingId = self.site?.buildingId {
-                try await loadBuilding(buildingId: buildingId)
+                await loadBuilding(buildingId: buildingId)
             }
         } catch {
             print("Error loading site: \(error.localizedDescription)")

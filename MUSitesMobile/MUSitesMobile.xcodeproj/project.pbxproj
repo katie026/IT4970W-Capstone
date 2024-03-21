@@ -154,20 +154,19 @@
 		6E3329712B7F6253009FCD14 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				E59C91952BA75DC300509FF8 /* InventorySubmissionView */,
 				6E8C57292B7CC35100B5BF59 /* RootView.swift */,
-				F668B1E42B9AB638000B2886 /* Keys */,
 				26EC33B52B966B33001F0AEE /* Apple Maps */,
+				6E3329752B7F6363009FCD14 /* Authentication */,
+				6E6858342B84468400896B16 /* Buildings */,
 				6EA65F592B8E75C0000766C7 /* Components */,
 				6EA65F562B8E754E000766C7 /* Extensions */,
-				6EA65F4A2B8710DC000766C7 /* TabBarView */,
-				6E33297B2B7F6442009FCD14 /* Profile */,
-				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
 				6EA65F6B2B98EEF3000766C7 /* Inventory */,
-				6E3329752B7F6363009FCD14 /* Authentication */,
+				F668B1E42B9AB638000B2886 /* Keys */,
+				6E33297B2B7F6442009FCD14 /* Profile */,
 				6E3329722B7F62A7009FCD14 /* Settings */,
 				6EA65F5D2B911B0C000766C7 /* Sites */,
-				6E6858342B84468400896B16 /* Buildings */,
+				6EA65F4A2B8710DC000766C7 /* TabBarView */,
+				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -212,14 +211,14 @@
 		6E33297E2B7F6954009FCD14 /* Firestore */ = {
 			isa = PBXGroup;
 			children = (
-				6E3329802B7F699F009FCD14 /* UserManager.swift */,
 				6E68583B2B84498A00896B16 /* BuildingsManager.swift */,
 				6EA65F6C2B98EF6F000766C7 /* InventorySitesManager.swift */,
 				6EA65F702B98FAD2000766C7 /* InventoryTypeManager.swift */,
+				F668B1E22B9AB392000B2886 /* KeySetManager.swift */,
 				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
 				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
-				F668B1E22B9AB392000B2886 /* KeySetManager.swift */,
 				E59C91982BA75E3500509FF8 /* SupplyCountManager.swift */,
+				6E3329802B7F699F009FCD14 /* UserManager.swift */,
 			);
 			path = Firestore;
 			sourceTree = "<group>";
@@ -328,6 +327,7 @@
 			children = (
 				6EA65F6E2B98F70B000766C7 /* InventorySitesView.swift */,
 				6EA65F772B990423000766C7 /* DetailedInventorySiteView.swift */,
+				E59C91952BA75DC300509FF8 /* InventorySubmissionView */,
 				6EA65F742B9902AA000766C7 /* Subviews */,
 			);
 			path = Inventory;

@@ -13,13 +13,11 @@ struct InventoryType: Codable, Hashable {
     let id: String
     let name: String
     let keyTypeId: String?
-    let supplies: [Supply]
 
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case name = "name"
         case keyTypeId = "key_type"
-        case supplies
     }
 }
 class InventoryTypeManager {

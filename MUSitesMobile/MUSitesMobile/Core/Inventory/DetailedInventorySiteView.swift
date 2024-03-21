@@ -93,7 +93,8 @@ struct DetailedInventorySiteView: View {
                 .padding(.horizontal)
                 
                 // Submit Inventory Button
-                NavigationLink(destination: InventorySubmissionView(siteId: inventorySite.id, inventoryTypes: viewModel.inventoryTypes), isActive: $showInventorySubmission) {
+                NavigationLink(destination: InventorySubmissionView(siteId: inventorySite.id)) {
+//                NavigationLink(destination: InventorySubmissionView(siteId: inventorySite.id), isActive: $showInventorySubmission) {
                     Button(action: {
                         showInventorySubmission = true
                     }) {
@@ -104,6 +105,7 @@ struct DetailedInventorySiteView: View {
                             .background(Color.blue)
                             .cornerRadius(8)
                     }
+                    .buttonStyle(BorderlessButtonStyle()) // Apply a borderless button style
                 }
                 
                 // Map
