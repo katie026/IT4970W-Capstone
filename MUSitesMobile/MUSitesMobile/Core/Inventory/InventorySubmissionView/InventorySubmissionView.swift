@@ -52,28 +52,23 @@ final class InventorySubmissionViewModel: ObservableObject {
                 
                 print("created new Supply doc in Firestore")
             } catch {
-                // Handle error
                 print("Error creating new supply count: \(error)")
             }
         }
     }
     
-    func submitInventory(inventorySiteId: String, completion: @escaping (Bool) -> Void) {
-//        InventorySubmissionManager.shared.submitInventory(
-//            siteId: siteId,
-//            inventoryTypeId: selectedInventoryType.id,
-//            supplies: supplies,
-//            comments: comments
-//        ) { result in
-//            switch result {
-//            case .success:
-//                print("Inventory submission successful")
-//                completion(true)
-//            case .failure(let error):
-//                print("Inventory submission failed: \(error.localizedDescription)")
-//                completion(false)
-//            }
-//        }
+    func submitSupplyCounts(completion: @escaping () -> Void) {
+        Task {
+            do {
+                try await SupplyCountManager.shared.updateSupplyCounts(newSupplyCounts)
+                // Call the completion handler upon successful creation
+                completion()
+                
+                print("Updated supplies doc in Firestore")
+            } catch {
+                print("Error creating new supply count: \(error)")
+            }
+        }
     }
 }
 
@@ -196,7 +191,7 @@ struct InventorySubmissionView: View {
             
             // supply fix field column
             if let supplyCount = supplyCount, viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
-                supplyFixTextField()
+                supplyFixTextField(for: supplyCount)
             }
         }
         .id(supplyType.id) // Specify the id parameter explicitly
@@ -226,13 +221,30 @@ struct InventorySubmissionView: View {
         }
     }
     
-    private func supplyFixTextField() -> some View {
-        TextField("#", text: .constant(""))
-            .multilineTextAlignment(.center)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .frame(width: 50)
-            .keyboardType(.numberPad)
-            .textContentType(.oneTimeCode)
+    private func supplyFixTextField(for supplyCount: SupplyCount) -> some View {
+        TextField("#", text: Binding(
+            get: {
+                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                    return "\(viewModel.newSupplyCounts[index].count ?? 0)"
+                } else {
+                    return ""
+                }
+            },
+            set: { newValue in
+                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                    // Parse the new value as an integer
+                    if let newCount = Int(newValue) {
+                        // Update the count of the corresponding SupplyCount object
+                        viewModel.newSupplyCounts[index].count = newCount
+                    }
+                }
+            }
+        ))
+        .multilineTextAlignment(.center)
+        .textFieldStyle(RoundedBorderTextFieldStyle())
+        .frame(width: 50)
+        .keyboardType(.numberPad)
+        .textContentType(.oneTimeCode)
     }
     
     private var commentsSection: some View {
@@ -265,11 +277,10 @@ struct InventorySubmissionView: View {
     
     private var confirmExitButton: some View {
         Button(action: {
-//            viewModel.submitInventory(inventorySiteId: inventorySite.id) { success in
-//                if success {
-//                    presentationMode.wrappedValue.dismiss()
-//                }
-//            }
+            viewModel.submitSupplyCounts() {
+                // Reload view upon successful creation
+                reloadView.toggle()
+            }
         }) {
             Text("Confirm & Exit")
                 .foregroundColor(.white)

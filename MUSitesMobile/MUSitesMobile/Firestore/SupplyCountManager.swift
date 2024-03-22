@@ -168,7 +168,7 @@ class SupplyCountManager {
         try await supplyCountsCollection.aggregateCount()
     }
     
-    // get supply name
+    // get supply type name from supplyTypeId
     func getSupplyTypeName(supplyTypeId: String) async -> String? {
         do {
             // Use 'try await' to call the asynchronous function within the async context
@@ -180,9 +180,35 @@ class SupplyCountManager {
             return nil
         }
     }
+    
+    func updateSupplyCounts(_ supplyCounts: [SupplyCount]) async throws {
+        // Create a new batched write operation
+        let batch = Firestore.firestore().batch()
+        
+        // Iterate over the supplyCounts array and update each document in the batch
+        for supplyCount in supplyCounts {
+            // Get the reference to the document
+            let documentRef = supplyCountDocument(supplyCountId: supplyCount.id)
+            
+            // Encode the updated supplyCount object
+            guard let data = try? encoder.encode(supplyCount) else {
+                // Handle encoding error
+                throw SupplyCountManagerError.encodingError
+            }
+            
+            // Set the data for the document in the batch
+            batch.setData(data, forDocument: documentRef)
+        }
+        
+        // Commit the batched write operation
+        try await batch.commit()
+        print("tried to commit batch")
+    }
+
 }
 
 // Errors
 enum SupplyCountManagerError: Error {
     case noSupplyTypeId
+    case encodingError
 }
