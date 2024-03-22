@@ -23,6 +23,9 @@ final class InventorySubmissionViewModel: ObservableObject {
     func getSupplyCounts(inventorySiteId: String) {
         Task {
             self.supplyCounts = try await SupplyCountManager.shared.getAllSupplyCountsBySite(siteId: inventorySiteId)
+            
+            // Make a copy of each SupplyCount object and assign to newSupplyCounts
+            self.newSupplyCounts = self.supplyCounts.map { $0.copy() }
         }
     }
     
@@ -192,7 +195,7 @@ struct InventorySubmissionView: View {
             }
             
             // supply fix field column
-            if let supplyCount = supplyCount, !viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
+            if let supplyCount = supplyCount, viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
                 supplyFixTextField()
             }
         }
@@ -202,19 +205,20 @@ struct InventorySubmissionView: View {
     
     private func supplyToggle(for supplyCount: SupplyCount) -> some View {
         Toggle(isOn: Binding(
-            get: { viewModel.newSupplyCounts.contains { $0.id == supplyCount.id } },
-            set: { newValue in
-                if newValue {
-                    let newSupplyCount = SupplyCount(
-                        id: supplyCount.id,
-                        inventorySiteId: supplyCount.inventorySiteId,
-                        supplyTypeId: supplyCount.supplyTypeId,
-                        countMin: supplyCount.countMin,
-                        count: supplyCount.count
-                    )
-                    viewModel.newSupplyCounts.append(newSupplyCount)
+            get: {
+                !viewModel.newSupplyCounts.contains { $0.id == supplyCount.id }
+            },
+            set: { confirmed in
+                if confirmed {
+                    // If confirmed, remove from newSupplyCounts if exists
+                    if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                        viewModel.newSupplyCounts.remove(at: index)
+                    }
                 } else {
-                    viewModel.newSupplyCounts.removeAll { $0.id == supplyCount.id }
+                    // If not confirmed, add to newSupplyCounts if not already added
+                    if !viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
+                        viewModel.newSupplyCounts.append(supplyCount)
+                    }
                 }
             }
         )) {

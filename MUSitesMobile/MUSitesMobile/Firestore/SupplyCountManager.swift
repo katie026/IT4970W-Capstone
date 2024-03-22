@@ -9,7 +9,11 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct SupplyCount: Identifiable, Codable {
+protocol Copyable {
+    func copy() -> Self
+}
+
+struct SupplyCount: Identifiable, Codable, Copyable {
     var id: String
     // vars because they may need to be changed
     var inventorySiteId: String?
@@ -66,6 +70,17 @@ struct SupplyCount: Identifiable, Codable {
         try container.encodeIfPresent(self.supplyTypeId, forKey: .supplyTypeId)
         try container.encodeIfPresent(self.countMin, forKey: .countMin)
         try container.encodeIfPresent(self.count, forKey: .count)
+    }
+    
+    // Copyable Protocal
+    func copy() -> SupplyCount {
+        return SupplyCount(
+            id: self.id,
+            inventorySiteId: self.inventorySiteId,
+            supplyTypeId: self.supplyTypeId,
+            countMin: self.countMin,
+            count: self.count
+        )
     }
 }
 
