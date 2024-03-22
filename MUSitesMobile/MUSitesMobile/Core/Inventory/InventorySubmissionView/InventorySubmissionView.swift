@@ -58,23 +58,26 @@ final class InventorySubmissionViewModel: ObservableObject {
     }
     
     func submitSupplyCounts(completion: @escaping () -> Void) {
-        Task {
-            do {
-                try await SupplyCountManager.shared.updateSupplyCounts(newSupplyCounts)
-                // Call the completion handler upon successful creation
-                completion()
-                
-                print("Updated supplies doc in Firestore")
-            } catch {
-                print("Error creating new supply count: \(error)")
-            }
-        }
+        print("supplyCounts submitted!")
+        completion()
+//        Task {
+//            do {
+//                try await SupplyCountManager.shared.updateSupplyCounts(newSupplyCounts)
+//                // Call the completion handler upon successful creation
+//                completion()
+//                
+//                print("Updated supplies doc in Firestore")
+//            } catch {
+//                print("Error creating new supply count: \(error)")
+//            }
+//        }
     }
 }
 
 struct InventorySubmissionView: View {
     @StateObject private var viewModel = InventorySubmissionViewModel()
     @State private var reloadView = false
+    @State private var showAlert = false
     @Environment(\.presentationMode) private var presentationMode
     
     let inventorySite: InventorySite
@@ -277,9 +280,23 @@ struct InventorySubmissionView: View {
     
     private var confirmExitButton: some View {
         Button(action: {
-            viewModel.submitSupplyCounts() {
-                // Reload view upon successful creation
-                reloadView.toggle()
+            // Check if any counts have been changed
+            let countsChanged = viewModel.newSupplyCounts.contains { newSupplyCount in
+                guard let originalCount = viewModel.supplyCounts.first(where: { $0.id == newSupplyCount.id })?.count else {
+                    return false
+                }
+                return newSupplyCount.count != originalCount
+            }
+            
+            if countsChanged {
+                // If counts have changed, submit the counts
+                viewModel.submitSupplyCounts() {
+                    // Reload view upon successful creation
+                    reloadView.toggle()
+                }
+            } else {
+                // If counts haven't changed, show an alert
+                showAlert = true
             }
         }) {
             Text("Confirm & Exit")
@@ -287,6 +304,9 @@ struct InventorySubmissionView: View {
                 .padding()
                 .background(Color.blue)
                 .cornerRadius(10)
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("No Changes"), message: Text("There are no changes to submit."), dismissButton: .default(Text("OK")))
         }
     }
     

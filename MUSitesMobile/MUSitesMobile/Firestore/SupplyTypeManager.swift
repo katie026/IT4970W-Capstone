@@ -84,7 +84,6 @@ class SupplyTypeManager {
 //            // sort whole collection
 //            query = getAllSitesSortedByNameQuery(descending: descending)
 //        }
-        print("trying to query supply types collection, query: \(query)")
         return try await query
             .getDocuments(as: SupplyType.self) // query key_types collection
     }
