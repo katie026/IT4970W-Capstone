@@ -14,12 +14,6 @@ final class InventorySubmissionViewModel: ObservableObject {
     @Published var newSupplyCounts: [SupplyCount] = [] // Change to SupplyCount array
     @Published var comments: String = ""
     
-//    func getSupplyCounts(inventorySiteId: String) {
-//        Task {
-//            self.supplyCounts = try await SupplyCountManager.shared.getAllSupplyCountsBySite(siteId: inventorySiteId)
-//        }
-//    }
-    
     func getSupplyTypes() {
         Task {
             self.supplyTypes = try await SupplyTypeManager.shared.getAllSupplyTypes(descending: true)
@@ -61,17 +55,6 @@ final class InventorySubmissionViewModel: ObservableObject {
         }
     }
     
-    // get supply type name for each supply count
-//    private func getSupplyCountNames() async throws -> Void {
-//        // Iterate through supplyCounts asynchronously
-//        for supplyCount in self.supplyCounts {
-//            if let typeName = await SupplyCountManager.shared.getSupplyTypeName(supplyTypeId: supplyCount.supplyTypeId ?? "") {
-//                // Append non-nil results to the supplyCountNames array
-//                self.supplyCountNames.append(typeName)
-//            }
-//        }
-//    }
-    
     func submitInventory(inventorySiteId: String, completion: @escaping (Bool) -> Void) {
 //        InventorySubmissionManager.shared.submitInventory(
 //            siteId: siteId,
@@ -107,6 +90,7 @@ struct InventorySubmissionView: View {
                 }
             }
             .navigationTitle(inventorySite.name ?? "No name")
+            .id(reloadView)
     }
     
     private var content: some View {
@@ -195,13 +179,12 @@ struct InventorySubmissionView: View {
                     // display the toggle
                     supplyToggle(for: supplyCount)
                 } else {
+                    // display Add button
                     Button("Add") {
-                        print("clicked Add button")
                         // create a new SupplyCount in Firestore
                         viewModel.createNewSupplyCount(inventorySiteId: inventorySite.id, supplyTypeId: supplyType.id) {
                             // Reload view upon successful creation
                             reloadView.toggle()
-                            print("tried to reload view")
                         }
                     }
                 }
