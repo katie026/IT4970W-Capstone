@@ -11,13 +11,32 @@ import SwiftUI
 final class InventorySubmissionViewModel: ObservableObject {
     @Published var supplyCounts: [SupplyCount] = []
     @Published var newSupplyCounts: [SupplyCount] = [] // Change to SupplyCount array
+    @Published var supplyCountNames: [String] = []
     @Published var comments: String = ""
+    
+//    func getSupplyCounts(inventorySiteId: String) {
+//        Task {
+//            self.supplyCounts = try await SupplyCountManager.shared.getAllSupplyCountsBySite(siteId: inventorySiteId)
+//        }
+//    }
     
     func getSupplyCounts(inventorySiteId: String) {
         Task {
             self.supplyCounts = try await SupplyCountManager.shared.getAllSupplyCountsBySite(siteId: inventorySiteId)
+            // Populate supplyCountNames array
+            try await getSupplyCountNames()
         }
-        print("init: \(supplyCounts.count)")
+    }
+    
+    // get supply type name for each supply count
+    private func getSupplyCountNames() async throws -> Void {
+        // Iterate through supplyCounts asynchronously
+        for supplyCount in self.supplyCounts {
+            if let typeName = await SupplyCountManager.shared.getSupplyTypeName(supplyTypeId: supplyCount.supplyTypeId ?? "") {
+                // Append non-nil results to the supplyCountNames array
+                self.supplyCountNames.append(typeName)
+            }
+        }
     }
     
     func submitInventory(inventorySiteId: String, completion: @escaping (Bool) -> Void) {
@@ -78,22 +97,66 @@ struct InventorySubmissionView: View {
                 .padding()
             }
         }
-    }
-    
-    private var suppliesSection: some View {
-        Section(header: Text("Supplies")) {
-            ForEach(viewModel.supplyCounts) { supplyCount in
-                supplyRow(for: supplyCount)
+        .toolbar {
+            ToolbarItem(placement: .keyboard) {
+                Button("Done") {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
             }
         }
     }
     
-    private func supplyRow(for supplyCount: SupplyCount) -> some View {
-        HStack {
-            Text(supplyCount.supplyTypeId ?? "N/A")
-            Spacer()
+    private var suppliesSection: some View {
+        Section(header: Text("Supplies")) {
+            LazyVGrid(columns: [
+                GridItem(.flexible(), alignment: .center),
+                GridItem(.flexible(), alignment: .center),
+                GridItem(.flexible(), alignment: .center),
+                GridItem(.flexible(), alignment: .center)
+            ]) {
+                Text("Supply").fontWeight(.bold)
+                Text("Count").fontWeight(.bold)
+                Text("Confirm").fontWeight(.bold)
+                Text("Fix").fontWeight(.bold)
+            }
+            // wait for supply names to load
+            if viewModel.supplyCounts.count == viewModel.supplyCountNames.count {
+                ForEach(viewModel.supplyCounts.indices, id: \.self) { index in
+                    supplyRow(for: viewModel.supplyCounts[index], supplyCountName: viewModel.supplyCountNames[index])
+                }
+            } else {
+                ProgressView()
+            }
+        }
+    }
+    
+    private func supplyRow(for supplyCount: SupplyCount, supplyCountName: String) -> some View {
+        // create 1x4 grid
+        LazyVGrid(columns: [
+            GridItem(.flexible(), alignment: .center),
+            GridItem(.flexible(), alignment: .center),
+            GridItem(.flexible(), alignment: .center),
+            GridItem(.flexible(), alignment: .center)
+        ]) {
+            
+            // supply name column
+            Text(supplyCountName)
+                .frame(maxWidth: .infinity, alignment: .leading) // Align text to the leading edge
+            
+            // supply count column
             supplyCountText(for: supplyCount)
-            supplyToggle(for: supplyCount)
+            
+            // supply toggle column
+            HStack {
+                Spacer()
+                supplyToggle(for: supplyCount)
+                Spacer()
+            }
+            
+            // supply fix field column
+            if !viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
+                supplyFixTextField()
+            }
         }
     }
     
@@ -123,8 +186,17 @@ struct InventorySubmissionView: View {
                 }
             }
         )) {
-            Image(systemName: viewModel.newSupplyCounts.contains { $0.id == supplyCount.id } ? "checkmark.square" : "square")
+            
         }
+    }
+    
+    private func supplyFixTextField() -> some View {
+        TextField("#", text: .constant(""))
+            .multilineTextAlignment(.center)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(width: 50)
+            .keyboardType(.numberPad)
+            .textContentType(.oneTimeCode)
     }
     
     private var commentsSection: some View {
@@ -148,11 +220,11 @@ struct InventorySubmissionView: View {
     
     private var confirmExitButton: some View {
         Button(action: {
-            viewModel.submitInventory(inventorySiteId: inventorySite.id) { success in
-                if success {
-                    presentationMode.wrappedValue.dismiss()
-                }
-            }
+//            viewModel.submitInventory(inventorySiteId: inventorySite.id) { success in
+//                if success {
+//                    presentationMode.wrappedValue.dismiss()
+//                }
+//            }
         }) {
             Text("Confirm & Exit")
                 .foregroundColor(.white)

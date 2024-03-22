@@ -93,19 +93,27 @@ struct DetailedInventorySiteView: View {
                 .padding(.horizontal)
                 
                 // Submit Inventory Button
+//                NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite), isActive: $showInventorySubmission) {
+//                    Button(action: {
+//                        showInventorySubmission = true
+//                    }) {
+//                        Text("Submit Inventory Entry")
+//                            .foregroundColor(.white)
+//                            .padding(.horizontal)
+//                            .padding(.vertical, 8)
+//                            .background(Color.blue)
+//                            .cornerRadius(8)
+//                    }
+//                    .buttonStyle(BorderlessButtonStyle()) // Apply a borderless button style
+//                }
+                
                 NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite)) {
-//                NavigationLink(destination: InventorySubmissionView(siteId: inventorySite.id), isActive: $showInventorySubmission) {
-                    Button(action: {
-                        showInventorySubmission = true
-                    }) {
-                        Text("Submit Inventory Entry")
-                            .foregroundColor(.white)
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                            .background(Color.blue)
-                            .cornerRadius(8)
-                    }
-                    .buttonStyle(BorderlessButtonStyle()) // Apply a borderless button style
+                    Text("Submit Inventory Entry")
+                        .foregroundColor(.white)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(Color.blue)
+                        .cornerRadius(8)
                 }
                 
                 // Map

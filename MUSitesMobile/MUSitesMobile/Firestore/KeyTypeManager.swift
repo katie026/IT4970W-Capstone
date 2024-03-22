@@ -14,6 +14,12 @@ struct KeyType: Codable {
     let name: String
     let notes: String?
     
+    init(id: String, name: String, notes: String?) {
+        self.id = id
+        self.name = name
+        self.notes = notes
+    }
+    
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case name = "name"

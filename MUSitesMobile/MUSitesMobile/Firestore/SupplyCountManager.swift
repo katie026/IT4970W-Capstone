@@ -1,5 +1,5 @@
 //
-//  InventorySubmissionViewManager.swift
+//  SupplyCountManager.swift
 //  MUSitesMobile
 //
 //  Created by Michael Oreto on 3/17/24.
@@ -16,6 +16,16 @@ struct SupplyCount: Identifiable, Codable {
     var supplyTypeId: String?
     var countMin: Int?
     var count: Int?
+    
+    // calculated values
+    var supplyTypeName: Task<String?, Error> {
+        Task {
+            // check if there's a supplyId
+            guard let supplyTypeId = supplyTypeId else { throw SupplyCountManagerError.noSupplyTypeId }
+            // if so, return the supply type name
+            return await SupplyCountManager.shared.getSupplyTypeName(supplyTypeId: supplyTypeId)
+        }
+    }
     
     // create SupplyCount manually
     init(
@@ -134,5 +144,22 @@ class SupplyCountManager {
     func allSupplyCountsCount() async throws -> Int {
         try await supplyCountsCollection.aggregateCount()
     }
+    
+    // get supply name
+    func getSupplyTypeName(supplyTypeId: String) async -> String? {
+        do {
+            // Use 'try await' to call the asynchronous function within the async context
+            let supplyType = try await SupplyTypeManager.shared.getSupplyType(supplyTypeId: supplyTypeId)
+            return supplyType.name
+        } catch {
+            // Handle errors if any
+            print("Error fetching supply type name: \(error)")
+            return nil
+        }
+    }
 }
 
+// Errors
+enum SupplyCountManagerError: Error {
+    case noSupplyTypeId
+}
