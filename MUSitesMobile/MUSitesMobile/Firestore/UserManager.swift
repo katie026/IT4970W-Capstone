@@ -135,7 +135,7 @@ final class UserManager {
     
     // update user's clock-in status in Firestore
     func updateUserClockInStatus(userId: String, isClockedIn: Bool) async throws {
-        // create dictioanary to pass
+        // create dictionary to pass
         let data: [String:Any] = [
             // use DBUser object's coding key for dictionary key
             DBUser.CodingKeys.isClockedIn.rawValue : isClockedIn

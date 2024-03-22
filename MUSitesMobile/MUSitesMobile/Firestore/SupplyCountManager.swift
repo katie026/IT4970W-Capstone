@@ -10,7 +10,7 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 
 struct SupplyCount: Identifiable, Codable {
-    let id: String
+    var id: String
     // vars because they may need to be changed
     var inventorySiteId: String?
     var supplyTypeId: String?
@@ -98,6 +98,14 @@ class SupplyCountManager {
     // get an supply count from Firestore as SupplyCount struct
     func getSupplyCount(supplyCountId: String) async throws -> SupplyCount {
         try await supplyCountDocument(supplyCountId: supplyCountId).getDocument(as: SupplyCount.self)
+    }
+    
+    // create new supply count document in Firestore, return id
+    func getNewSupplyCountId() async throws -> String {
+        // create auto-generated document in collection
+        let document = supplyCountsCollection.document()
+        // get document id
+        return document.documentID
     }
     
     // create a new supply count in Firestore from struct
