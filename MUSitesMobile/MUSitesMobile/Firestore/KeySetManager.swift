@@ -67,6 +67,23 @@ class KeySetManager {
         try await keySetDocument(keySetId: keySetId).getDocument(as: KeySet.self)
     }
     
+    // Fetch a KeySet based on userId from Firestore
+    func getKeySetForUser(userId: String) async throws -> KeySet? {
+        let query = keySetsCollection.whereField(KeySet.CodingKeys.userId.rawValue, isEqualTo: userId)
+        
+        do {
+            let querySnapshot = try await query.getDocuments()
+            if let keySetDocument = querySnapshot.documents.first {
+                return try keySetDocument.data(as: KeySet.self)
+            } else {
+                // KeySet not found for userId
+                return nil
+            }
+        } catch {
+            throw error
+        }
+    }
+    
     // create a new key set in Firestore from struct
     func createKeySet(keySet: KeySet) async throws {
         // connect to Firestore and create a new document from codable struct

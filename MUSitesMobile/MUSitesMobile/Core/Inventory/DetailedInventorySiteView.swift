@@ -117,9 +117,27 @@ struct DetailedInventorySiteView: View {
                 }
                 
                 // Map
-                SitesMap()
+                SitesMapView()
                     .frame(height: 200)
                     .cornerRadius(8)
+                if let buildingCoordinates = viewModel.building?.coordinates {
+                    SimpleMapView(
+                        coordinates: CLLocationCoordinate2D(
+                            latitude: buildingCoordinates.latitude,
+                            longitude: buildingCoordinates.longitude
+                        ),
+                        label: self.inventorySite.name ?? "N/A"
+                    )
+                    .frame(height: 200)
+                    .cornerRadius(8)
+                } else {
+                    SimpleMapView(
+                        coordinates: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+                        label: self.inventorySite.name ?? "N/A"
+                    )
+                    .frame(height: 200)
+                    .cornerRadius(8)
+                }
                 
                 // Pictures
                 ScrollView(.horizontal, showsIndicators: false) {
