@@ -45,6 +45,7 @@ final class DetailedInventorySiteViewModel: ObservableObject {
 
 struct DetailedInventorySiteView: View {
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
+    @State private var showInventorySubmission = false
     
     private var inventorySite: InventorySite
     
@@ -54,7 +55,6 @@ struct DetailedInventorySiteView: View {
     
     var body: some View {
         ZStack {
-            // Background
             LinearGradient(
                 gradient: Gradient(colors: [.green, .white]),
                 startPoint: .top,
@@ -63,7 +63,6 @@ struct DetailedInventorySiteView: View {
             .edgesIgnoringSafeArea(.top)
             
             VStack(spacing: 16) {
-                // Header
                 Text("Inventory")
                     .font(.title)
                     .fontWeight(.bold)
@@ -94,8 +93,21 @@ struct DetailedInventorySiteView: View {
                 .padding(.horizontal)
                 
                 // Submit Inventory Button
-                Button(action: {
-                }) {
+//                NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite), isActive: $showInventorySubmission) {
+//                    Button(action: {
+//                        showInventorySubmission = true
+//                    }) {
+//                        Text("Submit Inventory Entry")
+//                            .foregroundColor(.white)
+//                            .padding(.horizontal)
+//                            .padding(.vertical, 8)
+//                            .background(Color.blue)
+//                            .cornerRadius(8)
+//                    }
+//                    .buttonStyle(BorderlessButtonStyle()) // Apply a borderless button style
+//                }
+                
+                NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite)) {
                     Text("Submit Inventory Entry")
                         .foregroundColor(.white)
                         .padding(.horizontal)
@@ -154,9 +166,7 @@ struct DetailedInventorySiteView: View {
             }
         }
     }
-    
 }
-    
     #Preview {
         NavigationStack {
             DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "Strickland 222", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
