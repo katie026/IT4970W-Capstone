@@ -12,6 +12,7 @@ final class InventorySubmissionViewModel: ObservableObject {
     @Published var supplyTypes: [SupplyType] = []
     @Published var supplyCounts: [SupplyCount] = []
     @Published var newSupplyCounts: [SupplyCount] = [] // Change to SupplyCount array
+    @Published var inventoryEntryType: InventoryEntryType = InventoryEntryType.Check
     @Published var comments: String = ""
     
     func getSupplyTypes() {
@@ -77,7 +78,8 @@ final class InventorySubmissionViewModel: ObservableObject {
 struct InventorySubmissionView: View {
     @StateObject private var viewModel = InventorySubmissionViewModel()
     @State private var reloadView = false
-    @State private var showAlert = false
+    @State private var showNoChangesAlert = false
+    @State private var showEntryTypeAlert = false
     @Environment(\.presentationMode) private var presentationMode
     
     let inventorySite: InventorySite
@@ -282,9 +284,12 @@ struct InventorySubmissionView: View {
         Button(action: {
             // Check if any counts have been changed
             let countsChanged = viewModel.newSupplyCounts.contains { newSupplyCount in
+                // find the original count for the supply using the SupplyCount.id
                 guard let originalCount = viewModel.supplyCounts.first(where: { $0.id == newSupplyCount.id })?.count else {
-                    return false
+                    // if original count not found, counts have changed
+                    return true
                 }
+                // counts have changed if the new count is different from the original count
                 return newSupplyCount.count != originalCount
             }
             
@@ -296,8 +301,24 @@ struct InventorySubmissionView: View {
                 }
             } else {
                 // If counts haven't changed, show an alert
-                showAlert = true
+                showNoChangesAlert = true
             }
+            
+//            // check if all toggles are true
+//            let allConfirmed = viewModel.supplyCounts.allSatisfy { supplyCount in
+//                viewModel.newSupplyCounts.contains { $0.id == supplyCount.id }
+//            }
+//            
+//            if allConfirmed {
+//                // if all toggles are true, carry out the action
+//                viewModel.submitSupplyCounts() {
+//                    // reload view upon successful creation
+//                    reloadView.toggle()
+//                }
+//            } else {
+//                // if not, show an alert with options to select
+//                showEntryTypeAlert = true
+//            }
         }) {
             Text("Confirm & Exit")
                 .foregroundColor(.white)
@@ -305,7 +326,7 @@ struct InventorySubmissionView: View {
                 .background(Color.blue)
                 .cornerRadius(10)
         }
-        .alert(isPresented: $showAlert) {
+        .alert(isPresented: $showNoChangesAlert) {
             Alert(title: Text("No Changes"), message: Text("There are no changes to submit."), dismissButton: .default(Text("OK")))
         }
     }
@@ -323,10 +344,42 @@ struct InventorySubmissionView: View {
     }
 }
 
-
-
 #Preview {
     NavigationView {
         InventorySubmissionView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "BCC 122", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TzLMIsUbadvLh9PEgqaV"]))
+    }
+}
+
+// MARK: Custom Alert
+
+struct EntryTypeAlertView: View {
+    @Binding var selectedOption: InventoryEntryType?
+    
+    var body: some View {
+        VStack {
+            Text("You did not confirm all counts, would you like to report this?")
+                .font(.headline)
+                .padding()
+            
+            HStack {
+                RadioButton(text: "Yes, there is a discrepancy.", isSelected: selectedOption == .Fix) {
+                    selectedOption = .Fix
+                }
+                .padding()
+                
+                RadioButton(text: "Yes, there was a delivery.", isSelected: selectedOption == .Delivery) {
+                    selectedOption = .Delivery
+                }
+                .padding()
+            }
+            
+            Button("OK") {
+                // Dismiss the alert
+            }
+            .padding()
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(10)
     }
 }
