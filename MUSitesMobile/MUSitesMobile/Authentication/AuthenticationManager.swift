@@ -12,7 +12,6 @@ import FirebaseAuth
 struct AuthDataResultModel {
     let uid: String
     let email: String?
-    let name: String?
     let photoURL: String?
     let isAnonymous: Bool?
     
@@ -20,7 +19,6 @@ struct AuthDataResultModel {
         // the type "User" is from the Firebase SDK
         self.uid = user.uid
         self.email = user.email
-        self.name = user.displayName
         self.photoURL = user.photoURL?.absoluteString
         self.isAnonymous = user.isAnonymous
     }
@@ -86,15 +84,10 @@ final class AuthenticationManager {
     
     // delete current user
     func deleteCurrentUser() async throws {
-        // get current user
         guard let user = Auth.auth().currentUser else {
             throw URLError(.badURL)
         }
         
-        // update user document's auth status
-        try await UserManager.shared.updateUserHasAuthentication(userId: user.uid, hasAuthentication: false)
-        
-        // delete user auth
         try await user.delete()
     }
 }

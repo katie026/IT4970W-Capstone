@@ -15,7 +15,7 @@ struct TabBarView: View {
         TabView {
             // Map View
             NavigationStack {
-                SitesMapView()
+                SitesMap()
             }
             .tabItem {
                 Image(systemName: "map")
@@ -65,15 +65,6 @@ struct TabBarView: View {
             .tabItem {
                 Image(systemName: "person.crop.circle")
                 Text("Profile")
-            }
-            
-            // NonAuthUser View
-            NavigationStack {
-                NonAuthUsersView()
-            }
-            .tabItem {
-                Image(systemName: "person.circle")
-                Text("Non-Auth Users")
             }
         }
     }

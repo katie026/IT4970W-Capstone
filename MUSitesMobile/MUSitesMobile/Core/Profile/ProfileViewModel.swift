@@ -2,7 +2,7 @@
 //  ProfileViewModel.swift
 //  MUSitesMobile
 //
-//  Created by Katie Jackson on 2/19/24.
+//  Created by J Kim on 2/19/24.
 //
 
 import Foundation
@@ -11,29 +11,12 @@ import Foundation
 final class ProfileViewModel: ObservableObject {
     // ObservableObject means any changes to ProfileViewModel will trigger re-rendering of associated views
     @Published private(set) var user: DBUser? = nil
-    @Published private(set) var keySet: KeySet? = nil
-    @Published private(set) var keys: [Key]? = nil
-    @Published private(set) var keyTypeCodeMap: [String: String] = [:]
     
     func loadCurrentUser() async throws {
         // get authData for current user
         let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
         // use authData to get user data from Firestore as DBUser struct
         self.user = try await UserManager.shared.getUser(userId: authDataResult.uid)
-        // get optional key set
-        self.keySet = try await KeySetManager.shared.getKeySetForUser(userId: authDataResult.uid)
-        // get optional keys for set
-        self.keys = try await KeyManager.shared.getKeysForKeySet(keySetId: keySet?.id ?? "")
-        
-        // fetch key type for each key and add to dictionary
-        for key in keys ?? [] {
-            do {
-                let keyType = try await KeyTypeManager.shared.getKeyType(keyTypeId: key.keyType ?? "")
-                keyTypeCodeMap[keyType.name] = key.keyCode
-            } catch {
-                print("Error fetching key types: \(error)")
-            }
-        }
     }
     
     func toggleClockInStatus() {

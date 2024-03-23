@@ -2,7 +2,7 @@
 //  InventorySiteCellView.swift
 //  MUSitesMobile
 //
-//  Created by Katie Jackson on 3/6/24.
+//  Created by J Kim on 3/6/24.
 //
 
 import SwiftUI
