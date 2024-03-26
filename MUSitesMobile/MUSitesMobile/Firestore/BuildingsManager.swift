@@ -88,7 +88,7 @@ struct Building: Identifiable, Codable, Equatable { // allow encoding and decodi
     }
 }
 
-final class BuildingsManager {    
+final class BuildingsManager {
     // create singleton of BuildingsManager
     static let shared = BuildingsManager()
     private init() { }
@@ -160,9 +160,9 @@ final class BuildingsManager {
     // get buildings filtered by group & sorted name
     private func getAllBuildingsByGroupAndNameQuery(nameDescending: Bool, group: String) -> Query {
         buildingsCollection
-            // filter by group
+        // filter by group
             .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: group)
-            // sort by name
+        // sort by name
             .order(by: Building.CodingKeys.siteGroup.rawValue, descending: nameDescending)
     }
     
@@ -174,11 +174,11 @@ final class BuildingsManager {
         if let descending, let group {
             // filter and sort collection
             query = getAllBuildingsByGroupAndNameQuery(nameDescending: descending, group: group)
-        // if given sort
+            // if given sort
         } else if let descending {
             // sort whole collection
             query = getAllBuildingsSortedByNameQuery(descending: descending)
-        // if given filter
+            // if given filter
         } else if let group {
             // filter whole collection
             query = getAllBuildingsFilteredByGroupQuery(siteGroup: group)
@@ -193,4 +193,5 @@ final class BuildingsManager {
     func allBuildingsCount() async throws -> Int {
         try await buildingsCollection.aggregateCount()
     }
+    
 }

@@ -11,7 +11,7 @@ struct SiteCellView: View {
     let site: Site
     
     var body: some View {
-        NavigationLink(destination: DetailedSiteView(site: site)) {
+        NavigationLink(destination: DetailedSiteView(site: site, inventorySite: InventorySite(id: site.nearestInventoryId ?? "", buildingId: site.buildingId, inventoryTypeIds: ["typeId1", "typeId2"]))){
             HStack(alignment: .top) {
                 // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
                 AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in
@@ -53,6 +53,7 @@ struct SiteCellView: View {
         }
     }
 }
+
 
 #Preview {
     SiteCellView(site: Site(id: "001", name: "Naka", buildingId: "EBW", nearestInventoryId: "Naka", chairCounts: [ChairCount(count: 4, type: "black_physics")], hasClock: true, hasInventory: true, hasWhiteboard: true, namePatternMac: "NAKA-MAC-##", namePatternPc: "NAKA-PC-##", namePatternPrinter: "Naka Printer #"))

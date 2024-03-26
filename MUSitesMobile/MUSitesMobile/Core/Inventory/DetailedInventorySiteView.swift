@@ -47,7 +47,7 @@ struct DetailedInventorySiteView: View {
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
     @State private var showInventorySubmission = false
     
-    private var inventorySite: InventorySite
+    public var inventorySite: InventorySite
     
     init(inventorySite: InventorySite) {
         self.inventorySite = inventorySite
@@ -149,6 +149,8 @@ struct DetailedInventorySiteView: View {
         }
     }
 }
+
+
     #Preview {
         NavigationStack {
             DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "Strickland 222", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))

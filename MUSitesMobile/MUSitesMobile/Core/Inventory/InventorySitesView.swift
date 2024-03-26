@@ -79,7 +79,7 @@ struct InventorySitesView: View {
         .onAppear {
             Task {
                 viewModel.getInventorySites()
-//                try? await viewModel.getSite(id: "6tYFeMv41IXzfXkwbbh6")
+//                try? await viewModel.getSite(id:å "6tYFeMv41IXzfXkwbbh6")
             }
         }
     }
