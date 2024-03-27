@@ -29,35 +29,20 @@ struct InventorySite: Identifiable, Codable, Equatable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case id = "id"
-        case name = "name"
+        case id
+        case name
         case buildingId = "building"
         case inventoryTypeIds = "inventory_types"
     }
     
-    init(from decoder: Decoder) async throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(String.self, forKey: .id)
-        self.name = try container.decodeIfPresent(String.self, forKey: .name)
-        self.buildingId = try container.decodeIfPresent(String.self, forKey: .buildingId)
-        self.inventoryTypeIds = try container.decodeIfPresent([String].self, forKey: .inventoryTypeIds)
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(self.id, forKey: .id)
-        try container.encodeIfPresent(self.name, forKey: .name)
-        try container.encodeIfPresent(self.buildingId, forKey: .buildingId)
-        try container.encodeIfPresent(self.inventoryTypeIds, forKey: .inventoryTypeIds)
-    }
-    
-    static func == (lhs:InventorySite, rhs: InventorySite) -> Bool {
-        // if two sites have the same ID, we're going to say they're equal to eachother
+    static func == (lhs: InventorySite, rhs: InventorySite) -> Bool {
+        // if two inventory sites have the same ID, we're going to say they're equal to each other
         return lhs.id == rhs.id
     }
 }
 
 final class InventorySitesManager {
+    
     // create singleton of manager
     static let shared = InventorySitesManager()
     private init() { }
@@ -82,7 +67,7 @@ final class InventorySitesManager {
         return decoder
     }()
     
-    // get an inventory site from Firestore as inventorySite struct
+    // get an inventory site from Firestore as InventorySite struct
     func getInventorySite(inventorySiteId: String) async throws -> InventorySite {
         try await inventorySiteDocument(inventorySiteId: inventorySiteId).getDocument(as: InventorySite.self)
     }
@@ -93,32 +78,32 @@ final class InventorySitesManager {
         try inventorySiteDocument(inventorySiteId: inventorySite.id).setData(from: inventorySite, merge: false)
     }
     
-    // fetch site collection onto local device
+    // fetch inventory site collection onto local device
     private func getAllInventorySitesQuery() -> Query {
         inventorySitesCollection
     }
     
-    // get sites sorted by Name
+    // get inventory sites sorted by Name
     private func getAllInventorySitesSortedByNameQuery(descending: Bool) -> Query {
         inventorySitesCollection
             .order(by: InventorySite.CodingKeys.name.rawValue, descending: descending)
     }
     
-    // get inventory sites by name
+    // get all inventory sites
     func getAllInventorySites(descending: Bool?) async throws -> [InventorySite] {
-        let query: Query = getAllInventorySitesQuery()
+        var query: Query = getAllInventorySitesQuery()
         
-//        // if given sort
-//        if let descending {
-//            // sort whole collection
-//            query = getAllSitesSortedByNameQuery(descending: descending)
-//        }
+        // if given sort
+        if let descending {
+            // sort whole collection
+            query = getAllInventorySitesSortedByNameQuery(descending: descending)
+        }
         print("trying to query inventory sites collection, query: \(query)")
         return try await query
             .getDocuments(as: InventorySite.self) // query inventory_site collection
     }
     
-    // get count of all sites
+    // get count of all inventory sites
     // we can use this to determine if we need to use pagination
     func allInventorySitesCount() async throws -> Int {
         try await inventorySitesCollection.aggregateCount()

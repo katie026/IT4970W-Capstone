@@ -11,7 +11,7 @@ struct SiteCellView: View {
     let site: Site
     
     var body: some View {
-        NavigationLink(destination: DetailedSiteView(site: site, inventorySite: InventorySite(id: site.nearestInventoryId ?? "", buildingId: site.buildingId, inventoryTypeIds: ["typeId1", "typeId2"]))){
+        NavigationLink(destination: DetailedSiteView(site: site, inventorySite: InventorySite(id: site.nearestInventoryId ?? ""))){
             HStack(alignment: .top) {
                 // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
                 AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in

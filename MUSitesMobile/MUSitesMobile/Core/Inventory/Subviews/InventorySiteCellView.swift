@@ -11,7 +11,7 @@ struct InventorySiteCellView: View {
     let inventorySite: InventorySite
     
     var body: some View {
-        NavigationLink(destination: DetailedInventorySiteView(inventorySite: inventorySite)) {
+        NavigationLink(destination: DetailedInventorySiteView(inventorySiteId: inventorySite.id))  {
             HStack(alignment: .top) {
                 // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
                 AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in

@@ -8,49 +8,14 @@
 import SwiftUI
 import MapKit
 
-@MainActor
-final class DetailedInventorySiteViewModel: ObservableObject {
-    @Published var building: Building?
-    @Published var inventoryTypes: [InventoryType] = []
-    @Published var keyTypes: [KeyType] = []
-    
-    func loadBuilding(buildingId: String) async {
-        do {
-            self.building = try await BuildingsManager.shared.getBuilding(buildingId: buildingId)
-        } catch {
-            print("Error loading building: \(error.localizedDescription)")
-        }
-    }
-    
-    func loadInventoryTypes(inventoryTypeIds: [String]) async {
-        do {
-            for typeId in inventoryTypeIds {
-                // try to get each
-                let inventoryType = try await InventoryTypeManager.shared.getInventoryType(inventoryTypeId: typeId)
-                inventoryTypes.append(inventoryType)
-                
-                // if keyTypeId is not nil
-                if let keyTypeId = inventoryType.keyTypeId {
-                    let keyType = try await KeyTypeManager.shared.getKeyType(keyTypeId: keyTypeId)
-                    keyTypes.append(keyType)
-                } else {
-                    print("Warning: keyTypeId is nil for inventoryType with ID \(inventoryType.id)")
-                }
-            }
-        } catch {
-            print("Error loading inventory types: \(error.localizedDescription)")
-        }
-    }
-}
-
 struct DetailedInventorySiteView: View {
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
     @State private var showInventorySubmission = false
     
-    public var inventorySite: InventorySite
+    public var inventorySiteId: String
     
-    init(inventorySite: InventorySite) {
-        self.inventorySite = inventorySite
+    init(inventorySiteId: String) {
+        self.inventorySiteId = inventorySiteId
     }
     
     var body: some View {
@@ -68,7 +33,7 @@ struct DetailedInventorySiteView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                 
-                Text(inventorySite.name ?? "N/A")
+                Text(viewModel.inventorySite?.name ?? "N/A")
                     .font(.headline)
                     .foregroundColor(.white)
                 
@@ -93,26 +58,21 @@ struct DetailedInventorySiteView: View {
                 .padding(.horizontal)
                 
                 // Submit Inventory Button
-//                NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite), isActive: $showInventorySubmission) {
-//                    Button(action: {
-//                        showInventorySubmission = true
-//                    }) {
-//                        Text("Submit Inventory Entry")
-//                            .foregroundColor(.white)
-//                            .padding(.horizontal)
-//                            .padding(.vertical, 8)
-//                            .background(Color.blue)
-//                            .cornerRadius(8)
-//                    }
-//                    .buttonStyle(BorderlessButtonStyle()) // Apply a borderless button style
-//                }
-                
-                NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite)) {
+                if let inventorySite = viewModel.inventorySite {
+                    NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite)) {
+                        Text("Submit Inventory Entry")
+                            .foregroundColor(.white)
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(Color.blue)
+                            .cornerRadius(8)
+                    }
+                } else {
                     Text("Submit Inventory Entry")
                         .foregroundColor(.white)
                         .padding(.horizontal)
                         .padding(.vertical, 8)
-                        .background(Color.blue)
+                        .background(Color.gray)
                         .cornerRadius(8)
                 }
                 
@@ -143,17 +103,14 @@ struct DetailedInventorySiteView: View {
         .navigationTitle("Inventory Site")
         .onAppear {
             Task {
-                await viewModel.loadBuilding(buildingId: inventorySite.buildingId ?? "")
-                await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
+                await viewModel.loadInventorySite(inventorySiteId: inventorySiteId)
             }
         }
     }
 }
 
-
-    #Preview {
-        NavigationStack {
-            DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "Strickland 222", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
-        }
+#Preview {
+    NavigationStack {
+        DetailedInventorySiteView(inventorySiteId: "TzLMIsUbadvLh9PEgqaV")
     }
-
+}

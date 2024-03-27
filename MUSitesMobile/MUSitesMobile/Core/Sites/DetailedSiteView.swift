@@ -6,104 +6,221 @@
 //
 
 import SwiftUI
-
+import MapKit
+import Foundation
 struct DetailedSiteView: View {
     @StateObject private var viewModel = DetailedSiteViewModel()
+    
     private var site: Site
-    let inventorySite: InventorySite
-    @State private var section1Expanded: Bool = true
-    @State private var section2Expanded: Bool = false
+    private var inventorySite: InventorySite
+
+    @State private var informationSectionExpanded: Bool = true
+    @State private var equipmentSectionExpanded: Bool = false
+    @State private var pcSectionExpanded: Bool = false
+    @State private var macSectionExpanded: Bool = false
+    @State private var bwPrinterSectionExpanded: Bool = false
+    @State private var colorPrinterSectionExpanded: Bool = false
+    @State private var scannerSectionExpanded: Bool = false
+    @State private var mapSectionExpanded: Bool = false
     
     init(site: Site, inventorySite: InventorySite) {
         self.site = site
         self.inventorySite = inventorySite
     }
-
+    
     var body: some View {
         VStack {
             Form {
                 Section {
-                    DisclosureGroup(isExpanded: $section1Expanded) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("**Group:** \(viewModel.building?.siteGroup ?? "N/A")")
-                            Text("**Building:** \(viewModel.building?.name ?? "N/A")")
-                            Text("**Site Type:** \(viewModel.building?.siteGroup ?? "N/A")")
-                            Text("**SS Captain:** \(viewModel.building?.siteGroup ?? "N/A")")
-                        }
-                        .listRowInsets(EdgeInsets())
-                    } label: {
-                        Text("Information")
-                            .font(.title)
-                            .fontWeight(.bold)
-                    }
-                    .padding(.top, 10.0)
-                    .listRowBackground(Color.clear)
-                }
-                
-                Section {
-                    DisclosureGroup(isExpanded: $section2Expanded) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("**Has Clock:** \(site.hasClock == true ? "Yes" : "No")")
-                            Text("**Has Inventory:** \(site.hasInventory == true ? "Yes" : "No")")
-                            Text("**Has Whiteboard:** \(site.hasWhiteboard == true ? "Yes" : "No")")
-                            Text("**Name Pattern (Mac):** \(site.namePatternMac ?? "N/A")")
-                            Text("**Name Pattern (PC):** \(site.namePatternPc ?? "N/A")")
-                            Text("**Name Pattern (Printer):** \(site.namePatternPrinter ?? "N/A")")
-                        }
-                        .listRowInsets(EdgeInsets())
-                    } label: {
-                        Text("Equipment")
-                            .font(.title)
-                            .fontWeight(.bold)
-                    }
-                    .padding(.top, 10.0)
-                    .listRowBackground(Color.clear)
-                }
-                
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        NavigationLink(destination: SitesMap()) {
-                            HStack {
-                                Image(systemName: "map")
-                                    .foregroundColor(.blue)
-                                Text("Map")
-                                    .font(.headline)
-                                Spacer()
-                            }
-                        }
-                    }
-                }
-                
-                Section {
-                    NavigationLink(destination: DetailedInventorySiteView(inventorySite: inventorySite)) {
-                        Image(systemName: "cabinet")
-                            .foregroundColor(.blue)
+                    NavigationLink(destination: DetailedInventorySiteView(inventorySiteId: inventorySite.id))   {
                         Text("Nearest Inventory")
+                            .foregroundColor(.blue)
                     }
+                }
+                Section {
+                    DisclosureGroup(
+                        isExpanded: $informationSectionExpanded,
+                        content: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("**Group:** \(viewModel.building?.siteGroup ?? "N/A")")
+                                Text("**Building:** \(viewModel.building?.name ?? "N/A")")
+                                Text("**Site Type:** \(self.site.siteType ?? "N/A")")
+                                Text("**SS Captain:** \(viewModel.building?.siteGroup ?? "N/A")")
+                            }
+                            .listRowInsets(EdgeInsets())
+                        },
+                        label: {
+                            Text("Information")
+                                .font(.title)
+                                .fontWeight(.bold)
+                        }
+                    )
+                    .padding(.top, 10.0)
+                    .listRowBackground(Color.clear)
                 }
                 
                 Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        NavigationLink(destination: SubmitView()) {
-                            HStack {
-                                Image(systemName: "square.and.pencil")
-                                    .foregroundColor(.blue)
-                                Text("Submit")
-                                    .font(.headline)
-                                Spacer()
+                    DisclosureGroup(
+                        isExpanded: $equipmentSectionExpanded,
+                        content: {
+                            // PC section
+                            Section {
+                                DisclosureGroup(
+                                    isExpanded: $pcSectionExpanded,
+                                    content: {
+                                        Text(site.namePatternPc ?? "N/A")
+                                    },
+                                    label: {
+                                        Text("**PC Count:** \(1)")
+                                    }
+                                )
+                            }
+                            // MAC section
+                            Section {
+                                DisclosureGroup(
+                                    isExpanded: $macSectionExpanded,
+                                    content: {
+                                        Text(site.namePatternMac ?? "N/A")
+                                    },
+                                    label: {
+                                        Text("**MAC Count:** \(1)")
+                                    }
+                                )
+                            }
+                            // B&W Printer section
+                            Section {
+                                DisclosureGroup(
+                                    isExpanded: $bwPrinterSectionExpanded,
+                                    content: {
+                                        Text(site.namePatternMac ?? "N/A")
+                                    },
+                                    label: {
+                                        Text("**B&W Printer Count:** \(1)")
+                                    }
+                                )
+                            }
+                            // Color Printer section
+                            Section {
+                                DisclosureGroup(
+                                    isExpanded: $colorPrinterSectionExpanded,
+                                    content: {
+                                        Text(site.namePatternMac ?? "N/A")
+                                    },
+                                    label: {
+                                        Text("**Color Printer Count:** \(1)")
+                                    }
+                                )
+                            }
+                            
+                            // Bools
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    if site.hasClock == true {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                    } else {
+                                        Image(systemName: "xmark.square.fill")
+                                            .foregroundColor(.red)
+                                    }
+                                    Text("Clock")
+                                }
+                                HStack {
+                                    if site.hasInventory == true {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                    } else {
+                                        Image(systemName: "xmark.square.fill")
+                                            .foregroundColor(.red)
+                                    }
+                                    Text("Inventory")
+                                }
+                                HStack {
+                                    if site.hasWhiteboard == true {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                    } else {
+                                        Image(systemName: "xmark.square.fill")
+                                            .foregroundColor(.red)
+                                    }
+                                    Text("Whiteboard")
+                                }
+                            }
+                        },
+                        label: {
+                            Text("Equipment")
+                                .font(.title)
+                                .fontWeight(.bold)
+                        }
+                    )
+                    .padding(.vertical, 8)
+                    .listRowBackground(Color.clear)
+                }
+                
+                // Map
+                Section {
+                    DisclosureGroup(
+                        isExpanded: $mapSectionExpanded,
+                        content: {
+                            if let buildingCoordinates = viewModel.building?.coordinates {
+                                SimpleMapView(
+                                    coordinates: CLLocationCoordinate2D(
+                                        latitude: buildingCoordinates.latitude,
+                                        longitude: buildingCoordinates.longitude
+                                    ),
+                                    label: self.site.name ?? "N/A"
+                                )
+                                .listRowInsets(EdgeInsets())
+                                .frame(height: 200)
+                                .cornerRadius(8)
+                            } else {
+                                SimpleMapView(
+                                    coordinates: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+                                    label: self.site.name ?? "N/A"
+                                )
+                                .listRowInsets(EdgeInsets())
+                                .frame(height: 200)
+                                .cornerRadius(8)
+                            }
+                        },
+                        label: {
+                            Text("Map")
+                                .font(.title)
+                                .fontWeight(.bold)
+                        }
+                    )
+                    .padding(.top, 10.0)
+                    .listRowBackground(Color.clear)
+                }
+                
+                // Image Gallery
+                /*Section {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(viewModel.imageURLs, id: \.self) { imageUrl in
+                                AsyncImage(url: imageUrl) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 100, height: 100)
+                                        .cornerRadius(10)
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                .frame(width: 150, height: 100)
+                                .cornerRadius(15)
+                                .clipped()
                             }
                         }
-                    }
+                    }*/
                 }
             }
-        }
-        .font(.callout)
-        .foregroundStyle(.secondary)
-        .navigationTitle(site.name ?? "N/A")
-        .onAppear {
-            Task {
-                await viewModel.loadSite(siteId: site.id)
+            .navigationTitle(site.name ?? "N/A")
+            .onAppear {
+                Task {
+                    await viewModel.loadSite(siteId: site.id)
+                    //await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Default")
+                }
             }
         }
     }
-}
+

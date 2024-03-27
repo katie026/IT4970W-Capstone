@@ -9,17 +9,18 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct InventoryType: Codable, Hashable {
+struct InventoryType: Codable {
     let id: String
     let name: String
     let keyTypeId: String?
-
+    
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case name = "name"
         case keyTypeId = "key_type"
     }
 }
+
 class InventoryTypeManager {
     static let shared = InventoryTypeManager()
     private init() { }

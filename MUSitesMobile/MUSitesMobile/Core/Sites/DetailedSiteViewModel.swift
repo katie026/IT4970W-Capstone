@@ -13,6 +13,7 @@ import FirebaseFirestoreSwift
 final class DetailedSiteViewModel: ObservableObject {
     @Published var site: Site?
     @Published var building: Building?
+    @Published var imageURLs: [URL] = []
     
     func loadSite(siteId: String) async {
         do {
@@ -26,7 +27,7 @@ final class DetailedSiteViewModel: ObservableObject {
             // Handle the error, e.g., show an alert or update the UI accordingly
         }
     }
-
+    
     func loadBuilding(buildingId: String) async {
         do {
             self.building = try await BuildingsManager.shared.getBuilding(buildingId: buildingId)
