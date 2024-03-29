@@ -15,6 +15,8 @@ import FirebaseStorage
 @MainActor
 final class DetailedSiteViewModel: ObservableObject {
     @Published var building: Building?
+    @Published var imageURLs: [URL] = []
+    @Published var boardImageURLs: [URL] = []
     
     func loadBuilding(site: Site) async {
         do {
@@ -24,49 +26,27 @@ final class DetailedSiteViewModel: ObservableObject {
             // Handle the error, e.g., show an alert or update the UI accordingly
         }
     }
-    
-//    func fetchImageURLs(forSite siteName: String) async {
-//        let imagePath = "sites/\(siteName)01.jpg"
-//        let imageRef = Storage.storage().reference(withPath: imagePath)
-//        
-//        imageRef.downloadURL { url, error in
-//            if let error = error {
-//                print("Error getting download URL: \(error.localizedDescription)")
-//            } else if let downloadURL = url {
-//                print("Successfully fetched image URL: \(downloadURL)")
-//                DispatchQueue.main.async {
-//                    self.imageURLs = [downloadURL]
-//                }
-//            }
-//        }
-//    }
-    func fetchSiteSpecificImageURLs(siteName: String) async {
-            let siteImagesRef = Storage.storage().reference(withPath: "sites")
 
-            siteImagesRef.listAll { [weak self] (result, error) in
-                guard let items = result?.items, error == nil else {
-                    print("Error listing images for site \(siteName): \(error!.localizedDescription)")
-                    return
-                }
+    func fetchSiteSpecificImageURLs(siteName: String, category: String) async {
+        // The reference should include the site name and the category (e.g., "Posters").
+        let siteCategoryImagesRef = Storage.storage().reference(withPath: "Sites/\(siteName)/\(category)")
 
-                let siteSpecificImages = items.filter { $0.name.contains(siteName) }
+        do {
+            // List all images in the specific site's category folder
+            let result = try await siteCategoryImagesRef.listAll()
+            let siteSpecificImages = result.items
 
-                for item in siteSpecificImages {
-                    item.downloadURL { url, error in
-                        guard let downloadURL = url, error == nil else {
-                            print("Error getting download URL for image \(item.name): \(error!.localizedDescription)")
-                            return
-                        }
-
-                        DispatchQueue.main.async {
-                            self?.imageURLs.append(downloadURL)
-                        }
-                    }
+            for item in siteSpecificImages {
+                // Asynchronously get the download URL for each item
+                let downloadURL = try await item.downloadURL()
+                if category == "Posters" {
+                    self.imageURLs.append(downloadURL)
+                } else if category == "Board" {
+                    self.boardImageURLs.append(downloadURL)
                 }
             }
+        } catch {
+            print("Error listing images for site \(siteName) category \(category): \(error.localizedDescription)")
         }
-
-        
-    // Add a property to store the fetched URLs
-    @Published var imageURLs: [URL] = []
+    }
 }

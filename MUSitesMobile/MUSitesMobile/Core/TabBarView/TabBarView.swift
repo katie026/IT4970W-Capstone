@@ -10,6 +10,7 @@ import SwiftUI
 struct TabBarView: View {
     
     @Binding var showSignInView: Bool
+    @State private var isAdmin = false
     
     var body: some View {
         TabView {
@@ -64,7 +65,7 @@ struct TabBarView: View {
             }
             .tabItem {
                 Image(systemName: "person.crop.circle")
-                Text("Profile")
+                Text(isAdmin ? "Admin" : "Profile")
             }
             
             // NonAuthUser View

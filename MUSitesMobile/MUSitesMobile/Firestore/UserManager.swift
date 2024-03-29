@@ -183,6 +183,21 @@ final class UserManager {
         }
     }
     
+    //function to get all the users in the user collection
+    func getAllUsers(completion: @escaping (Result<[DBUser], Error>) -> Void) {
+        Firestore.firestore().collection("users").getDocuments { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            let users = snapshot?.documents.compactMap { document -> DBUser? in
+                try? document.data(as: DBUser.self)
+            } ?? []
+            
+            completion(.success(users))
+        }
+    }
     // update user's has-auth status in Firestore
     func updateUserHasAuthentication(userId: String, hasAuthentication: Bool) async throws {
         // create dictionary to pass

@@ -11,6 +11,7 @@ struct ProfileView: View {
     
     @StateObject private var viewModel = ProfileViewModel()
     @Binding var showSignInView: Bool
+    @State private var isAdmin: Bool = false
     
     // Disclosure Group bools
     @State private var keySetExpanded = false
@@ -124,14 +125,26 @@ struct ProfileView: View {
                         } label: {
                             Text("**Chair Count:** \(user.chairReport?.chairType ?? "N/A") - \(user.chairReport?.chairCount != nil ? String(user.chairReport!.chairCount) : "N/A")")
                         }
+                        //opens up a tab that will take the user to the admin view(this is set up correctly)
+                        if isAdmin {
+                            NavigationLink(destination: AdminView()) {
+                                HStack {
+                                    Text("Admin Panel")
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-        .task {
-            try? await viewModel.loadCurrentUser()
-        }
         .navigationTitle("Profile")
+        .onAppear {
+            AdminManager.shared.checkIfUserIsAdmin { isAdminResult in
+                DispatchQueue.main.async {
+                    self.isAdmin = isAdminResult
+                }
+            }
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 NavigationLink{
@@ -140,13 +153,22 @@ struct ProfileView: View {
                     Image(systemName: "gear")
                     .font(.headline)}
             }
+        }.task {
+            try? await viewModel.loadCurrentUser()
         }
     }
 }
-
-#Preview {
-    NavigationStack {
-//        RootView()
+    
+//    #Preview {
+//        NavigationStack {
+//            //        RootView()
+//            ProfileView(showSignInView: .constant(false))
+//        }
+//    }
+//included this struct so it would run(wasnt running with the #Preview)
+struct ProfileView_Previews: PreviewProvider {
+    static var previews: some View {
         ProfileView(showSignInView: .constant(false))
     }
 }
+
