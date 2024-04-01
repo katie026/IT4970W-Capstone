@@ -48,7 +48,8 @@ final class DetailedInventorySiteViewModel: ObservableObject {
 
 struct DetailedInventorySiteView: View {
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
-    @State private var showInventorySubmission = false
+    @State private var mapSectionExpanded: Bool = true
+    @State private var pictureSectionExpanded: Bool = true
     
     private var inventorySite: InventorySite
     
@@ -102,50 +103,106 @@ struct DetailedInventorySiteView: View {
                 
                 // Submit Inventory Button
                 HStack {
-                    NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite)) {
-                        Text("Submit Inventory Entry")
-                            .foregroundColor(.white)
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                            .background(Color.gray)
-                            .cornerRadius(8)
+                    NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite))
+                    {
+                        HStack {
+                            Text("Submit Inventory Entry")
+                                .padding(10)
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
                     }
+                    .isDetailLink(false)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(UIColor.systemGray5))
+                    .cornerRadius(8)
+                    
                     Spacer()
                 }
                 
                 // Map
-                if let buildingCoordinates = viewModel.building?.coordinates {
-                    SimpleMapView(
-                        coordinates: CLLocationCoordinate2D(
-                            latitude: buildingCoordinates.latitude,
-                            longitude: buildingCoordinates.longitude
-                        ),
-                        label: self.inventorySite.name ?? "N/A"
+                Section() {
+                    DisclosureGroup(
+                        isExpanded: $mapSectionExpanded,
+                        content: {
+                            if let buildingCoordinates = viewModel.building?.coordinates {
+                                SimpleMapView(
+                                    coordinates: CLLocationCoordinate2D(
+                                        latitude: buildingCoordinates.latitude,
+                                        longitude: buildingCoordinates.longitude
+                                    ),
+                                    label: self.inventorySite.name ?? "N/A"
+                                )
+                                .frame(height: 200)
+                                .cornerRadius(8)
+                                .padding(.top, 10)
+                            } else {
+                                SimpleMapView(
+                                    coordinates: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+                                    label: self.inventorySite.name ?? "N/A"
+                                )
+                                .frame(height: 200)
+                                .cornerRadius(8)
+                                .padding(.top, 10)
+                            }
+                        },
+                        label: {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .foregroundColor(Color(UIColor.systemGray5))
+                                HStack {
+                                    Text("Map")
+                                        .font(.title)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                }
+                                .padding(10)
+                            }
+                            
+                        }
                     )
-                    .frame(height: 200)
-                    .cornerRadius(8)
-                } else {
-                    SimpleMapView(
-                        coordinates: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-                        label: self.inventorySite.name ?? "N/A"
-                    )
-                    .frame(height: 200)
-                    .cornerRadius(8)
+                    .padding(.top, 10.0)
                 }
                 
                 // Pictures
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(0..<3) { _ in
-                            Image(systemName: "photo")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 100)
-                                .padding(4)
-                                .background(Color.gray.opacity(0.3))
-                                .cornerRadius(8)
+                Section() {
+                    DisclosureGroup(
+                        isExpanded: $pictureSectionExpanded,
+                        content: {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(0..<3) { _ in
+                                        Image(systemName: "photo")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(height: 100)
+                                            .padding(4)
+                                            .background(Color.gray.opacity(0.3))
+                                            .cornerRadius(8)
+                                    }
+                                }
+                            }
+                            .padding(.top, 10)
+                        },
+                        label: {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .foregroundColor(Color(UIColor.systemGray5))
+                                HStack {
+                                    Text("Pictures")
+                                        .font(.title)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                }
+                                .padding(10)
+                            }
                         }
-                    }
+                    )
+                    .padding(.top, 10.0)
                 }
                 
                 Spacer()
@@ -165,12 +222,11 @@ struct DetailedInventorySiteView: View {
             }
         }
     }
-    
 }
     
     #Preview {
         NavigationStack {
-            DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "Strickland 222", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
+            DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "GO BCC", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
         }
     }
 

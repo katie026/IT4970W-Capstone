@@ -9,10 +9,12 @@ import SwiftUI
 
 struct InventorySubmissionView: View {
     @StateObject private var viewModel = InventorySubmissionViewModel()
+//    @State var showInventorySubmissionView: Bool = true
+    @State private var showChangeView = false
     @State private var reloadView = false
     @State private var showNoChangesAlert = false
     @State private var showEntryTypeAlert = false
-    @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.dismiss) private var dismiss
 
     let inventorySite: InventorySite
 
@@ -26,6 +28,12 @@ struct InventorySubmissionView: View {
             }
             .navigationTitle(inventorySite.name ?? "No name")
             .id(reloadView)
+            .fullScreenCover(isPresented: $showChangeView) {
+                NavigationStack {
+                    InventoryChangeView(showChangeView: $showChangeView, inventorySite: inventorySite)
+                    // pass and bind showChangeView variable to the InvenotryChangeView, so that it can change this value
+                }
+            }
     }
 
     private var content: some View {
@@ -202,10 +210,8 @@ struct InventorySubmissionView: View {
 
     private var actionButtonsSection: some View {
         Section {
-            VStack {
-                confirmExitButton
-                confirmContinueButton
-            }
+            confirmExitButton
+            confirmContinueButton
         }
     }
 
@@ -227,11 +233,16 @@ struct InventorySubmissionView: View {
                 viewModel.submitSupplyCounts() {
                     // Reload view upon successful creation
                     reloadView.toggle()
+                    // Dismiss the current view
+                    print("confirm & exit")
+                    dismiss()
                 }
             } else {
                 // If counts haven't changed, show an alert
                 // ! need to alter this alert to allow for a a confirm with no changes
 //                showNoChangesAlert = true
+                print("confirm & exit")
+                dismiss()
             }
         }) {
             Text("Confirm & Exit")
@@ -244,25 +255,28 @@ struct InventorySubmissionView: View {
             Alert(title: Text("No Changes"), message: Text("There are no changes to submit."), dismissButton: .default(Text("OK")))
         }
     }
-
+    
     private var confirmContinueButton: some View {
-        NavigationLink(destination: InventoryChangeView(inventorySite: inventorySite)) {
-            Button(action: {
-                // Handle "Confirm & Continue" action
-            }) {
-                Text("Confirm & Continue")
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.yellow)
-                    .cornerRadius(10)
-            }
+        Button(action: {
+            // Perform actions before navigation if needed
+            print("confirm & continue")
+            // Navigate to the next view
+            self.showChangeView = true
+        }) {
+            Text("Confirm & Continue")
+                .foregroundColor(.white)
+                .padding()
+                .background(Color.yellow)
+                .cornerRadius(10)
         }
     }
 }
 
 #Preview {
+//    RootView()
     NavigationView {
         InventorySubmissionView(
+//            showInventorySubmissionView: .constant(false),
             inventorySite: InventorySite(
                 id: "TzLMIsUbadvLh9PEgqaV",
                 name: "BCC 122",
