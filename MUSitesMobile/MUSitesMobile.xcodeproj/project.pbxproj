@@ -186,20 +186,19 @@
 			isa = PBXGroup;
 			children = (
 				D5B5E06B2BB32BE500AFCE3C /* Admin */,
-				6E8C57292B7CC35100B5BF59 /* RootView.swift */,
-				F668B1E42B9AB638000B2886 /* Keys */,
 				26EC33B52B966B33001F0AEE /* Apple Maps */,
+				6E3329752B7F6363009FCD14 /* Authentication */,
+				6E6858342B84468400896B16 /* Buildings */,
 				6EA65F592B8E75C0000766C7 /* Components */,
 				6EA65F562B8E754E000766C7 /* Extensions */,
-				6EA65F4A2B8710DC000766C7 /* TabBarView */,
-				6E33297B2B7F6442009FCD14 /* Profile */,
-				F69D74292BA0E9570095A817 /* Users */,
-				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
 				6EA65F6B2B98EEF3000766C7 /* Inventory */,
-				6E3329752B7F6363009FCD14 /* Authentication */,
+				F668B1E42B9AB638000B2886 /* Keys */,
+				6E33297B2B7F6442009FCD14 /* Profile */,
 				6E3329722B7F62A7009FCD14 /* Settings */,
 				6EA65F5D2B911B0C000766C7 /* Sites */,
-				6E6858342B84468400896B16 /* Buildings */,
+				6EA65F4A2B8710DC000766C7 /* TabBarView */,
+				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
+				F69D74292BA0E9570095A817 /* Users */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -244,16 +243,16 @@
 		6E33297E2B7F6954009FCD14 /* Firestore */ = {
 			isa = PBXGroup;
 			children = (
-				6E3329802B7F699F009FCD14 /* UserManager.swift */,
-				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
+				D5B5E0722BB32FA700AFCE3C /* AdminManager.swift */,
 				6E68583B2B84498A00896B16 /* BuildingsManager.swift */,
 				6EA65F6C2B98EF6F000766C7 /* InventorySitesManager.swift */,
 				6EA65F702B98FAD2000766C7 /* InventoryTypeManager.swift */,
+				F6246A7B2BA12FD400828DAE /* KeyManager.swift */,
 				F668B1E22B9AB392000B2886 /* KeySetManager.swift */,
 				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
-				F6246A7B2BA12FD400828DAE /* KeyManager.swift */,
-				D5B5E0722BB32FA700AFCE3C /* AdminManager.swift */,
+				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
 				D5B5E0762BB3458600AFCE3C /* StorageManager.swift */,
+				6E3329802B7F699F009FCD14 /* UserManager.swift */,
 			);
 			path = Firestore;
 			sourceTree = "<group>";
@@ -272,8 +271,8 @@
 			isa = PBXGroup;
 			children = (
 				6E8C57272B7CB39D00B5BF59 /* AuthenticationManager.swift */,
-				6E8C57382B7ED9DF00B5BF59 /* SignInGoogleHelper.swift */,
 				6E8C573A2B7F068600B5BF59 /* SignInAppleHelper.swift */,
+				6E8C57382B7ED9DF00B5BF59 /* SignInGoogleHelper.swift */,
 				6E8C57352B7CF30300B5BF59 /* Utilities */,
 			);
 			path = Authentication;
@@ -340,12 +339,11 @@
 		6EA65F5D2B911B0C000766C7 /* Sites */ = {
 			isa = PBXGroup;
 			children = (
-				6EA65F602B91204D000766C7 /* SitesView.swift */,
-				6EA65F622B912058000766C7 /* SitesViewModel.swift */,
 				6EA65F672B96EF0B000766C7 /* DetailedSiteView.swift */,
 				6EA65F692B96F028000766C7 /* DetailedSiteViewModel.swift */,
+				6EA65F602B91204D000766C7 /* SitesView.swift */,
+				6EA65F622B912058000766C7 /* SitesViewModel.swift */,
 				6EA65F642B9120CF000766C7 /* Subviews */,
-				D5225A662BB73D76007F14E2 /* DetailedSitePosterBoardView.swift */,
 			);
 			path = Sites;
 			sourceTree = "<group>";
@@ -353,6 +351,7 @@
 		6EA65F642B9120CF000766C7 /* Subviews */ = {
 			isa = PBXGroup;
 			children = (
+				D5225A662BB73D76007F14E2 /* DetailedSitePosterBoardView.swift */,
 				6EA65F652B9120E0000766C7 /* SiteCellView.swift */,
 			);
 			path = Subviews;
@@ -361,8 +360,8 @@
 		6EA65F6B2B98EEF3000766C7 /* Inventory */ = {
 			isa = PBXGroup;
 			children = (
-				6EA65F6E2B98F70B000766C7 /* InventorySitesView.swift */,
 				6EA65F772B990423000766C7 /* DetailedInventorySiteView.swift */,
+				6EA65F6E2B98F70B000766C7 /* InventorySitesView.swift */,
 				6EA65F742B9902AA000766C7 /* Subviews */,
 			);
 			path = Inventory;
@@ -402,6 +401,7 @@
 				6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */,
 				6EE110702B7B57F700747F04 /* ContentView.swift */,
 				6E3329712B7F6253009FCD14 /* Core */,
+				6E8C57292B7CC35100B5BF59 /* RootView.swift */,
 				6E33297E2B7F6954009FCD14 /* Firestore */,
 				6E8C57202B7CAAB400B5BF59 /* Authentication */,
 				6EE110722B7B57FA00747F04 /* Assets.xcassets */,
@@ -479,8 +479,8 @@
 		F69D74292BA0E9570095A817 /* Users */ = {
 			isa = PBXGroup;
 			children = (
-				F69D742A2BA0E9A10095A817 /* NonAuthUsersView.swift */,
 				F69D742F2BA0EE440095A817 /* DetailedUserView.swift */,
+				F69D742A2BA0E9A10095A817 /* NonAuthUsersView.swift */,
 				F69D742E2BA0EE270095A817 /* Subviews */,
 			);
 			path = Users;
