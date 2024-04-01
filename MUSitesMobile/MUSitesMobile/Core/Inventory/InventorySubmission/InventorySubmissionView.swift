@@ -15,6 +15,8 @@ struct InventorySubmissionView: View {
     @State private var showNoChangesAlert = false
     @State private var showEntryTypeAlert = false
     @Environment(\.dismiss) private var dismiss
+    
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     let inventorySite: InventorySite
 
@@ -28,12 +30,12 @@ struct InventorySubmissionView: View {
             }
             .navigationTitle(inventorySite.name ?? "No name")
             .id(reloadView)
-            .fullScreenCover(isPresented: $showChangeView) {
-                NavigationStack {
-                    InventoryChangeView(showChangeView: $showChangeView, inventorySite: inventorySite)
-                    // pass and bind showChangeView variable to the InvenotryChangeView, so that it can change this value
-                }
-            }
+//            .fullScreenCover(isPresented: $showChangeView) {
+//                NavigationStack {
+//                    InventoryChangeView(showChangeView: $showChangeView, inventorySite: inventorySite)
+//                    // pass and bind showChangeView variable to the InvenotryChangeView, so that it can change this value
+//                }
+//            }
     }
 
     private var content: some View {
@@ -257,18 +259,20 @@ struct InventorySubmissionView: View {
     }
     
     private var confirmContinueButton: some View {
-        Button(action: {
-            // Perform actions before navigation if needed
-            print("confirm & continue")
-            // Navigate to the next view
-            self.showChangeView = true
-        }) {
-            Text("Confirm & Continue")
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.yellow)
-                .cornerRadius(10)
-        }
+        NavigationLink("Confirm & Continue",
+                       destination: InventoryChangeView(parentPresentationMode: self.presentationMode, inventorySite: inventorySite))
+//        Button(action: {
+//            // Perform actions before navigation if needed
+//            print("confirm & continue")
+//            // Navigate to the next view
+//            self.showChangeView = true
+//        }) {
+//            Text("Confirm & Continue")
+//                .foregroundColor(.white)
+//                .padding()
+//                .background(Color.yellow)
+//                .cornerRadius(10)
+//        }
     }
 }
 
