@@ -23,6 +23,9 @@ final class DetailedInventorySiteViewModel: ObservableObject {
     }
     
     func loadInventoryTypes(inventoryTypeIds: [String]) async {
+        inventoryTypes = []
+        keyTypes = []
+        
         do {
             for typeId in inventoryTypeIds {
                 // try to get each
@@ -54,74 +57,63 @@ struct DetailedInventorySiteView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Background
-            LinearGradient(
-                gradient: Gradient(colors: [.green, .white]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .edgesIgnoringSafeArea(.top)
-            
+        // Content
+        ScrollView {
             VStack(spacing: 16) {
                 // Header
-                Text("Inventory")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
-                Text(inventorySite.name ?? "N/A")
-                    .font(.headline)
-                    .foregroundColor(.white)
+                VStack {
+                    HStack {
+                        Text("Inventory")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                        Spacer()
+                    }
+                    HStack {
+                        Text(inventorySite.name ?? "N/A")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }
+                }
+                .padding([.leading, .bottom, .trailing], 5.0)
                 
                 // Site Information
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Group: \(viewModel.building?.siteGroup ?? "N/A")")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    Text("Building: \(viewModel.building?.name ?? "N/A")")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    Text("Type: \(viewModel.inventoryTypes.map { $0.name }.joined(separator: ", "))")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    Text("Keys: \(viewModel.keyTypes.map { $0.name }.joined(separator: ", "))")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                HStack {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("**Group:** \(viewModel.building?.siteGroup ?? "N/A")")
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+                        
+                        Text("**Building:** \(viewModel.building?.name ?? "N/A")")
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+                        
+                        Text("**Type:** \(viewModel.inventoryTypes.map { $0.name }.joined(separator: ", "))")
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+                        
+                        Text("**Keys:** \(viewModel.keyTypes.map { $0.name }.joined(separator: ", "))")
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+                    }
+                    Spacer()
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 15.0)
                 
                 // Submit Inventory Button
-//                NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite), isActive: $showInventorySubmission) {
-//                    Button(action: {
-//                        showInventorySubmission = true
-//                    }) {
-//                        Text("Submit Inventory Entry")
-//                            .foregroundColor(.white)
-//                            .padding(.horizontal)
-//                            .padding(.vertical, 8)
-//                            .background(Color.blue)
-//                            .cornerRadius(8)
-//                    }
-//                    .buttonStyle(BorderlessButtonStyle()) // Apply a borderless button style
-//                }
-                
-                NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite)) {
-                    Text("Submit Inventory Entry")
-                        .foregroundColor(.white)
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .background(Color.blue)
-                        .cornerRadius(8)
+                HStack {
+                    NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite)) {
+                        Text("Submit Inventory Entry")
+                            .foregroundColor(.white)
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(Color.gray)
+                            .cornerRadius(8)
+                    }
+                    Spacer()
                 }
                 
                 // Map
-                SitesMapView()
-                    .frame(height: 200)
-                    .cornerRadius(8)
                 if let buildingCoordinates = viewModel.building?.coordinates {
                     SimpleMapView(
                         coordinates: CLLocationCoordinate2D(
@@ -159,8 +151,13 @@ struct DetailedInventorySiteView: View {
                 Spacer()
             }
             .padding()
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(inventorySite.name ?? "N/A")
+                }
+            }
         }
-        .navigationTitle("Inventory Site")
         .onAppear {
             Task {
                 await viewModel.loadBuilding(buildingId: inventorySite.buildingId ?? "")

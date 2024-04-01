@@ -7,73 +7,6 @@
 
 import SwiftUI
 
-@MainActor
-final class InventorySubmissionViewModel: ObservableObject {
-    @Published var supplyTypes: [SupplyType] = []
-    @Published var supplyCounts: [SupplyCount] = []
-    @Published var newSupplyCounts: [SupplyCount] = [] // Change to SupplyCount array
-    @Published var inventoryEntryType: InventoryEntryType = InventoryEntryType.Check
-    @Published var comments: String = ""
-
-    func getSupplyTypes() {
-        Task {
-            self.supplyTypes = try await SupplyTypeManager.shared.getAllSupplyTypes(descending: true)
-        }
-    }
-
-    func getSupplyCounts(inventorySiteId: String) {
-        Task {
-            self.supplyCounts = try await SupplyCountManager.shared.getAllSupplyCountsBySite(siteId: inventorySiteId)
-
-            // Make a copy of each SupplyCount object and assign to newSupplyCounts
-            self.newSupplyCounts = self.supplyCounts.map { $0.copy() }
-        }
-    }
-
-    func createNewSupplyCount(inventorySiteId: String, supplyTypeId: String, completion: @escaping () -> Void) {
-        Task {
-            do {
-                // create new document and get id from Firestore
-                let newId = try await SupplyCountManager.shared.getNewSupplyCountId()
-
-                // create a new SupplyCount struct
-                let newSupplyCount = SupplyCount(
-                    id: newId, // Generate a unique ID
-                    inventorySiteId: inventorySiteId,
-                    supplyTypeId: supplyTypeId,
-                    countMin: 0,
-                    count: 0
-                )
-
-                // update document with new SupplyCount
-                try await SupplyCountManager.shared.createSupplyCount(supplyCount: newSupplyCount)
-
-                // Call the completion handler upon successful creation
-                completion()
-
-                print("created new Supply doc in Firestore")
-            } catch {
-                print("Error creating new supply count: \(error)")
-            }
-        }
-    }
-
-    func submitSupplyCounts(completion: @escaping () -> Void) {
-        print("supplyCounts submitted!")
-        Task {
-            do {
-                try await SupplyCountManager.shared.updateSupplyCounts(newSupplyCounts)
-                // Call the completion handler upon successful creation
-                completion()
-
-                print("Updated supplies doc in Firestore")
-            } catch {
-                print("Error creating new supply count: \(error)")
-            }
-        }
-    }
-}
-
 struct InventorySubmissionView: View {
     @StateObject private var viewModel = InventorySubmissionViewModel()
     @State private var reloadView = false
@@ -262,19 +195,16 @@ struct InventorySubmissionView: View {
                     Text("ID: \(supply.id)")
                     Text("Count: \(supply.count ?? 0)")
                 }
-                .foregroundColor(.white) // Optionally change text color
+                .foregroundColor(Color(UIColor.label)) // Optionally change text color
             }
         }
     }
 
     private var actionButtonsSection: some View {
         Section {
-            HStack {
-                Spacer()
+            VStack {
                 confirmExitButton
-                Spacer()
                 confirmContinueButton
-                Spacer()
             }
         }
     }
@@ -300,24 +230,9 @@ struct InventorySubmissionView: View {
                 }
             } else {
                 // If counts haven't changed, show an alert
-                showNoChangesAlert = true
+                // ! need to alter this alert to allow for a a confirm with no changes
+//                showNoChangesAlert = true
             }
-
-//            // check if all toggles are true
-//            let allConfirmed = viewModel.supplyCounts.allSatisfy { supplyCount in
-//                viewModel.newSupplyCounts.contains { $0.id == supplyCount.id }
-//            }
-//
-//            if allConfirmed {
-//                // if all toggles are true, carry out the action
-//                viewModel.submitSupplyCounts() {
-//                    // reload view upon successful creation
-//                    reloadView.toggle()
-//                }
-//            } else {
-//                // if not, show an alert with options to select
-//                showEntryTypeAlert = true
-//            }
         }) {
             Text("Confirm & Exit")
                 .foregroundColor(.white)
@@ -331,21 +246,30 @@ struct InventorySubmissionView: View {
     }
 
     private var confirmContinueButton: some View {
-        Button(action: {
-            // Handle "Confirm & Continue" action
-        }) {
-            Text("Confirm & Continue")
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.yellow)
-                .cornerRadius(10)
+        NavigationLink(destination: InventoryChangeView(inventorySite: inventorySite)) {
+            Button(action: {
+                // Handle "Confirm & Continue" action
+            }) {
+                Text("Confirm & Continue")
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.yellow)
+                    .cornerRadius(10)
+            }
         }
     }
 }
 
 #Preview {
     NavigationView {
-        InventorySubmissionView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "BCC 122", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TzLMIsUbadvLh9PEgqaV"]))
+        InventorySubmissionView(
+            inventorySite: InventorySite(
+                id: "TzLMIsUbadvLh9PEgqaV",
+                name: "BCC 122",
+                buildingId: "yXT87CrCZCoJVRvZn5DC",
+                inventoryTypeIds: ["TzLMIsUbadvLh9PEgqaV"]
+            )
+        )
     }
 }
 
