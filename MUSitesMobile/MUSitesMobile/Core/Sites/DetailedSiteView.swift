@@ -47,7 +47,7 @@ struct DetailedSiteView: View {
                             // Inventory Section
                             NavigationLink(destination: DetailedInventorySiteView(inventorySiteId: inventorySite.id)) {
                                 HStack {
-                                    Spacer(minLength: 8) // Add a Spacer with a fixed width
+                                    Spacer(minLength: 4) // Add a Spacer with a fixed width
                                     Text("Nearest Inventory")
                                         .font(.headline)
                                         .fontWeight(.semibold)
@@ -57,7 +57,19 @@ struct DetailedSiteView: View {
                                 .padding(.horizontal)
                                 .padding(.vertical)
                             }
-                            //equipment section
+                            //Submit a Form section
+                            NavigationLink(destination: SubmitView(siteName: site.name ?? "")) {
+                                HStack {
+                                    Spacer(minLength: 4)
+                                    Text("Submit a Form")
+                                        .font(.headline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.blue)
+                                    Spacer()
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical)
+                            }
                         }
                         .background(Color(.systemGray6))
                         .cornerRadius(8)

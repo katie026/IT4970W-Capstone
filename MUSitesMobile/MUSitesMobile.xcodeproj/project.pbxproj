@@ -445,6 +445,7 @@
 		E5E52AD82BB1FE7900E9AD27 /* SiteCaptain */ = {
 			isa = PBXGroup;
 			children = (
+				E5F67D572BBA2A1200372890 /* SubViews */,
 				E5E52AD92BB1FF1900E9AD27 /* SiteCaptainSubmissionView.swift */,
 			);
 			path = SiteCaptain;
@@ -454,6 +455,13 @@
 			isa = PBXGroup;
 			children = (
 				E5E52ADE2BB31BC000E9AD27 /* SimpleMapView.swift */,
+			);
+			path = SubViews;
+			sourceTree = "<group>";
+		};
+		E5F67D572BBA2A1200372890 /* SubViews */ = {
+			isa = PBXGroup;
+			children = (
 			);
 			path = SubViews;
 			sourceTree = "<group>";
