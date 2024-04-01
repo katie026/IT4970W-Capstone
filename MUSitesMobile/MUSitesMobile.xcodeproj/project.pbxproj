@@ -197,6 +197,7 @@
 		6E3329712B7F6253009FCD14 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				6E8C57292B7CC35100B5BF59 /* RootView.swift */,
 				D5B5E06B2BB32BE500AFCE3C /* Admin */,
 				26EC33B52B966B33001F0AEE /* Apple Maps */,
 				6E3329752B7F6363009FCD14 /* Authentication */,
@@ -418,7 +419,6 @@
 				6EE1106E2B7B57F700747F04 /* MUSitesMobileApp.swift */,
 				6EE110702B7B57F700747F04 /* ContentView.swift */,
 				6E3329712B7F6253009FCD14 /* Core */,
-				6E8C57292B7CC35100B5BF59 /* RootView.swift */,
 				6E33297E2B7F6954009FCD14 /* Firestore */,
 				6E8C57202B7CAAB400B5BF59 /* Authentication */,
 				6EE110722B7B57FA00747F04 /* Assets.xcassets */,
