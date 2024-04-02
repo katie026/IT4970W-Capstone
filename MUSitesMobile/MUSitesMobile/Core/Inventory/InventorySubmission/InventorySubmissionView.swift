@@ -15,6 +15,8 @@ struct InventorySubmissionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var sheetManager: SheetManager // for pop up view
+    @State private var confirmContinue = false
+    @State var viewSelection: Int? = nil
     // Alerts
     @State private var showNoChangesAlert = false
     @State private var showEntryTypeAlert = false
@@ -37,10 +39,8 @@ struct InventorySubmissionView: View {
             }
             // View Title
             .navigationTitle("Submit Inventory")
-            // modifier assigns an identifier to a view
-            // if identifer changes, SwiftUI considers the view as having a new identity
-            // triggers a view update when reloadView variable changes
-            .id(reloadView)
+            // Assign id to view
+            .id(reloadView) // triggers update when reloadView changes
             // EntryType Popup
             .overlay(alignment: .bottom) {
                 if sheetManager.action.isPresented {
@@ -50,7 +50,8 @@ struct InventorySubmissionView: View {
                             // submit an entry
 //                            submitAnEntry()
                             print("closure-submit counts to db: \(inventoryEntryType)")
-                            // reset submitClciked status
+                            
+                            // reset submitClicked status
                             submitClicked = false
                             
                             // dismiss popup
@@ -58,9 +59,18 @@ struct InventorySubmissionView: View {
                                 sheetManager.dismiss()
                             }
                             
-                            // dismiss current view
-                            dismiss()
+                            // if user clicked Confirm & Exit
+                            if !confirmContinue {
+                                // dismiss current view
+                                dismiss()
+                            } else {
+                            // if user clicked Confirm & Continue
+                                // go to next view
+                                print("next view")
+                                self.viewSelection = 1
+                            }
                         } else {
+                        // if CLOSE was clicked
                             // dismiss popup
                             withAnimation {
                                 sheetManager.dismiss()
@@ -331,8 +341,6 @@ struct InventorySubmissionView: View {
                 withAnimation {
                     sheetManager.present()
                 }
-                
-                
             }
         }) {
             Text("Confirm & Exit")
@@ -341,86 +349,33 @@ struct InventorySubmissionView: View {
                 .background(Color.blue)
                 .cornerRadius(10)
         }
-        
-//        Button(action: {
-//            // Check if any counts have been changed
-//            let countsChanged = viewModel.newSupplyCounts.contains { newSupplyCount in
-//                // find the original count for the supply using the SupplyCount.id
-//                guard let originalCount = viewModel.supplyCounts.first(where: { $0.id == newSupplyCount.id })?.count else {
-//                    // if original count not found, counts have changed
-//                    return true
-//                }
-//                // counts have changed if the new count is different from the original count
-//                return newSupplyCount.count != originalCount
-//            }
-//
-//            // If counts have changed
-//            if countsChanged {
-//                // display popup, get inventory entry type
-//                withAnimation {
-//                    sheetManager.present()
-//                }
-////                // submit the counts
-////                viewModel.submitSupplyCounts() { // excutes immediately (doesn't wait for async)
-//////                    reloadView.toggle() // reloads view
-////                    // Dismiss the current view
-////                    dismiss()
-////                }
-//            // If counts haven't changed
-//            } else {
-//                // update entry type
-//                inventoryEntryType = .Check
-//                // test code
-//                print("submit counts to db")
-//                dismiss()
-////                // show an alert
-////                showNoChangesAlert = true
-//            }
-//        }) {
-//            Text("Confirm & Exit")
-//                .foregroundColor(.white)
-//                .padding()
-//                .background(Color.blue)
-//                .cornerRadius(10)
-//        }
-//        .alert(isPresented: $showNoChangesAlert) {
-//            Alert(
-//                title: Text("No Changes"),
-//                message: Text("There are no changes to submit."),
-//                // OK Button
-//                primaryButton: .default(Text("OK")) {
-//                    // display popup, get inventory entry type
-//                    withAnimation {
-//                        sheetManager.present()
-//                    }
-//                    
-//                    // test code
-//                    print("submit counts to db")
-//                    dismiss()
-////                    // submit the counts anyway
-////                    viewModel.submitSupplyCounts() { // this code excutes immediately (doesn't wait for async)
-////                        // dismiss the current view
-////                        dismiss()
-////                    }
-//                },
-//                // Cancel Button
-//                secondaryButton: .cancel()
-//            )
-//        }
     }
     
     private var confirmContinueButton: some View {
         // Confirm & Continue button
-        NavigationLink(destination: InventoryChangeView(
+        return Button("Confirm & Continue", action: {
+            // display popup -> update entry type -> may submit entry
+            withAnimation {
+                sheetManager.present()
+            }
+        })
+        NavigationLink(
+            destination: InventoryChangeView(
             parentPresentationMode: self.presentationMode,
-            inventorySite: inventorySite)
-        ) {
-            Text("Confirm & Continue")
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.yellow)
-                .cornerRadius(10)
-        }
+            inventorySite: inventorySite),
+            tag: 1,
+            selection: $viewSelection
+        ) { EmptyView() }
+//        NavigationLink(destination: InventoryChangeView(
+//            parentPresentationMode: self.presentationMode,
+//            inventorySite: inventorySite)
+//        ) {
+//            Text("Confirm & Continue")
+//                .foregroundColor(.white)
+//                .padding()
+//                .background(Color.yellow)
+//                .cornerRadius(10)
+//        }
     }
     
     func submitAnEntry() {

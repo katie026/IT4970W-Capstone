@@ -64,7 +64,11 @@ final class InventorySitesViewModel: ObservableObject {
 
 
 struct InventorySitesView: View {
+    // View Model
     @StateObject private var viewModel = InventorySitesViewModel()
+    
+    // View Control
+//    @State private var path = NavigationPath()
     
     var body: some View {
         List {
