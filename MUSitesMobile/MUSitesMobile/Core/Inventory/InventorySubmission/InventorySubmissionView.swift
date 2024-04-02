@@ -46,7 +46,7 @@ struct InventorySubmissionView: View {
             LinearGradient(
                 gradient: Gradient(colors: [.teal, .clear]),
                 startPoint: .top,
-                endPoint: .bottom
+                endPoint: .center
             )
             .edgesIgnoringSafeArea(.top)
             
@@ -65,8 +65,11 @@ struct InventorySubmissionView: View {
                 Form {
                     suppliesSection
                     commentsSection
-                    actionButtonsSection
+                    newSupplyCountsSection
                 }
+                
+                // Action Button section
+                actionButtonsSection
             }
         }
         // add a button to dismiss keypad when needed
@@ -232,11 +235,17 @@ struct InventorySubmissionView: View {
             // craete large text field
             TextEditor(text: $viewModel.comments)
                 .frame(height: 100)
-
+        }
+    }
+    
+    // list of NewSupplyCounts for testing purposes
+    private var newSupplyCountsSection: some View {
+        Section(header: Text("New Supply Counts")) {
             // Display the contents of the newSupplyCounts array
             ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
                 HStack {
                     Text("ID: \(supply.id)")
+//                    Text("Name: \(supply.supplyTypeName)")
                     Text("Count: \(supply.count ?? 0)")
                 }
                 .foregroundColor(Color(UIColor.label)) // Optionally change text color
@@ -247,10 +256,14 @@ struct InventorySubmissionView: View {
     private var actionButtonsSection: some View {
         // Section for action buttons
         Section {
-            // Confirm & Exit back to DetailedInventorySiteView
-            confirmExitButton
-            // Confirm & Continue to IvnentoryChangeVIew
-            confirmContinueButton
+            HStack {
+                // Confirm & Exit back to DetailedInventorySiteView
+                confirmExitButton
+                Text("OR")
+                // Confirm & Continue to IvnentoryChangeVIew
+                confirmContinueButton
+            }
+            .padding(.vertical)
         }
     }
 
@@ -308,8 +321,16 @@ struct InventorySubmissionView: View {
     
     private var confirmContinueButton: some View {
         // Confirm & Continue button
-        NavigationLink("Confirm & Continue",
-                       destination: InventoryChangeView(parentPresentationMode: self.presentationMode, inventorySite: inventorySite))
+        NavigationLink(destination: InventoryChangeView(
+            parentPresentationMode: self.presentationMode,
+            inventorySite: inventorySite)
+        ) {
+            Text("Confirm & Continue")
+                .foregroundColor(.white)
+                .padding()
+                .background(Color.yellow)
+                .cornerRadius(10)
+        }
     }
 }
 
