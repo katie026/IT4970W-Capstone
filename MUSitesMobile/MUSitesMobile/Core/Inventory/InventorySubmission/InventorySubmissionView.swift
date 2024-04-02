@@ -14,10 +14,12 @@ struct InventorySubmissionView: View {
     @State private var reloadView = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @EnvironmentObject var sheetManager: SheetManager
     // Alerts
     @State private var showNoChangesAlert = false
     @State private var showEntryTypeAlert = false
-    // Pased-In Constants
+    @State private var inventoryEntryType: InventoryEntryType = .Check
+    // Passed-In Constants
     let inventorySite: InventorySite
     
     // Main Content
@@ -38,6 +40,15 @@ struct InventorySubmissionView: View {
             // if identifer changes, SwiftUI considers the view as having a new identity
             // triggers a view update when reloadView variable changes
             .id(reloadView)
+            .overlay(alignment: .bottom) {
+                if sheetManager.action.isPresented {
+                    EntryTypePopupView(didClose: {
+                        withAnimation {
+                            sheetManager.dismiss()
+                        }
+                    }, selectedOption: $inventoryEntryType)
+                }
+            }
     }
 
     private var content: some View {
@@ -60,6 +71,14 @@ struct InventorySubmissionView: View {
                         .padding(.horizontal)
                     Spacer()
                 }
+                
+                // Testing purposes
+                Button("Show Custom Sheet") {
+                    withAnimation {
+                        sheetManager.present()
+                    }
+                }
+                Text("\(inventoryEntryType)")
                 
                 // Form section
                 Form {
@@ -289,7 +308,10 @@ struct InventorySubmissionView: View {
                     dismiss()
                 }
             } else {
-                // If counts haven't changed, show an alert
+                // If counts haven't changed
+                // upadte entry type
+                inventoryEntryType = .Check
+                // show an alert
                 showNoChangesAlert = true
             }
         }) {
@@ -343,6 +365,7 @@ struct InventorySubmissionView: View {
                 inventoryTypeIds: ["TzLMIsUbadvLh9PEgqaV"]
             )
         )
+        .environmentObject(SheetManager())
     }
 }
 

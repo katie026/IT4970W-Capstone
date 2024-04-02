@@ -51,6 +51,8 @@ struct DetailedInventorySiteView: View {
     @State private var mapSectionExpanded: Bool = true
     @State private var pictureSectionExpanded: Bool = true
     
+    @StateObject var sheetManager = SheetManager()
+    
     private var inventorySite: InventorySite
     
     init(inventorySite: InventorySite) {
@@ -221,6 +223,7 @@ struct DetailedInventorySiteView: View {
                 await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
             }
         }
+        .environmentObject(sheetManager)
     }
 }
     

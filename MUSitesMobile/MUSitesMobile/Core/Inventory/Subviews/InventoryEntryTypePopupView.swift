@@ -8,7 +8,11 @@
 import SwiftUI
 
 struct EntryTypePopupView: View {
-    @State var selectedOption: InventoryEntryType = .Check
+    // Closure
+    let didClose: () -> Void
+    
+    // Binded variables
+    @Binding var selectedOption: InventoryEntryType
 
     var body: some View {
         VStack {
@@ -32,21 +36,25 @@ struct EntryTypePopupView: View {
             Divider()
 
             Button("Submit") {
-                // Dismiss the alert
+                // reset entry type
+                selectedOption = .Check
+                // call closure
+                didClose()
             }
             .padding()
         }
         .padding()
-        .background()
+        .background(background)
         .cornerRadius(10)
         .overlay(alignment: .topTrailing) {
             close
         }
+        .transition(.move(edge: .bottom))
     }
 }
 
 #Preview {
-    EntryTypePopupView()
+    EntryTypePopupView(didClose: {}, selectedOption: .constant(.Check))
         .padding()
         .background(.blue)
         .previewLayout(.sizeThatFits)
@@ -55,7 +63,10 @@ struct EntryTypePopupView: View {
 private extension EntryTypePopupView {
     var close: some View {
         Button(action: {
-
+            // reset entry type
+            selectedOption = .Check
+            // call closure
+            didClose()
         }) {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 30))
@@ -63,5 +74,11 @@ private extension EntryTypePopupView {
                 .opacity(1)
                 .padding()
         }
+    }
+    
+    var background: some View {
+        RoundedRectangle(cornerRadius: 10)
+            .fill(Color.white)
+            .shadow(color: .black.opacity(0.9), radius: 3)
     }
 }

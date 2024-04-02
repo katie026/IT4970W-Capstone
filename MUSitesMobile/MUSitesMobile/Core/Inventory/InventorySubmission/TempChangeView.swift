@@ -92,15 +92,15 @@ struct TempChangeView: View {
             LazyVGrid(columns: [
                 GridItem(.flexible(), alignment: .center), // name
 //                GridItem(.flexible(), alignment: .center), // old count
-                GridItem(.flexible(), alignment: .center), // toggle
+//                GridItem(.flexible(), alignment: .center), // toggle
                 GridItem(.flexible(), alignment: .center), // used
                 GridItem(.flexible(), alignment: .center) // new count
             ]) {
                 // Grid headers
                 Text("Supply").fontWeight(.bold) // nmae
 //                Text("Old Count").fontWeight(.bold)  // old count
+//                Text("Used").fontWeight(.bold) // toggle
                 Text("Used").fontWeight(.bold) // used
-                Text("#").fontWeight(.bold) // used
                 Text("Count").fontWeight(.bold) // new count
             }
             
@@ -131,7 +131,7 @@ struct TempChangeView: View {
         return LazyVGrid(columns: [
             GridItem(.flexible(), alignment: .center), // name
 //            GridItem(.flexible(), alignment: .center), // old count
-            GridItem(.flexible(), alignment: .center), // toggle
+//            GridItem(.flexible(), alignment: .center), // toggle
             GridItem(.flexible(), alignment: .center), // used
             GridItem(.flexible(), alignment: .center) // new count
         ]) {
@@ -143,19 +143,19 @@ struct TempChangeView: View {
 //             supply Old Count column
 //            Text("\(count)") // old count
             
-            // toggle
-            HStack {
-                Spacer()
-                // if there's a supplyCount for the supplyType
-                if let supplyCount = supplyCount {
-                    // display the toggle
-                    usedToggle(for: supplyCount)
-                } else {
-                    // display placeholder
-                    Text("(_)")
-                }
-                Spacer()
-            }
+//            // toggle
+//            HStack {
+//                Spacer()
+//                // if there's a supplyCount for the supplyType
+//                if let supplyCount = supplyCount {
+//                    // display the toggle
+//                    usedToggle(for: supplyCount)
+//                } else {
+//                    // display placeholder
+//                    Text("(_)")
+//                }
+//                Spacer()
+//            }
             
             // supply Used column
             if let supplyCount = supplyCount, viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
@@ -260,17 +260,17 @@ struct TempChangeView: View {
             .keyboardType(.numberPad)
             .textContentType(.oneTimeCode)
             
-//            // Plus Button
-//            Button(action: {
-//                // Increase the used count by 1
-//                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
-//                    viewModel.newSupplyCounts[index].usedCount += 1
-//                    // Update the count accordingly
-//                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
-//                }
-//            }) {
-//                Image(systemName: "plus")
-//            }
+            // Plus Button
+            Button(action: {
+                // Increase the used count by 1
+                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                    viewModel.newSupplyCounts[index].usedCount += 1
+                    // Update the count accordingly
+                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+                }
+            }) {
+                Image(systemName: "plus")
+            }
         }
     }
     
