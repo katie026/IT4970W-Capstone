@@ -11,14 +11,23 @@ struct TempChangeView: View {
     // View Model
     @StateObject private var viewModel = InventorySubmissionViewModel()
     // View Control
+//    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+//    @Binding var parentPresentationMode: PresentationMode
     @State private var reloadView = false
     // Alerts
     @State private var showNoChangesAlert = false
     @State private var showEntryTypeAlert = false
-    // Pased-In Constants
+    // Passed-In Constants
     let inventorySite: InventorySite
     
     var body: some View {
+//        VStack {
+//            Button(action: {
+//                self.popParent()
+//            }) {
+//                Text("Go Back")
+//            }
+//        }
         // Content
         content
             // On appear
@@ -81,22 +90,25 @@ struct TempChangeView: View {
         Section(header: Text("Supplies")) {
             // Create grid
             LazyVGrid(columns: [
-                GridItem(.flexible(), alignment: .center),
+                GridItem(.flexible(), alignment: .center), // name
 //                GridItem(.flexible(), alignment: .center), // old count
-                GridItem(.flexible(), alignment: .center),
-                GridItem(.flexible(), alignment: .center)
+                GridItem(.flexible(), alignment: .center), // toggle
+                GridItem(.flexible(), alignment: .center), // used
+                GridItem(.flexible(), alignment: .center) // new count
             ]) {
                 // Grid headers
-                Text("Supply").fontWeight(.bold)
+                Text("Supply").fontWeight(.bold) // nmae
 //                Text("Old Count").fontWeight(.bold)  // old count
-                Text("Used").fontWeight(.bold)
+                Text("Used").fontWeight(.bold) // used
+                Text("#").fontWeight(.bold) // used
                 Text("Count").fontWeight(.bold) // new count
             }
             
             // If supply types are loaded
             if !viewModel.supplyTypes.isEmpty {
-                // given each suppply type, create a row
+                // For each supply type
                 ForEach(viewModel.supplyTypes, id: \.id) { supplyType in
+                    // create a row
                     supplyRow(for: supplyType)
                 }
             } else {
@@ -112,29 +124,42 @@ struct TempChangeView: View {
         // Find the corresponding supply count in viewModel.newSupplyCounts
         let newSupplyCount = viewModel.newSupplyCounts.first(where: { $0.supplyTypeId == supplyType.id })
 
-        // calculate the count, if nil then count = 0
-        let count = supplyCount?.count ?? 0
-        let usedCount = supplyCount?.usedCount ?? 0
+//        // calculate the count, if nil then count = 0
+//        let count = supplyCount?.count ?? 0
 
         // create grid
         return LazyVGrid(columns: [
-            GridItem(.flexible(), alignment: .center),
+            GridItem(.flexible(), alignment: .center), // name
 //            GridItem(.flexible(), alignment: .center), // old count
-            GridItem(.flexible(), alignment: .center),
-            GridItem(.flexible(), alignment: .center)
+            GridItem(.flexible(), alignment: .center), // toggle
+            GridItem(.flexible(), alignment: .center), // used
+            GridItem(.flexible(), alignment: .center) // new count
         ]) {
 
             // supply Name column
             Text(supplyType.name)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            // supply Old Count column
+//             supply Old Count column
 //            Text("\(count)") // old count
+            
+            // toggle
+            HStack {
+                Spacer()
+                // if there's a supplyCount for the supplyType
+                if let supplyCount = supplyCount {
+                    // display the toggle
+                    usedToggle(for: supplyCount)
+                } else {
+                    // display placeholder
+                    Text("(_)")
+                }
+                Spacer()
+            }
             
             // supply Used column
             if let supplyCount = supplyCount, viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
                 supplyUsedTextField(for: supplyCount)
-                
             }
             
             // supply New Count column
@@ -142,25 +167,65 @@ struct TempChangeView: View {
                 Text("\(newSupplyCount.count ?? 0)")
             }
         }
-        // define grid's id
-        // when views are recreated due to changes in state/data, id preserves the state of individual views --> ensures user interactions (scrolling/entering text) are maintained correctly across view updates
         .id(supplyType.id) // Specify the id parameter explicitly
+    }
+    
+    private func usedToggle(for supplyCount: SupplyCount) -> some View {
+        // create Used toggle
+        Toggle(isOn: Binding( // two-way connection between view and the underlying data
+            // returns boolean binding (toggle state)
+            get: {
+                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                    if viewModel.newSupplyCounts[index].usedCount >= 0 {
+                        return true
+                    } else {
+                        return false
+                    }
+                } else {
+                    return true
+                }
+            },
+            // sets boolean binding (toggle state)
+            // receives boolean parameter "confirmed"
+            set: { used in
+                // if toggled on
+                if used {
+                    // if used
+                    if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                        // make usedCount positive in newSupplyCounts
+                        viewModel.newSupplyCounts[index].usedCount = abs(viewModel.newSupplyCounts[index].usedCount)
+                        // update count in newSupplyCounts
+                        viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+                    }
+                // if toggled off
+                } else {
+                    // if used
+                    if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                        // make usedCount negative in newSupplyCounts
+                        viewModel.newSupplyCounts[index].usedCount = -1 * abs(viewModel.newSupplyCounts[index].usedCount)
+                        // update count in newSupplyCounts
+                        viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+                    }
+                }
+            }
+        )) {
+
+        }
     }
     
     private func supplyUsedTextField(for supplyCount: SupplyCount) -> some View {
         HStack {
-            // Minus Button
-            Button(action: {
-                // Decrease the used count by 1
-                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
-                    viewModel.newSupplyCounts[index].usedCount -= 1
-                    // Update the count accordingly
-                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
-                }
-                print("minus")
-            }) {
-                Image(systemName: "minus")
-            }
+//            // Minus Button
+//            Button(action: {
+//                // Decrease the used count by 1
+//                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+//                    viewModel.newSupplyCounts[index].usedCount -= 1
+//                    // Update the count accordingly
+//                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+//                }
+//            }) {
+//                Image(systemName: "minus")
+//            }
             
             // create Used text field
             TextField("#", text: Binding( // binding establishes two-way connection between view and the underlying data
@@ -195,18 +260,17 @@ struct TempChangeView: View {
             .keyboardType(.numberPad)
             .textContentType(.oneTimeCode)
             
-            // Plus Button
-            Button(action: {
-                // Increase the used count by 1
-                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
-                    viewModel.newSupplyCounts[index].usedCount += 1
-                    // Update the count accordingly
-                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
-                }
-                print("plus")
-            }) {
-                Image(systemName: "plus")
-            }
+//            // Plus Button
+//            Button(action: {
+//                // Increase the used count by 1
+//                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+//                    viewModel.newSupplyCounts[index].usedCount += 1
+//                    // Update the count accordingly
+//                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+//                }
+//            }) {
+//                Image(systemName: "plus")
+//            }
         }
     }
     
@@ -235,26 +299,6 @@ struct TempChangeView: View {
     
     // Return to DetailedInventorySiteView
     //func popParent() {
-}
-
-// MARK: Structs for Preview
-
-private struct ParentPresentationView: View {
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    
-    var body: some View {
-        NavigationLink("Confirm & Continue",
-                       destination: InventoryChangeView(
-                        parentPresentationMode: self.presentationMode,
-                        inventorySite: InventorySite(
-                            id: "TzLMIsUbadvLh9PEgqaV",
-                            name: "BCC 122",
-                            buildingId: "yXT87CrCZCoJVRvZn5DC",
-                            inventoryTypeIds: ["TzLMIsUbadvLh9PEgqaV"]
-                        )
-                       )
-        )
-    }
 }
 
 #Preview {
