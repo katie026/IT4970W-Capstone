@@ -10,22 +10,58 @@ import MapKit
 
 struct SitesMapView: View {
     @State private var selectedBuilding: Building? = nil
+    @State private var selectedSiteGroup: String? = nil
     
     
     var body: some View {
             NavigationView {
                 ZStack {
-                    MapView(selectedBuilding: $selectedBuilding)
-                        .edgesIgnoringSafeArea(.all)
+                    MapView(selectedBuilding: $selectedBuilding, selectedSiteGroup: $selectedSiteGroup)
+                        .edgesIgnoringSafeArea(.top)
                     
                     VStack {
                         Spacer()
                         
-                        Button(action: {
-                            // Refresh button action
-                            // fetchBuildingsFromFirestore()
-                        }) {
-                            Text("Refresh Buildings")
+                        
+                        Menu {
+                            Button(action: {
+                                selectedSiteGroup = nil
+                            }) {
+                                Text("All")
+                            }
+                            
+                            Button(action: {
+                                selectedSiteGroup = "R1"
+                            }) {
+                                Text("R1")
+                            }
+                            
+                            Button(action: {
+                                selectedSiteGroup = "G1"
+                            }) {
+                                Text("G1")
+                            }
+                            
+                            Button(action: {
+                                selectedSiteGroup = "G2"
+                            }) {
+                                Text("G2")
+                            }
+                            
+                            Button(action: {
+                                selectedSiteGroup = "G3"
+                            }) {
+                                Text("G3")
+                            }
+                            Button(action: {
+                                selectedSiteGroup = ""
+                            }) {
+                                Text("None")
+                            }
+                            
+                            // Add more site groups as needed
+                        } label: {
+                            Text("Select Site Group")
                         }
                         .padding()
                     }
@@ -58,6 +94,8 @@ struct SitesMapView: View {
 struct MapView: UIViewRepresentable {
     @State private var userTrackingMode: MKUserTrackingMode = .follow
     @Binding var selectedBuilding: Building?
+    @Binding var selectedSiteGroup: String?
+    
     private let locationManager = CLLocationManager()
     
     @State private var buildings: [Building] = []
@@ -113,22 +151,10 @@ struct MapView: UIViewRepresentable {
         
         
         for building in buildings {
-            if let coordinates = building.coordinates {
+            if let coordinates = building.coordinates, selectedSiteGroup == nil || building.siteGroup == selectedSiteGroup {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude)
-                switch building.siteGroup {
-                                case "R1":
-                                    annotation.subtitle = "R1"
-                                case "G1":
-                                    annotation.subtitle = "G1"
-                                case "G2":
-                                    annotation.subtitle = "G2"
-                                case "G3":
-                                    annotation.subtitle = "G3"
-                                // Add more cases as needed
-                                default:
-                                    annotation.subtitle = "No site group"
-                            }
+                annotation.subtitle = building.siteGroup
                 annotation.title =  building.name ?? ""
                 mapView.addAnnotation(annotation)
             }
@@ -164,3 +190,4 @@ struct MapView: UIViewRepresentable {
 #Preview {
     SitesMapView()
 }
+
