@@ -13,6 +13,7 @@ struct EntryTypePopupView: View {
     
     // Binded variables
     @Binding var selectedOption: InventoryEntryType
+    @Binding var submitClicked: Bool
 
     var body: some View {
         VStack {
@@ -36,8 +37,8 @@ struct EntryTypePopupView: View {
             Divider()
 
             Button("Submit") {
-                // reset entry type
-                selectedOption = .Check
+                // tell parent view Submit button was clicked
+                submitClicked = true
                 // call closure
                 didClose()
             }
@@ -54,7 +55,7 @@ struct EntryTypePopupView: View {
 }
 
 #Preview {
-    EntryTypePopupView(didClose: {}, selectedOption: .constant(.Check))
+    EntryTypePopupView(didClose: {}, selectedOption: .constant(.Check), submitClicked: .constant(false))
         .padding()
         .background(.blue)
         .previewLayout(.sizeThatFits)

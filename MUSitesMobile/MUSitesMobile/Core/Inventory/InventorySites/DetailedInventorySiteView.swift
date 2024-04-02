@@ -47,14 +47,17 @@ final class DetailedInventorySiteViewModel: ObservableObject {
 }
 
 struct DetailedInventorySiteView: View {
+    // View Model
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
+    // View Managing
+    @StateObject var sheetManager = SheetManager()
+    // Section Bools
     @State private var mapSectionExpanded: Bool = true
     @State private var pictureSectionExpanded: Bool = true
-    
-    @StateObject var sheetManager = SheetManager()
-    
+    // Passed-In Values
     private var inventorySite: InventorySite
     
+    // Initializer
     init(inventorySite: InventorySite) {
         self.inventorySite = inventorySite
     }
@@ -63,173 +66,185 @@ struct DetailedInventorySiteView: View {
         // Content
         ScrollView {
             VStack(spacing: 16) {
-                // Header
-                VStack {
-                    HStack {
-                        Text("Inventory")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        Spacer()
-                    }
-                    HStack {
-                        Text(inventorySite.name ?? "N/A")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        Spacer()
-                    }
-                }
-                .padding([.leading, .bottom, .trailing], 5.0)
-                
-                // Site Information
-                HStack {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("**Group:** \(viewModel.building?.siteGroup ?? "N/A")")
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                        
-                        Text("**Building:** \(viewModel.building?.name ?? "N/A")")
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                        
-                        Text("**Type:** \(viewModel.inventoryTypes.map { $0.name }.joined(separator: ", "))")
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                        
-                        Text("**Keys:** \(viewModel.keyTypes.map { $0.name }.joined(separator: ", "))")
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 15.0)
-                
-                // Submit Inventory Button
-                HStack {
-                    NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite))
-                    {
-                        HStack {
-                            Text("Submit Inventory Entry")
-                                .padding(10)
-                                .font(.title)
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
-                            Spacer()
-                        }
-                    }
-                    .isDetailLink(false)
-                    .frame(maxWidth: .infinity)
-                    .background(Color(UIColor.systemGray5))
-                    .cornerRadius(8)
-                    
-                    Spacer()
-                }
-                
-                // Map
-                Section() {
-                    DisclosureGroup(
-                        isExpanded: $mapSectionExpanded,
-                        content: {
-                            if let buildingCoordinates = viewModel.building?.coordinates {
-                                SimpleMapView(
-                                    coordinates: CLLocationCoordinate2D(
-                                        latitude: buildingCoordinates.latitude,
-                                        longitude: buildingCoordinates.longitude
-                                    ),
-                                    label: self.inventorySite.name ?? "N/A"
-                                )
-                                .frame(height: 200)
-                                .cornerRadius(8)
-                                .padding(.top, 10)
-                            } else {
-                                SimpleMapView(
-                                    coordinates: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-                                    label: self.inventorySite.name ?? "N/A"
-                                )
-                                .frame(height: 200)
-                                .cornerRadius(8)
-                                .padding(.top, 10)
-                            }
-                        },
-                        label: {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .foregroundColor(Color(UIColor.systemGray5))
-                                HStack {
-                                    Text("Map")
-                                        .font(.title)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                }
-                                .padding(10)
-                            }
-                            
-                        }
-                    )
-                    .padding(.top, 10.0)
-                }
-                
-                // Pictures
-                Section() {
-                    DisclosureGroup(
-                        isExpanded: $pictureSectionExpanded,
-                        content: {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
-                                    ForEach(0..<3) { _ in
-                                        Image(systemName: "photo")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(height: 100)
-                                            .padding(4)
-                                            .background(Color.gray.opacity(0.3))
-                                            .cornerRadius(8)
-                                    }
-                                }
-                            }
-                            .padding(.top, 10)
-                        },
-                        label: {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .foregroundColor(Color(UIColor.systemGray5))
-                                HStack {
-                                    Text("Pictures")
-                                        .font(.title)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                }
-                                .padding(10)
-                            }
-                        }
-                    )
-                    .padding(.top, 10.0)
-                }
-                
-                Spacer()
+                Header
+                BasicInfo
+                SubmitInventoryButton
+                MapSection
+                PictureSection
             }
             .padding()
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text(inventorySite.name ?? "N/A")
-                }
-            }
         }
+        // View Title
+        .navigationTitle("Inventory: \(inventorySite.name ?? "N/A")")
+        // On Appear
         .onAppear {
             Task {
                 await viewModel.loadBuilding(buildingId: inventorySite.buildingId ?? "")
                 await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
             }
         }
-        .environmentObject(sheetManager)
+    }
+    
+    private var Header: some View {
+        HStack {
+            Text(inventorySite.name ?? "N/A")
+                .font(.title2)
+                .fontWeight(.semibold)
+            Spacer()
+        }.padding([.leading, .bottom, .trailing], 5.0)
+    }
+    
+    private var BasicInfo: some View {
+        // Basic Info
+        HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("**Group:** \(viewModel.building?.siteGroup ?? "N/A")")
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                
+                Text("**Building:** \(viewModel.building?.name ?? "N/A")")
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                
+                Text("**Type:** \(viewModel.inventoryTypes.map { $0.name }.joined(separator: ", "))")
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                
+                Text("**Keys:** \(viewModel.keyTypes.map { $0.name }.joined(separator: ", "))")
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 15.0)
+    }
+    
+    private var SubmitInventoryButton: some View {
+        // Submit Inventory Button
+        HStack {
+            NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite).environmentObject(sheetManager))
+            {
+                HStack {
+                    Text("Submit Inventory Entry")
+                        .padding(10)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    Spacer()
+                }
+            }
+            .isDetailLink(false)
+            .frame(maxWidth: .infinity)
+            .background(Color(UIColor.systemGray5))
+            .cornerRadius(8)
+            
+            Spacer()
+        }
+    }
+    
+    private var MapSection: some View {
+        let coordinates: CLLocationCoordinate2D
+        
+        if let buildingCoordinates = viewModel.building?.coordinates {
+            coordinates = CLLocationCoordinate2D(latitude: buildingCoordinates.latitude, longitude: buildingCoordinates.longitude)
+        } else {
+            coordinates = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+        }
+        
+        // Map Section
+        return Section() {
+            DisclosureGroup(
+                isExpanded: $mapSectionExpanded,
+                content: {
+                    VStack {
+                        // Map Preview
+                        SimpleMapView(
+                            coordinates: coordinates,
+                            label: self.inventorySite.name ?? "N/A"
+                        )
+                        .frame(height: 200)
+                        .cornerRadius(8)
+                        .padding(.top, 10)
+                        
+                        // Button to Apple Maps
+                        Button("Get Directions") {
+                            openMapDirections(to: coordinates)
+                        }
+                    }
+                },
+                label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .foregroundColor(Color(UIColor.systemGray5))
+                        HStack {
+                            Text("Map")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
+                        .padding(10)
+                    }
+                }
+            )
+            .padding(.top, 10.0)
+        }
+    }
+        
+    private var PictureSection: some View {
+        // Picture Section
+        Section() {
+            DisclosureGroup(
+                isExpanded: $pictureSectionExpanded,
+                content: {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(0..<3) { _ in
+                                Image(systemName: "photo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 100)
+                                    .padding(4)
+                                    .background(Color.gray.opacity(0.3))
+                                    .cornerRadius(8)
+                            }
+                        }
+                    }
+                    .padding(.top, 10)
+                },
+                label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .foregroundColor(Color(UIColor.systemGray5))
+                        HStack {
+                            Text("Pictures")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
+                        .padding(10)
+                    }
+                }
+            )
+            .padding(.top, 10.0)
+        }
+    }
+    
+    func openMapDirections(to destinationCoordinate: CLLocationCoordinate2D) {
+        // specify destination
+        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: destinationCoordinate))
+        
+        // define destination name
+        mapItem.name = (inventorySite.name ?? "N/A")
+        
+        // launch Apple Maps with walking directions
+        mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking])
     }
 }
     
-    #Preview {
-        NavigationStack {
-            DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "GO BCC", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
-        }
+#Preview {
+    NavigationStack {
+        DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "GO BCC", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
     }
-
+}
