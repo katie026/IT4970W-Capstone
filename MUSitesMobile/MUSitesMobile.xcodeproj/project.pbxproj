@@ -81,6 +81,7 @@
 		F668B1E32B9AB392000B2886 /* KeySetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E22B9AB392000B2886 /* KeySetManager.swift */; };
 		F668B1E62B9AB688000B2886 /* KeySetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E52B9AB688000B2886 /* KeySetsView.swift */; };
 		F668B1E82B9AB79C000B2886 /* KeySetCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */; };
+		F68E1B052BBBE4B300EBE6AC /* TempChangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */; };
 		F69D742B2BA0E9A20095A817 /* NonAuthUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69D742A2BA0E9A10095A817 /* NonAuthUsersView.swift */; };
 		F69D742D2BA0EAA50095A817 /* NonAuthUserCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69D742C2BA0EAA50095A817 /* NonAuthUserCellView.swift */; };
 		F69D74302BA0EE440095A817 /* DetailedUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69D742F2BA0EE440095A817 /* DetailedUserView.swift */; };
@@ -158,6 +159,7 @@
 		F668B1E22B9AB392000B2886 /* KeySetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetManager.swift; sourceTree = "<group>"; };
 		F668B1E52B9AB688000B2886 /* KeySetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetsView.swift; sourceTree = "<group>"; };
 		F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetCellView.swift; sourceTree = "<group>"; };
+		F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempChangeView.swift; sourceTree = "<group>"; };
 		F69D742A2BA0E9A10095A817 /* NonAuthUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonAuthUsersView.swift; sourceTree = "<group>"; };
 		F69D742C2BA0EAA50095A817 /* NonAuthUserCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonAuthUserCellView.swift; sourceTree = "<group>"; };
 		F69D742F2BA0EE440095A817 /* DetailedUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedUserView.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 			isa = PBXGroup;
 			children = (
 				F63F46C12BBAFEB000ADEB9D /* InventoryChangeView.swift */,
+				F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */,
 				F63F46B62BBAA28600ADEB9D /* InventorySubmissionView.swift */,
 				F63F46C32BBB01DB00ADEB9D /* InventorySubmissionViewModel.swift */,
 			);
@@ -631,6 +634,7 @@
 				6E68583C2B84498A00896B16 /* BuildingsManager.swift in Sources */,
 				6E3329772B7F6389009FCD14 /* AuthenticationViewModel.swift in Sources */,
 				6EA65F5F2B911B34000766C7 /* SitesManager.swift in Sources */,
+				F68E1B052BBBE4B300EBE6AC /* TempChangeView.swift in Sources */,
 				D5225A672BB73D76007F14E2 /* DetailedSitePosterBoardView.swift in Sources */,
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				D5B5E07B2BB35DFB00AFCE3C /* ImageUploadView.swift in Sources */,

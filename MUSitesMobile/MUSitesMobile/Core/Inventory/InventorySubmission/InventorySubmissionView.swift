@@ -245,7 +245,6 @@ struct InventorySubmissionView: View {
             ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
                 HStack {
                     Text("ID: \(supply.id)")
-//                    Text("Name: \(supply.supplyTypeName)")
                     Text("Count: \(supply.count ?? 0)")
                 }
                 .foregroundColor(Color(UIColor.label)) // Optionally change text color

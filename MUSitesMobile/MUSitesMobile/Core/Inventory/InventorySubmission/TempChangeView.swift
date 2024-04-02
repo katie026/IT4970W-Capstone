@@ -1,18 +1,16 @@
 //
-//  InventoryChangeView.swift
+//  TempChangeView.swift
 //  MUSitesMobile
 //
-//  Created by Katie Jackson on 4/1/24.
+//  Created by Katie Jackson on 4/2/24.
 //
 
 import SwiftUI
 
-struct InventoryChangeView: View {
+struct TempChangeView: View {
     // View Model
     @StateObject private var viewModel = InventorySubmissionViewModel()
     // View Control
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    @Binding var parentPresentationMode: PresentationMode
     @State private var reloadView = false
     // Alerts
     @State private var showNoChangesAlert = false
@@ -21,14 +19,6 @@ struct InventoryChangeView: View {
     let inventorySite: InventorySite
     
     var body: some View {
-//        VStack {
-//            Button(action: {
-//                self.popParent()
-//            }) {
-//                Text("Go Back")
-//            }
-//        }
-        
         // Content
         content
             // On appear
@@ -72,7 +62,7 @@ struct InventoryChangeView: View {
                 Form {
                     suppliesSection
                     commentsSection
-//                    newSupplyCountsSection
+                    newSupplyCountsSection
                 }
             }
         }
@@ -89,14 +79,18 @@ struct InventoryChangeView: View {
     private var suppliesSection: some View {
         // List the supplies
         Section(header: Text("Supplies")) {
-            // Create 1x4 grid
+            // Create grid
             LazyVGrid(columns: [
+                GridItem(.flexible(), alignment: .center),
+//                GridItem(.flexible(), alignment: .center), // old count
                 GridItem(.flexible(), alignment: .center),
                 GridItem(.flexible(), alignment: .center)
             ]) {
                 // Grid headers
                 Text("Supply").fontWeight(.bold)
+//                Text("Old Count").fontWeight(.bold)  // old count
                 Text("Used").fontWeight(.bold)
+                Text("Count").fontWeight(.bold) // new count
             }
             
             // If supply types are loaded
@@ -113,14 +107,19 @@ struct InventoryChangeView: View {
     }
 
     private func supplyRow(for supplyType: SupplyType) -> some View {
-        // find the supply count for the current supply type
+        // Find the supply count for the current supply type in viewModel.supplyCounts
         let supplyCount = viewModel.supplyCounts.first(where: { $0.supplyTypeId == supplyType.id })
+        // Find the corresponding supply count in viewModel.newSupplyCounts
+        let newSupplyCount = viewModel.newSupplyCounts.first(where: { $0.supplyTypeId == supplyType.id })
 
         // calculate the count, if nil then count = 0
         let count = supplyCount?.count ?? 0
+        let usedCount = supplyCount?.usedCount ?? 0
 
-        // create 1x2 grid
+        // create grid
         return LazyVGrid(columns: [
+            GridItem(.flexible(), alignment: .center),
+//            GridItem(.flexible(), alignment: .center), // old count
             GridItem(.flexible(), alignment: .center),
             GridItem(.flexible(), alignment: .center)
         ]) {
@@ -128,15 +127,87 @@ struct InventoryChangeView: View {
             // supply Name column
             Text(supplyType.name)
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+            
+            // supply Old Count column
+//            Text("\(count)") // old count
+            
             // supply Used column
             if let supplyCount = supplyCount, viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
-                //supplyFixTextField(for: supplyCount)
+                supplyUsedTextField(for: supplyCount)
+                
+            }
+            
+            // supply New Count column
+            if let newSupplyCount = newSupplyCount {
+                Text("\(newSupplyCount.count ?? 0)")
             }
         }
         // define grid's id
         // when views are recreated due to changes in state/data, id preserves the state of individual views --> ensures user interactions (scrolling/entering text) are maintained correctly across view updates
         .id(supplyType.id) // Specify the id parameter explicitly
+    }
+    
+    private func supplyUsedTextField(for supplyCount: SupplyCount) -> some View {
+        HStack {
+            // Minus Button
+            Button(action: {
+                // Decrease the used count by 1
+                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                    viewModel.newSupplyCounts[index].usedCount -= 1
+                    // Update the count accordingly
+                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+                }
+                print("minus")
+            }) {
+                Image(systemName: "minus")
+            }
+            
+            // create Used text field
+            TextField("#", text: Binding( // binding establishes two-way connection between view and the underlying data
+                // returns boolean binding
+                get: {
+                    // if the supplyCount is present in the newSupplyCounts array
+                    if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                        // display the new count of the supply as a string
+                        return "\(viewModel.newSupplyCounts[index].usedCount)"
+                    } else {
+                        // otherwise, return an empty string
+                        return ""
+                    }
+                },
+                // sets boolean binding, called when the TextField value is changed
+                set: { newValue in
+                    // if the supplyCount is present in the newSupplyCounts array
+                    if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                        // Parse the new value as an integer
+                        if let newCount = Int(newValue) {
+                            // Update the usedCount of the corresponding SupplyCount object
+                            viewModel.newSupplyCounts[index].usedCount = newCount
+                            // Update the count of the corresponding SupplyCount object
+                            viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - newCount
+                        }
+                    }
+                }
+            ))
+            .multilineTextAlignment(.center)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .frame(width: 50)
+            .keyboardType(.numberPad)
+            .textContentType(.oneTimeCode)
+            
+            // Plus Button
+            Button(action: {
+                // Increase the used count by 1
+                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                    viewModel.newSupplyCounts[index].usedCount += 1
+                    // Update the count accordingly
+                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+                }
+                print("plus")
+            }) {
+                Image(systemName: "plus")
+            }
+        }
     }
     
     private var commentsSection: some View {
@@ -154,20 +225,16 @@ struct InventoryChangeView: View {
             ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
                 HStack {
                     Text("ID: \(supply.id)")
+                    Text("Used: \(supply.usedCount)")
                     Text("Count: \(supply.count ?? 0)")
                 }
-                .foregroundColor(Color(UIColor.label)) // Optionally change text color
+                .foregroundColor(Color(UIColor.label))
             }
         }
     }
     
     // Return to DetailedInventorySiteView
-    func popParent() {
-        // dismiss current view
-        presentationMode.wrappedValue.dismiss()
-        // wait and dismiss parent view
-        DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(0.001)) { self.parentPresentationMode.dismiss() }
-    }
+    //func popParent() {
 }
 
 // MARK: Structs for Preview
@@ -190,24 +257,9 @@ private struct ParentPresentationView: View {
     }
 }
 
-//#Preview {
-//    ParentPresentationView()
-//    NavigationView {
-//        InventoryChangeView(
-//            parentPresentationMode: .constant(@Environment(\.presentationMode)),
-//            inventorySite: InventorySite(
-//                id: "TzLMIsUbadvLh9PEgqaV",
-//                name: "BCC 122",
-//                buildingId: "yXT87CrCZCoJVRvZn5DC",
-//                inventoryTypeIds: ["TzLMIsUbadvLh9PEgqaV"]
-//            )
-//        )
-//    }
-//}
-
 #Preview {
     NavigationView {
-        InventorySubmissionView(
+        TempChangeView(
             inventorySite: InventorySite(
                 id: "TzLMIsUbadvLh9PEgqaV",
                 name: "BCC 122",

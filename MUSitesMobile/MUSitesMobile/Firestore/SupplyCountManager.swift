@@ -14,22 +14,15 @@ protocol Copyable {
 }
 
 struct SupplyCount: Identifiable, Codable, Copyable {
+    // Properties
     var id: String
     // vars because they may need to be changed
     var inventorySiteId: String?
     var supplyTypeId: String?
     var countMin: Int?
     var count: Int?
-    
-    // calculated values
-    var supplyTypeName: Task<String?, Error> {
-        Task {
-            // check if there's a supplyId
-            guard let supplyTypeId = supplyTypeId else { throw SupplyCountManagerError.noSupplyTypeId }
-            // if so, return the supply type name
-            return await SupplyCountManager.shared.getSupplyTypeName(supplyTypeId: supplyTypeId)
-        }
-    }
+    // will not be coded
+    var usedCount: Int = 0
     
     // create SupplyCount manually
     init(
