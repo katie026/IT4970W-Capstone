@@ -39,11 +39,13 @@ struct DetailedSiteView: View {
                             .padding(.horizontal)
                         
                         // Information and Inventory Sections
-                        VStack(spacing: 0) {
+                        VStack(alignment: .leading, spacing: 0) {
                             // Information Section
                             SiteInfoView(building: viewModel.building, siteType: site.siteType)
                             //Equipment Section
                             SiteEquipmentView(site: site)
+                            //Map Section
+                            SiteMapView(site: site, building: viewModel.building)
                             // Inventory Section
                             NavigationLink(destination: DetailedInventorySiteView(inventorySiteId: inventorySite.id)) {
                                 HStack {
@@ -70,26 +72,30 @@ struct DetailedSiteView: View {
                                 .padding(.horizontal)
                                 .padding(.vertical)
                             }
+                            
+                            //displaying the poster board views
+                            Section(header: Text("Posters")) {
+                                PostersView(imageURLs: viewModel.imageURLs)
+                            }
+                            Section(header: Text("Board")) {
+                                BoardView(imageURLs: viewModel.boardImageURLs)
+                            }
                         }
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
                         .padding(.horizontal)
-                        
-
                     }
-                    .padding(.top)
-                }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                Task {
-                    await viewModel.loadSite(siteId: site.id)
+                    .onAppear {
+                        Task {
+                            await viewModel.loadBuilding(site: self.site)
+                            //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
+                            await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
+                            await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
+                        }
+                    }
                 }
             }
         }
     }
 }
-
 struct DetailedSiteView_Previews: PreviewProvider {
     static var previews: some View {
         let site = Site(

@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct SiteInfoView: View {
-    @State private var isExpanded = true
+    @State private var isExpanded = false
     var building: Building?
     var siteType: String?
     
@@ -24,26 +24,18 @@ struct SiteInfoView: View {
                     Text("**SS Captain:** \(building?.siteGroup ?? "N/A")")
                 }
                 .listRowInsets(EdgeInsets())
-                .font(.subheadline)
             },
             label: {
-                HStack {
-                    Text("Information")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    Spacer()
-                }
-                .padding(.horizontal)
+                Text("Information")
+                    .font(.title)
+                    .fontWeight(.bold)
             }
         )
-        .padding(.horizontal)
-        .padding(.vertical)
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
-        .padding(.horizontal)
+        .padding(.top, 10.0)
+        .listRowBackground(Color.clear)
     }
 }
-
+    
 struct SiteInfoView_Previews: PreviewProvider {
     static var previews: some View {
         let building = Building(id: "sample", name: "Sample Building", siteGroup: "Sample Group")
@@ -52,3 +44,4 @@ struct SiteInfoView_Previews: PreviewProvider {
             .padding()
     }
 }
+

@@ -112,21 +112,13 @@ struct SiteEquipmentView: View {
                     }
                 },
                 label: {
-                    HStack {
-                        Text("Equipment")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            
-                        Spacer()
-                    }
-                    .padding(.horizontal)
+                    Text("Equipment")
+                        .font(.title)
+                        .fontWeight(.bold)
                 }
             )
-            .padding(.horizontal)
-            .padding(.vertical)
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
-            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .listRowBackground(Color.clear)
         }
     }
 }
