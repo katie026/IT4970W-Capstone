@@ -19,6 +19,8 @@ struct DetailedSiteView: View {
     @State private var colorPrinterSectionExpanded: Bool = false
     @State private var scannerSectionExpanded: Bool = false
     @State private var mapSectionExpanded: Bool = false
+    @State private var postersSectionExpanded: Bool = true
+    @State private var boardSectionExpanded: Bool = true
     
     init(site: Site) {
         self.site = site
@@ -183,12 +185,22 @@ struct DetailedSiteView: View {
                     .padding(.top, 10.0)
                     .listRowBackground(Color.clear)
                 }
+                //displaying the poster board views
+                Section(header: Text("Posters")) {
+                    PostersView(imageURLs: viewModel.imageURLs)
+                }
+                Section(header: Text("Board")) {
+                    BoardView(imageURLs: viewModel.boardImageURLs)
+                }
             }
         }
         .navigationTitle(site.name ?? "N/A")
         .onAppear {
             Task {
                 await viewModel.loadBuilding(site: self.site)
+                //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
+                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
+                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
             }
         }
     }

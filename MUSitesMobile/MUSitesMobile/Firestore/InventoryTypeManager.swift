@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct InventoryType: Codable {
+struct InventoryType: Codable, Hashable {
     let id: String
     let name: String
     let keyTypeId: String?
