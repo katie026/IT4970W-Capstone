@@ -12,18 +12,11 @@ struct InventoryChangeView: View {
     @StateObject private var viewModel = InventorySubmissionViewModel()
     // View Control
     @Binding private var path: [Route]
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-//    @Binding var parentPresentationMode: PresentationMode
     @State private var reloadView = false
     // Alerts
     @State private var showNoChangesAlert = false
-    @State private var showEntryTypeAlert = false
-    // Passed-In Constants
+    // Initializers
     let inventorySite: InventorySite
-    
-    let inventorySites = ["Option 1", "Option 2", "Option 3"]
-    @State private var destinationSite = "Default"
-    
     init(path: Binding<[Route]>, inventorySite: InventorySite) {
         self._path = path
         self.inventorySite = inventorySite
@@ -34,10 +27,23 @@ struct InventoryChangeView: View {
         content
             // On appear
             .onAppear {
-                // Get supply info
                 Task {
+                    // Get supply info
                     viewModel.getSupplyCounts(inventorySiteId: inventorySite.id)
                     viewModel.getSupplyTypes()
+                    // Get inventory sites if list is empty
+                    if (viewModel.inventorySites.isEmpty) {
+                        // load all inventory sites
+                        viewModel.getInventorySites {
+                            // wait for completion
+                            // remove the current Site from the list
+                            viewModel.inventorySites.removeAll { $0.id == inventorySite.id }
+                            // assign a destinationSite
+                            if !viewModel.inventorySites.isEmpty {
+                                viewModel.destinationSite = viewModel.inventorySites[0]
+                            }
+                        }
+                    }
                 }
             }
             // View Title
@@ -73,8 +79,11 @@ struct InventoryChangeView: View {
                 Form {
                     suppliesSection
                     commentsSection
-                    newSupplyCountsSection
-                    submitSection
+//                    newSupplyCountsSection // for testing
+                    entryTypeSection
+                    if viewModel.inventoryEntryType == .Move {
+                        destinationSection
+                    }
                     confirmButton
                 }
             }
@@ -249,11 +258,20 @@ struct InventoryChangeView: View {
                     // if the supplyCount is present in the newSupplyCounts array
                     if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
                         // Parse the new value as an integer
-                        if let newCount = Int(newValue) {
-                            // Update the usedCount of the corresponding SupplyCount object
-                            viewModel.newSupplyCounts[index].usedCount = newCount
-                            // Update the count of the corresponding SupplyCount object
-                            viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - newCount
+                        if let newUsedCount = Int(newValue) {
+                            // find the original count
+                            if let originalCount = viewModel.supplyCounts[index].count {
+                                // if newUsedCount is <= the originalCount
+                                if newUsedCount <= originalCount {
+                                    // update the new usedCount
+                                    viewModel.newSupplyCounts[index].usedCount = newUsedCount
+                                } else {
+                                    // otherwsie, set the new usedCount back to 0
+                                    viewModel.newSupplyCounts[index].usedCount = 0
+                                }
+                                // Update the count of the corresponding SupplyCount object
+                                viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - newUsedCount
+                            }
                         }
                     }
                 }
@@ -266,11 +284,18 @@ struct InventoryChangeView: View {
             
             // Plus Button
             Button(action: {
-                // Increase the used count by 1
+                // find the supply count in newSupplyCounts
                 if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
-                    viewModel.newSupplyCounts[index].usedCount += 1
-                    // Update the count accordingly
-                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+                    // find the original count
+                    if let originalCount = viewModel.supplyCounts[index].count {
+                        // if using <= what is already there
+                        if viewModel.newSupplyCounts[index].usedCount + 1 <= originalCount {
+                            // increase the used count by 1
+                            viewModel.newSupplyCounts[index].usedCount += 1
+                        }
+                        // update the count accordingly
+                        viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
+                    }
                 }
             }) {
                 Image(systemName: "plus")
@@ -290,44 +315,55 @@ struct InventoryChangeView: View {
     private var newSupplyCountsSection: some View {
         Section(header: Text("New Supply Counts")) {
             // Display the contents of the newSupplyCounts array
-//            ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
-//                HStack {
-//                    Text("ID: \(supply.id)")
-//                    Text("Used: \(supply.usedCount)")
-//                    Text("Count: \(supply.count ?? 0)")
-//                }
-//                .foregroundColor(Color(UIColor.label))
-//            }
+            ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
+                HStack {
+                    Text("ID: \(supply.id)")
+                    Text("Used: \(supply.usedCount)")
+                    Text("Count: \(supply.count ?? 0)")
+                }
+                .foregroundColor(Color(UIColor.label))
+            }
         }
     }
     
-    private var submitSection: some View {
+    private var entryTypeSection: some View {
         Section() {
             VStack {
+                // Used option
                 HStack {
-                    RadioButton(text: "Report as used.", isSelected: false) {
-                        
+                    RadioButton(text: "Report supplies as used", isSelected: viewModel.inventoryEntryType == .Use) {
+                        // these buttons are both triggered when the Section is clicked
+                        // toggle between .Move and .Use
+                        if viewModel.inventoryEntryType == .Use {
+                            viewModel.inventoryEntryType = .Move
+                        } else {
+                            viewModel.inventoryEntryType = .Use
+                        }
                     }
                     Spacer()
                 }
-                
                 Spacer()
-                
+                // Move option
                 HStack {
-                    RadioButton(text: "Move to:", isSelected: true) {
-                        
+                    RadioButton(text: "Move supplies", isSelected: viewModel.inventoryEntryType == .Move) {
+                        // do nothing since both buttons are triggered when the Section is clicked
                     }
-                    Picker("", selection: $destinationSite) {
-                        ForEach(inventorySites, id: \.self) {
-                            Text($0)
-                        }
-                    }
-                    .padding(.leading, -20)
-                    
                     Spacer()
                 }
             }
             .padding()
+        }
+        .onAppear{viewModel.inventoryEntryType = .Use} // default to .Use
+    }
+    
+    private var destinationSection: some View {
+        // Destination Site Picker
+        Picker("Move to:", selection: $viewModel.destinationSite) {
+            // for each site in InventorySite list
+            ForEach(viewModel.inventorySites) { site in
+                // dispay the name
+                Text(site.name ?? "N/A").tag(site) // tag associates each InventorySite with itself
+            }
         }
     }
     
@@ -335,13 +371,17 @@ struct InventoryChangeView: View {
         Section() {
             HStack {
                 Spacer()
+                // Confirm Button
                 Button(action: {
+                    //TODO: submit inventory entry, update supplyCounts
+                    
                     // return to DetailedInventoryView
                     path.removeLast(path.count - 1)
                 }) {
+                    // Label
                     Spacer()
                     Text("Submit")
-                        .font(.headline)
+                        .font(.title)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     Spacer()

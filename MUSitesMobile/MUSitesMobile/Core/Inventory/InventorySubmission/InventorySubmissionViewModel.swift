@@ -9,11 +9,23 @@ import Foundation
 
 @MainActor
 final class InventorySubmissionViewModel: ObservableObject {
+    // Supply Values
     @Published var supplyTypes: [SupplyType] = []
     @Published var supplyCounts: [SupplyCount] = []
+    
+    // Inventory Entry Default Values
     @Published var newSupplyCounts: [SupplyCount] = []
     @Published var inventoryEntryType: InventoryEntryType = .Check
     @Published var comments: String = ""
+    @Published var destinationSite: InventorySite = InventorySite(
+        id: "",
+        name: "Empty",
+        buildingId: "",
+        inventoryTypeIds: [""]
+    )
+    
+    // Inventory Sites
+    @Published var inventorySites: [InventorySite] = []
 
     func getSupplyTypes() {
         Task {
@@ -69,13 +81,24 @@ final class InventorySubmissionViewModel: ObservableObject {
         }
     }
     
+    func getInventorySites(completion: @escaping () -> Void) {
+        Task {
+            self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: false)
+            completion()
+        }
+    }
+    
     func submitAnInventoryEntry() {
-        // if entry type is !.Check
-            // update SupplyCounts in Firestore
-            submitSupplyCounts() {}
+        // remove newSupplyCounts where .usedCount == 0
+        
+        // update SupplyCounts in Firestore
+        submitSupplyCounts() {}
         
         // create InventoryEntry struct
+        
         // create InventoryEntry in Firestore
+        
+        // if entry type is .Move
         return
     }
 }

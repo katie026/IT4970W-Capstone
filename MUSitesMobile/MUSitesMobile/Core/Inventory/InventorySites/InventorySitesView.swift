@@ -11,7 +11,6 @@ import SwiftUI
 final class InventorySitesViewModel: ObservableObject {
     
     @Published private(set) var inventorySites: [InventorySite] = []
-    @Published private(set) var inventorySiteTest: InventorySite? = nil
     @Published var selectedSort: SortOption? = nil
     
     enum SortOption: String, CaseIterable {

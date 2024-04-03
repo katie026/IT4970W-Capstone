@@ -113,7 +113,7 @@ final class InventorySitesManager {
 //            // sort whole collection
 //            query = getAllSitesSortedByNameQuery(descending: descending)
 //        }
-        print("query all inventory sites")
+        print("Querying all inventory sites.")
         return try await query
             .getDocuments(as: InventorySite.self) // query inventory_site collection
     }
