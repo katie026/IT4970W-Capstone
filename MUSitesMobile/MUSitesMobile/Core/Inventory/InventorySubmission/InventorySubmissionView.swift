@@ -11,21 +11,19 @@ struct InventorySubmissionView: View {
     // View Model
     @StateObject private var viewModel = InventorySubmissionViewModel()
     // View Controls
+    @Binding private var path: [Route] // passed-in
+    @EnvironmentObject var sheetManager: SheetManager // passed-in, for pop up view
     @State private var reloadView = false
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    @EnvironmentObject var sheetManager: SheetManager // for pop up view
-    @State private var confirmContinue = false
-    @State var viewSelection: Int? = nil
-    // Alerts
-    @State private var showNoChangesAlert = false
-    @State private var showEntryTypeAlert = false
-    @State private var inventoryEntryType: InventoryEntryType = .Check
+    @State private var confirmContinue = false // button selection
     @State private var submitClicked = false
-    // Passed-In Constants
-    let inventorySite: InventorySite
     
-    // Main Content
+    // Initializer
+    let inventorySite: InventorySite
+    init(path: Binding<[Route]>, inventorySite: InventorySite) {
+        self._path = path
+        self.inventorySite = inventorySite
+    }
+    
     var body: some View {
         // Content
         content
@@ -43,40 +41,47 @@ struct InventorySubmissionView: View {
             .id(reloadView) // triggers update when reloadView changes
             // EntryType Popup
             .overlay(alignment: .bottom) {
+                // when sheetManager.present() is called -> sheetManager's enum Action == .isPresented
                 if sheetManager.action.isPresented {
-                    EntryTypePopupView(didClose: { // after closure is called
-                        // if SUBMIT was clicked
-                        if submitClicked {
-                            // submit an entry
-//                            submitAnEntry()
-                            print("closure-submit counts to db: \(inventoryEntryType)")
-                            
-                            // reset submitClicked status
-                            submitClicked = false
-                            
-                            // dismiss popup
-                            withAnimation {
-                                sheetManager.dismiss()
-                            }
-                            
-                            // if user clicked Confirm & Exit
-                            if !confirmContinue {
-                                // dismiss current view
-                                dismiss()
+                    // overlay the PopupView
+                    EntryTypePopupView(
+                        // pass in closure
+                        didClose: { // after closure is called
+                            // if SUBMIT was clicked
+                            if submitClicked {
+                                // submit an entry
+    //                            viewModel.submitAnInventoryEntry()
+                                print("closure-submit counts to db: \(viewModel.inventoryEntryType)")
+                                
+                                // reset submitClicked status
+                                submitClicked = false
+                                
+                                // dismiss popup
+                                withAnimation {
+                                    sheetManager.dismiss()
+                                }
+                                
+                                // if user clicked Confirm & Continue
+                                if confirmContinue {
+                                    // go to next view
+                                    path.append(Route.inventoryChange(inventorySite))
+                                // if user clicked Confirm & Exit
+                                } else {
+                                    // dismiss current view
+                                    path.removeLast()
+                                }
                             } else {
-                            // if user clicked Confirm & Continue
-                                // go to next view
-                                print("next view")
-                                self.viewSelection = 1
+                            // if CLOSE was clicked
+                                // dismiss popup
+                                withAnimation {
+                                    sheetManager.dismiss()
+                                }
                             }
-                        } else {
-                        // if CLOSE was clicked
-                            // dismiss popup
-                            withAnimation {
-                                sheetManager.dismiss()
-                            }
-                        }
-                    }, selectedOption: $inventoryEntryType, submitClicked: $submitClicked)
+                        },
+                        // pass in entryType
+                        selectedOption: $viewModel.inventoryEntryType,
+                        // pass in submitClicked bool
+                        submitClicked: $submitClicked)
                 }
             }
     }
@@ -102,19 +107,11 @@ struct InventorySubmissionView: View {
                     Spacer()
                 }
                 
-                // Testing purposes
-                Button("Show Custom Sheet") {
-                    withAnimation {
-                        sheetManager.present()
-                    }
-                }
-                Text("\(inventoryEntryType)")
-                
                 // Form section
                 Form {
                     suppliesSection
                     commentsSection
-                    newSupplyCountsSection
+//                    newSupplyCountsSection // for testing
                 }
                 
                 // Action Button section
@@ -148,7 +145,7 @@ struct InventorySubmissionView: View {
                 Text("Fix").fontWeight(.bold)
             }
             
-            // If supply types are loaded
+            // if supply types are loaded
             if !viewModel.supplyTypes.isEmpty {
                 // given each suppply type, create a row
                 ForEach(viewModel.supplyTypes, id: \.id) { supplyType in
@@ -204,7 +201,9 @@ struct InventorySubmissionView: View {
             }
 
             // supply fix field column
+            // if this supplyCount is in the newSupplyCounts array
             if let supplyCount = supplyCount, viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
+                // display the text field
                 supplyFixTextField(for: supplyCount)
             }
         }
@@ -227,15 +226,15 @@ struct InventorySubmissionView: View {
             // sets boolean binding (toggle state)
             // receives boolean parameter "confirmed"
             set: { confirmed in
-                // if toggled on
+                // if toggled on (confirmed)
                 if confirmed {
-                    // If confirmed, remove from newSupplyCounts if exists
+                    // remove supplyCount from newSupplyCounts array if exists
                     if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
                         viewModel.newSupplyCounts.remove(at: index)
                     }
-                // if toggled off
+                // if toggled off (not confirmed)
                 } else {
-                    // If not confirmed, add to newSupplyCounts if not already added
+                    // add supplyCount to newSupplyCounts if not already added
                     if !viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
                         viewModel.newSupplyCounts.append(supplyCount)
                     }
@@ -296,7 +295,7 @@ struct InventorySubmissionView: View {
                     Text("ID: \(supply.id)")
                     Text("Count: \(supply.count ?? 0)")
                 }
-                .foregroundColor(Color(UIColor.label)) // Optionally change text color
+                .foregroundColor(Color(UIColor.label))
             }
         }
     }
@@ -327,22 +326,25 @@ struct InventorySubmissionView: View {
             // if all toggles are true (confirmed)
             if togglesConfirmed {
                 // update entry type
-                inventoryEntryType = .Check
+                viewModel.inventoryEntryType = .Check
                 
                 // submit an entry
-//                submitAnEntry()
-                print("togglesConfirmed-submit counts to db: \(inventoryEntryType)")
+//                viewModel.submitAnInventoryEntry()
+                print("togglesConfirmed-submit counts to db: \(viewModel.inventoryEntryType)")
                 
                 // dismiss current view
-                dismiss()
+                path.removeLast()
             // if any toggles are false (not confirmed)
             } else {
+                // indicate Confirm & Exit button was pressed
+                confirmContinue = false
                 // display popup -> update entry type -> may submit entry
                 withAnimation {
                     sheetManager.present()
                 }
             }
         }) {
+            // Button display
             Text("Confirm & Exit")
                 .foregroundColor(.white)
                 .padding()
@@ -353,54 +355,82 @@ struct InventorySubmissionView: View {
     
     private var confirmContinueButton: some View {
         // Confirm & Continue button
-        return Button("Confirm & Continue", action: {
-            // display popup -> update entry type -> may submit entry
-            withAnimation {
-                sheetManager.present()
+        Button(action: {
+            // check if any toggles aren't confirmed
+            var togglesConfirmed: Bool = false
+            if viewModel.newSupplyCounts.isEmpty {
+                togglesConfirmed = true
             }
-        })
-        NavigationLink(
-            destination: InventoryChangeView(
-            parentPresentationMode: self.presentationMode,
-            inventorySite: inventorySite),
-            tag: 1,
-            selection: $viewSelection
-        ) { EmptyView() }
-//        NavigationLink(destination: InventoryChangeView(
-//            parentPresentationMode: self.presentationMode,
-//            inventorySite: inventorySite)
-//        ) {
-//            Text("Confirm & Continue")
-//                .foregroundColor(.white)
-//                .padding()
-//                .background(Color.yellow)
-//                .cornerRadius(10)
-//        }
-    }
-    
-    func submitAnEntry() {
-        // if entry type is !.Check
-            // update SupplyCounts in Firestore
-            viewModel.submitSupplyCounts() {}
-        
-        // create InventoryEntry struct
-        // create InventoryEntry in Firestore
-        return
+
+            // if all toggles are true (confirmed)
+            if togglesConfirmed {
+                // update entry type
+                viewModel.inventoryEntryType = .Check
+                
+                // submit an entry
+//                viewModel.submitAnInventoryEntry()
+                print("togglesConfirmed-submit counts to db: \(viewModel.inventoryEntryType)")
+                
+                // go to next view
+                path.append(Route.inventoryChange(inventorySite))
+            // if any toggles are false (not confirmed)
+            } else {
+                // indicate Confirm & Continue button was pressed
+                confirmContinue = true
+                // display popup -> update entry type -> may submit entry
+                withAnimation {
+                    sheetManager.present()
+                }
+            }
+        }) {
+            // Button display
+            Text("Confirm & Continue")
+                .foregroundColor(.white)
+                .padding()
+                .background(Color.yellow)
+                .cornerRadius(10)
+        }
     }
 }
 
-#Preview {
-    NavigationView {
-        InventorySubmissionView(
-            inventorySite: InventorySite(
-                id: "TzLMIsUbadvLh9PEgqaV",
-                name: "BCC 122",
-                buildingId: "yXT87CrCZCoJVRvZn5DC",
-                inventoryTypeIds: ["TzLMIsUbadvLh9PEgqaV"]
-            )
-        )
-        .environmentObject(SheetManager())
+//MARK: Previews
+private struct InventorySubmissionPreview: View {
+    @State private var path: [Route] = []
+    
+    private var inventorySite: InventorySite = InventorySite(
+        id: "TzLMIsUbadvLh9PEgqaV",
+        name: "GO BCC",
+        buildingId: "yXT87CrCZCoJVRvZn5DC",
+        inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+    )
+    
+    var body: some View {
+        NavigationStack (path: $path) {
+            Button ("Hello World") {
+                path.append(Route.inventorySubmission(inventorySite))
+            }
+            .navigationDestination(for: Route.self) { view in
+                switch view {
+                case .inventorySitesList:
+                    InventorySitesView()
+                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
+                case .inventorySubmission(let inventorySite):
+                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
+                        .environmentObject(SheetManager())
+                case .inventoryChange(let inventorySite):
+                    InventoryChangeView(path: $path, inventorySite: inventorySite)
+                }
+            }
+        }
+        .onAppear {
+            path.append(Route.inventorySubmission(inventorySite))
+        }
     }
+}
+
+    
+#Preview {
+    InventorySubmissionPreview()
 }
 
 // MARK: Custom Alert

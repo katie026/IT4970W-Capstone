@@ -50,15 +50,16 @@ struct DetailedInventorySiteView: View {
     // View Model
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
     // View Managing
+    @Binding private var path: [Route]
     @StateObject var sheetManager = SheetManager()
     // Section Bools
     @State private var mapSectionExpanded: Bool = true
     @State private var pictureSectionExpanded: Bool = true
     // Passed-In Values
-    private var inventorySite: InventorySite
+    let inventorySite: InventorySite
     
-    // Initializer
-    init(inventorySite: InventorySite) {
+    init(path: Binding<[Route]>, inventorySite: InventorySite) {
+        self._path = path
         self.inventorySite = inventorySite
     }
     
@@ -121,24 +122,23 @@ struct DetailedInventorySiteView: View {
     
     private var SubmitInventoryButton: some View {
         // Submit Inventory Button
-        HStack {
-            NavigationLink(destination: InventorySubmissionView(inventorySite: inventorySite).environmentObject(sheetManager))
-            {
-                HStack {
-                    Text("Submit Inventory Entry")
-                        .padding(10)
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    Spacer()
+        VStack {
+            Button (action: {
+                path.append(Route.inventorySubmission(inventorySite))
+            }) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .foregroundColor(Color(UIColor.systemGray5))
+                    HStack {
+                        Text("Submit Inventory Entry")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        Spacer()
+                    }
+                    .padding(10)
                 }
             }
-            .isDetailLink(false)
-            .frame(maxWidth: .infinity)
-            .background(Color(UIColor.systemGray5))
-            .cornerRadius(8)
-            
-            Spacer()
         }
     }
     
@@ -242,9 +242,44 @@ struct DetailedInventorySiteView: View {
         mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking])
     }
 }
+
+
+//MARK: Previews
+private struct DetailedInventorySitePreview: View {
+    @State private var path: [Route] = []
+    
+    private var inventorySite: InventorySite = InventorySite(
+        id: "TzLMIsUbadvLh9PEgqaV",
+        name: "GO BCC",
+        buildingId: "yXT87CrCZCoJVRvZn5DC",
+        inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+    )
+    
+    var body: some View {
+        NavigationStack (path: $path) {
+            Button ("Hello World") {
+                path.append(Route.detailedInventorySite(inventorySite))
+            }
+            .navigationDestination(for: Route.self) { view in
+                switch view {
+                case .inventorySitesList:
+                    InventorySitesView()
+                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
+                case .inventorySubmission(let inventorySite):
+                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
+                        .environmentObject(SheetManager())
+                case .inventoryChange(let inventorySite):
+                    InventoryChangeView(path: $path, inventorySite: inventorySite)
+                }
+            }
+        }
+        .onAppear {
+            path.append(Route.detailedInventorySite(inventorySite))
+        }
+    }
+}
+
     
 #Preview {
-    NavigationStack {
-        DetailedInventorySiteView(inventorySite: InventorySite(id: "TzLMIsUbadvLh9PEgqaV", name: "GO BCC", buildingId: "yXT87CrCZCoJVRvZn5DC", inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]))
-    }
+    DetailedInventorySitePreview()
 }

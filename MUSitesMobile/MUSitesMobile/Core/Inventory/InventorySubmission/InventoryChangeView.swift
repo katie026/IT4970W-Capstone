@@ -11,23 +11,25 @@ struct InventoryChangeView: View {
     // View Model
     @StateObject private var viewModel = InventorySubmissionViewModel()
     // View Control
+    @Binding private var path: [Route]
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    @Binding var parentPresentationMode: PresentationMode
+//    @Binding var parentPresentationMode: PresentationMode
     @State private var reloadView = false
     // Alerts
     @State private var showNoChangesAlert = false
     @State private var showEntryTypeAlert = false
     // Passed-In Constants
     let inventorySite: InventorySite
+    
+    let inventorySites = ["Option 1", "Option 2", "Option 3"]
+    @State private var destinationSite = "Default"
+    
+    init(path: Binding<[Route]>, inventorySite: InventorySite) {
+        self._path = path
+        self.inventorySite = inventorySite
+    }
 
     var body: some View {
-//        VStack {
-//            Button(action: {
-//                self.popParent()
-//            }) {
-//                Text("Go Back")
-//            }
-//        }
         // Content
         content
             // On appear
@@ -72,6 +74,8 @@ struct InventoryChangeView: View {
                     suppliesSection
                     commentsSection
                     newSupplyCountsSection
+                    submitSection
+                    confirmButton
                 }
             }
         }
@@ -286,35 +290,104 @@ struct InventoryChangeView: View {
     private var newSupplyCountsSection: some View {
         Section(header: Text("New Supply Counts")) {
             // Display the contents of the newSupplyCounts array
-            ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
-                HStack {
-                    Text("ID: \(supply.id)")
-                    Text("Used: \(supply.usedCount)")
-                    Text("Count: \(supply.count ?? 0)")
-                }
-                .foregroundColor(Color(UIColor.label))
-            }
+//            ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
+//                HStack {
+//                    Text("ID: \(supply.id)")
+//                    Text("Used: \(supply.usedCount)")
+//                    Text("Count: \(supply.count ?? 0)")
+//                }
+//                .foregroundColor(Color(UIColor.label))
+//            }
         }
     }
     
-    // Return to DetailedInventorySiteView
-    func popParent() {
-        // dismiss current view
-        presentationMode.wrappedValue.dismiss()
-        // wait and dismiss parent view
-        DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(0.001)) { self.parentPresentationMode.dismiss() }
+    private var submitSection: some View {
+        Section() {
+            VStack {
+                HStack {
+                    RadioButton(text: "Report as used.", isSelected: false) {
+                        
+                    }
+                    Spacer()
+                }
+                
+                Spacer()
+                
+                HStack {
+                    RadioButton(text: "Move to:", isSelected: true) {
+                        
+                    }
+                    Picker("", selection: $destinationSite) {
+                        ForEach(inventorySites, id: \.self) {
+                            Text($0)
+                        }
+                    }
+                    .padding(.leading, -20)
+                    
+                    Spacer()
+                }
+            }
+            .padding()
+        }
+    }
+    
+    private var confirmButton: some View {
+        Section() {
+            HStack {
+                Spacer()
+                Button(action: {
+                    // return to DetailedInventoryView
+                    path.removeLast(path.count - 1)
+                }) {
+                    Spacer()
+                    Text("Submit")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    Spacer()
+                }
+                Spacer()
+            }
+        }
     }
 }
 
-#Preview {
-    NavigationView {
-        InventorySubmissionView(
-            inventorySite: InventorySite(
-                id: "TzLMIsUbadvLh9PEgqaV",
-                name: "BCC 122",
-                buildingId: "yXT87CrCZCoJVRvZn5DC",
-                inventoryTypeIds: ["TzLMIsUbadvLh9PEgqaV"]
-            )
-        )
+//MARK: Previews
+private struct InventoryChangePreview: View {
+    @State private var path: [Route] = []
+    
+    private var inventorySite: InventorySite = InventorySite(
+        id: "TzLMIsUbadvLh9PEgqaV",
+        name: "GO BCC",
+        buildingId: "yXT87CrCZCoJVRvZn5DC",
+        inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+    )
+    
+    var body: some View {
+        NavigationStack (path: $path) {
+            Button ("Hello World") {
+                path.append(Route.inventoryChange(inventorySite))
+            }
+            .navigationDestination(for: Route.self) { view in
+                switch view {
+                case .inventorySitesList:
+                    InventorySitesView()
+                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
+                case .inventorySubmission(let inventorySite):
+                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
+                        .environmentObject(SheetManager())
+                case .inventoryChange(let inventorySite):
+                    InventoryChangeView(path: $path, inventorySite: inventorySite)
+                }
+            }
+        }
+        .onAppear {
+            path.append(Route.inventoryChange(inventorySite))
+        }
     }
+}
+
+    
+#Preview {
+    InventoryChangePreview()
 }

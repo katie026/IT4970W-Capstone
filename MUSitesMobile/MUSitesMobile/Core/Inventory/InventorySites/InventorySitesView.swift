@@ -62,28 +62,50 @@ final class InventorySitesViewModel: ObservableObject {
     }
 }
 
+enum Route: Hashable {
+    case inventorySitesList
+    case detailedInventorySite(InventorySite)
+    case inventorySubmission(InventorySite)
+    case inventoryChange(InventorySite)
+}
 
 struct InventorySitesView: View {
     // View Model
     @StateObject private var viewModel = InventorySitesViewModel()
     
     // View Control
-//    @State private var path = NavigationPath()
+    @State private var path: [Route] = []
     
     var body: some View {
-        List {
-            ForEach(viewModel.inventorySites) { inventorySite in
-                InventorySiteCellView(inventorySite: inventorySite)
+        NavigationStack (path: $path) { // will trigger nav destination if $path changes
+            List {
+//                ForEach(viewModel.inventorySites) { inventorySite in
+//                    InventorySiteCellView(inventorySite: inventorySite)
+//                }
+                ForEach(viewModel.inventorySites) { inventorySite in
+                    NavigationLink(value: Route.detailedInventorySite(inventorySite)) {
+                        InventorySiteCellView(inventorySite: inventorySite)
+                    }
+                }
             }
-//            if let site = viewModel.siteTest {
-//                SiteCellView(site: site)
-//            }
-        }
-        .navigationTitle("Inventory Sites")
-        .onAppear {
-            Task {
-                viewModel.getInventorySites()
-//                try? await viewModel.getSite(id: "6tYFeMv41IXzfXkwbbh6")
+            .navigationTitle("Inventory Sites")
+            .onAppear {
+                Task {
+                    viewModel.getInventorySites()
+                    //                try? await viewModel.getSite(id: "6tYFeMv41IXzfXkwbbh6")
+                }
+            }
+            .navigationDestination(for: Route.self) { view in
+                switch view {
+                case .inventorySitesList:
+                    InventorySitesView()
+                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
+                case .inventorySubmission(let inventorySite):
+                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
+                        .environmentObject(SheetManager())
+                case .inventoryChange(let inventorySite):
+                    InventoryChangeView(path: $path, inventorySite: inventorySite)
+                }
             }
         }
     }
@@ -92,6 +114,5 @@ struct InventorySitesView: View {
 #Preview {
     NavigationStack {
         InventorySitesView()
-//        RootView()
     }
 }

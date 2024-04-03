@@ -12,7 +12,7 @@ final class InventorySubmissionViewModel: ObservableObject {
     @Published var supplyTypes: [SupplyType] = []
     @Published var supplyCounts: [SupplyCount] = []
     @Published var newSupplyCounts: [SupplyCount] = []
-    @Published var inventoryEntryType: InventoryEntryType = InventoryEntryType.Check // Check or Fix
+    @Published var inventoryEntryType: InventoryEntryType = .Check
     @Published var comments: String = ""
 
     func getSupplyTypes() {
@@ -50,8 +50,6 @@ final class InventorySubmissionViewModel: ObservableObject {
 
                 // Call the completion handler upon successful creation
                 completion()
-
-                print("created new Supply doc in Firestore")
             } catch {
                 print("Error creating new supply count: \(error)")
             }
@@ -59,17 +57,25 @@ final class InventorySubmissionViewModel: ObservableObject {
     }
 
     func submitSupplyCounts(completion: @escaping () -> Void) {
-        print("supplyCounts submitted!")
         Task {
             do {
                 try await SupplyCountManager.shared.updateSupplyCounts(newSupplyCounts)
                 // Call the completion handler upon successful creation
                 completion()
-
-                print("Updated supplies doc in Firestore")
+                print("Updated SupplyCount batch in Firestore")
             } catch {
                 print("Error creating new supply count: \(error)")
             }
         }
+    }
+    
+    func submitAnInventoryEntry() {
+        // if entry type is !.Check
+            // update SupplyCounts in Firestore
+            submitSupplyCounts() {}
+        
+        // create InventoryEntry struct
+        // create InventoryEntry in Firestore
+        return
     }
 }

@@ -195,7 +195,6 @@ class SupplyCountManager {
         
         // Commit the batched write operation
         try await batch.commit()
-        print("tried to commit batch")
     }
     
 }

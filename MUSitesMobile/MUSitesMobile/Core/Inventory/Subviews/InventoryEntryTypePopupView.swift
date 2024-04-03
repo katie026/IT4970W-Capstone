@@ -23,6 +23,7 @@ struct EntryTypePopupView: View {
                 .multilineTextAlignment(.center)
                 .padding(.vertical, 20)
                 .padding(.horizontal, 28)
+                .foregroundColor(Color.black)
 
             RadioButton(text: "Yes, there is a discrepancy.", isSelected: selectedOption == .Fix) {
                 selectedOption = .Fix
@@ -51,6 +52,10 @@ struct EntryTypePopupView: View {
             close
         }
         .transition(.move(edge: .bottom))
+        .onAppear {
+            // set default option
+            selectedOption = .Fix
+        }
     }
 }
 
