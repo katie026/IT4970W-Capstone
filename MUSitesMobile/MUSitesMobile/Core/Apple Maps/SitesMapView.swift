@@ -64,13 +64,18 @@ struct SitesMapView: View {
                             Text("Select Site Group")
                         }
                         .padding()
+                        .background(Color.white)
+                        Text("Selected Option: \(selectedSiteGroup ?? "None")")
+                        .padding()
+                                    
+                        
                     }
                 }
                 .navigationTitle("Map")
                 .navigationBarHidden(true)
                 .background(
                     NavigationLink(
-                        destination: selectedBuilding != nil ? BuildingCellView(building: selectedBuilding!) : nil,
+                        destination: selectedBuilding != nil ? BuildingDetailView(building: selectedBuilding!) : nil,
                         isActive: Binding<Bool>(
                             get: { selectedBuilding != nil },
                             set: { newValue in
