@@ -15,7 +15,7 @@ struct InventoryChangeView: View {
     @State private var reloadView = false
     // Alerts
     @State private var showNoChangesAlert = false
-    // Initializers
+    // init
     let inventorySite: InventorySite
     init(path: Binding<[Route]>, inventorySite: InventorySite) {
         self._path = path
@@ -28,6 +28,8 @@ struct InventoryChangeView: View {
             // On appear
             .onAppear {
                 Task {
+                    // Tell the viewModel which site this is
+                    viewModel.inventorySite = inventorySite
                     // Get supply info
                     viewModel.getSupplyCounts(inventorySiteId: inventorySite.id)
                     viewModel.getSupplyTypes()
@@ -47,11 +49,13 @@ struct InventoryChangeView: View {
                 }
             }
             // View Title
-            .navigationTitle("Change Inventory")
+            .navigationTitle("Reduce Inventory")
             // modifier assigns an identifier to a view
             // if identifer changes, SwiftUI considers the view as having a new identity
             // triggers a view update when reloadView variable changes
             .id(reloadView)
+            .navigationBarBackButtonHidden(true) // don't let the user go back to InventorySubmissionView
+            .onAppear{viewModel.inventoryEntryType = .Use} // default to .Use
     }
     
     private var content: some View {
@@ -79,12 +83,17 @@ struct InventoryChangeView: View {
                 Form {
                     suppliesSection
                     commentsSection
-//                    newSupplyCountsSection // for testing
+                    newSupplyCountsSection // for testing
                     entryTypeSection
-                    if viewModel.inventoryEntryType == .Move {
+                    if viewModel.inventoryEntryType == .MoveTo {
                         destinationSection
                     }
                     confirmButton
+                    
+                    // test exit button
+                    Button("Cancel") {
+                        path.removeLast(path.count - 1)
+                    }
                 }
             }
         }
@@ -333,9 +342,9 @@ struct InventoryChangeView: View {
                 HStack {
                     RadioButton(text: "Report supplies as used", isSelected: viewModel.inventoryEntryType == .Use) {
                         // these buttons are both triggered when the Section is clicked
-                        // toggle between .Move and .Use
+                        // toggle between .MoveTo and .Use
                         if viewModel.inventoryEntryType == .Use {
-                            viewModel.inventoryEntryType = .Move
+                            viewModel.inventoryEntryType = .MoveTo
                         } else {
                             viewModel.inventoryEntryType = .Use
                         }
@@ -345,7 +354,7 @@ struct InventoryChangeView: View {
                 Spacer()
                 // Move option
                 HStack {
-                    RadioButton(text: "Move supplies", isSelected: viewModel.inventoryEntryType == .Move) {
+                    RadioButton(text: "Move supplies", isSelected: viewModel.inventoryEntryType == .MoveTo) {
                         // do nothing since both buttons are triggered when the Section is clicked
                     }
                     Spacer()
@@ -353,7 +362,6 @@ struct InventoryChangeView: View {
             }
             .padding()
         }
-        .onAppear{viewModel.inventoryEntryType = .Use} // default to .Use
     }
     
     private var destinationSection: some View {
@@ -373,21 +381,44 @@ struct InventoryChangeView: View {
                 Spacer()
                 // Confirm Button
                 Button(action: {
-                    //TODO: submit inventory entry, update supplyCounts
-                    
-                    // return to DetailedInventoryView
-                    path.removeLast(path.count - 1)
+                    // if no supplies are reported used
+                    if viewModel.newSupplyCounts.allSatisfy({ $0.usedCount == 0 }) {
+                        // show an alert
+                        showNoChangesAlert = true
+                    // otherwise, some supplies have been used
+                    } else {
+                        // submit inventory entry & update supplyCounts
+                        //                            viewModel.submitAnInventoryEntry() { print("entry done") }
+                        print("Submit Entry & Update Counts")
+                        
+                        // return to DetailedInventoryView
+                        path.removeLast(path.count - 1)
+                    }
                 }) {
                     // Label
                     Spacer()
                     Text("Submit")
-                        .font(.title)
+                        .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     Spacer()
                 }
                 Spacer()
             }
+        }
+        .alert(isPresented: $showNoChangesAlert) {
+            Alert(
+                title: Text("No Supplies Changed"),
+                message: Text("You have not reported any supplies being used/moved."),
+                primaryButton: .default(Text("Try Again")) {
+                    // dismiss alert
+                    showNoChangesAlert = false
+                },
+                secondaryButton: .destructive(Text("Cancel Submission")) {
+                    // return to DetailedInventoryView
+                    path.removeLast(path.count - 1)
+                }
+            )
         }
     }
 }

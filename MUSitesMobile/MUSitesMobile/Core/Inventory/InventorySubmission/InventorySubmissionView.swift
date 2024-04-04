@@ -14,8 +14,10 @@ struct InventorySubmissionView: View {
     @Binding private var path: [Route] // passed-in
     @EnvironmentObject var sheetManager: SheetManager // passed-in, for pop up view
     @State private var reloadView = false
-    @State private var confirmContinue = false // button selection
+    @State private var confirmOption: ConfirmOption = .Exit // button selection
     @State private var submitClicked = false
+    // Alerts
+    @State private var showDuplicateAlert = false
     
     // Initializer
     let inventorySite: InventorySite
@@ -50,7 +52,7 @@ struct InventorySubmissionView: View {
                             // if SUBMIT was clicked
                             if submitClicked {
                                 // submit an entry
-    //                            viewModel.submitAnInventoryEntry()
+    //                            viewModel.submitAnInventoryEntry() {}
                                 print("closure-submit counts to db: \(viewModel.inventoryEntryType)")
                                 
                                 // reset submitClicked status
@@ -62,7 +64,7 @@ struct InventorySubmissionView: View {
                                 }
                                 
                                 // if user clicked Confirm & Continue
-                                if confirmContinue {
+                                if confirmOption == .Continue {
                                     // go to next view
                                     path.append(Route.inventoryChange(inventorySite))
                                 // if user clicked Confirm & Exit
@@ -83,6 +85,13 @@ struct InventorySubmissionView: View {
                         // pass in submitClicked bool
                         submitClicked: $submitClicked)
                 }
+            }
+            .alert(isPresented: $showDuplicateAlert) {
+                Alert(
+                    title: Text("Duplicate Count"),
+                    message: Text("One of these supplies is the same. Either change or confirm the value."),
+                    dismissButton: .default(Text("OK"))
+                )
             }
     }
 
@@ -106,12 +115,13 @@ struct InventorySubmissionView: View {
                         .padding(.horizontal)
                     Spacer()
                 }
+                Text("\(viewModel.inventoryEntryType)")
                 
                 // Form section
                 Form {
                     suppliesSection
                     commentsSection
-//                    newSupplyCountsSection // for testing
+                    newSupplyCountsSection // for testing
                 }
                 
                 // Action Button section
@@ -317,32 +327,9 @@ struct InventorySubmissionView: View {
     private var confirmExitButton: some View {
         // Confirm & Exit button
         Button(action: {
-            // check if any toggles aren't confirmed
-            var togglesConfirmed: Bool = false
-            if viewModel.newSupplyCounts.isEmpty {
-                togglesConfirmed = true
-            }
-
-            // if all toggles are true (confirmed)
-            if togglesConfirmed {
-                // update entry type
-                viewModel.inventoryEntryType = .Check
-                
-                // submit an entry
-//                viewModel.submitAnInventoryEntry()
-                print("togglesConfirmed-submit counts to db: \(viewModel.inventoryEntryType)")
-                
-                // dismiss current view
-                path.removeLast()
-            // if any toggles are false (not confirmed)
-            } else {
-                // indicate Confirm & Exit button was pressed
-                confirmContinue = false
-                // display popup -> update entry type -> may submit entry
-                withAnimation {
-                    sheetManager.present()
-                }
-            }
+            // indicate which button was pressed
+            confirmOption = .Exit
+            confirm()
         }) {
             // Button display
             Text("Confirm & Exit")
@@ -356,32 +343,9 @@ struct InventorySubmissionView: View {
     private var confirmContinueButton: some View {
         // Confirm & Continue button
         Button(action: {
-            // check if any toggles aren't confirmed
-            var togglesConfirmed: Bool = false
-            if viewModel.newSupplyCounts.isEmpty {
-                togglesConfirmed = true
-            }
-
-            // if all toggles are true (confirmed)
-            if togglesConfirmed {
-                // update entry type
-                viewModel.inventoryEntryType = .Check
-                
-                // submit an entry
-//                viewModel.submitAnInventoryEntry()
-                print("togglesConfirmed-submit counts to db: \(viewModel.inventoryEntryType)")
-                
-                // go to next view
-                path.append(Route.inventoryChange(inventorySite))
-            // if any toggles are false (not confirmed)
-            } else {
-                // indicate Confirm & Continue button was pressed
-                confirmContinue = true
-                // display popup -> update entry type -> may submit entry
-                withAnimation {
-                    sheetManager.present()
-                }
-            }
+            // indicate which button was pressed
+            confirmOption = .Continue
+            confirm()
         }) {
             // Button display
             Text("Confirm & Continue")
@@ -389,6 +353,61 @@ struct InventorySubmissionView: View {
                 .padding()
                 .background(Color.yellow)
                 .cornerRadius(10)
+        }
+    }
+    
+    private enum ConfirmOption {
+        case Continue
+        case Exit
+    }
+    
+    private func confirm() {
+        // check if newSupplyCounts is empty
+        var allTogglesConfirmed = false
+        if viewModel.newSupplyCounts.isEmpty {
+            allTogglesConfirmed = true
+        }
+
+        // if all toggles are confirmed (newSupplyTypes is empty)
+        if allTogglesConfirmed {
+            // update entry type
+            viewModel.inventoryEntryType = .Check
+            
+            // submit an entry
+//                viewModel.submitAnInventoryEntry() {}
+            print("allTogglesConfirmed-submit counts to db: \(viewModel.inventoryEntryType)")
+            
+            if confirmOption == .Exit {
+                // dismiss submission view
+                path.removeLast()
+            } else {
+                // go to next view
+                path.append(Route.inventoryChange(inventorySite))
+            }
+        // if any toggles are false (newSupplyTypes has data)
+        } else {
+            // check if any newSupplyCounts match the original supplyCounts
+            var hasDuplicateCount = false
+            // for each newSupplyCount
+            for newSupplyCount in viewModel.newSupplyCounts {
+                // if original supplyCounts has a SupplyCount that matches the newSupplyCount
+                if viewModel.supplyCounts.contains(where: { $0.supplyTypeId == newSupplyCount.supplyTypeId && $0.count == newSupplyCount.count }) {
+                    hasDuplicateCount = true
+                    break
+                }
+            }
+            
+            // if any newSupplyCount matches the original supplyCount
+            if hasDuplicateCount {
+                // show alert
+                showDuplicateAlert = true
+            // otherwise, the user entered intentional changes
+            } else {
+                // display popup -> update entry type (.Fix or .Delivery) -> may submit entry
+                withAnimation {
+                    sheetManager.present()
+                }
+            }
         }
     }
 }
@@ -431,37 +450,4 @@ private struct InventorySubmissionPreview: View {
     
 #Preview {
     InventorySubmissionPreview()
-}
-
-// MARK: Custom Alert
-struct EntryTypeAlertView: View {
-    @Binding var selectedOption: InventoryEntryType?
-
-    var body: some View {
-        VStack {
-            Text("You did not confirm all counts, would you like to report this?")
-                .font(.headline)
-                .padding()
-
-            HStack {
-                RadioButton(text: "Yes, there is a discrepancy.", isSelected: selectedOption == .Fix) {
-                    selectedOption = .Fix
-                }
-                .padding()
-
-                RadioButton(text: "Yes, there was a delivery.", isSelected: selectedOption == .Delivery) {
-                    selectedOption = .Delivery
-                }
-                .padding()
-            }
-
-            Button("OK") {
-                // Dismiss the alert
-            }
-            .padding()
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(10)
-    }
 }

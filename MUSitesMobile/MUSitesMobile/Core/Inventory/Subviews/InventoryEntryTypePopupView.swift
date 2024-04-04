@@ -29,6 +29,11 @@ struct EntryTypePopupView: View {
                 selectedOption = .Fix
             }
             .padding(.bottom)
+            
+            RadioButton(text: "Yes, I moved these supplies.", isSelected: selectedOption == .MovedFrom) {
+                selectedOption = .MovedFrom
+            }
+            .padding(.bottom)
 
             RadioButton(text: "Yes, there was a delivery.", isSelected: selectedOption == .Delivery) {
                 selectedOption = .Delivery
