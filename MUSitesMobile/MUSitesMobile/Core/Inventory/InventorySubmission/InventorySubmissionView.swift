@@ -52,8 +52,8 @@ struct InventorySubmissionView: View {
                             // if SUBMIT was clicked
                             if submitClicked {
                                 // submit an entry
-    //                            viewModel.submitAnInventoryEntry() {}
-                                print("closure-submit counts to db: \(viewModel.inventoryEntryType)")
+                                print("Submit entry as \(viewModel.inventoryEntryType).")
+                                viewModel.submitAnInventoryEntry() { print("Entry completion.") }
                                 
                                 // reset submitClicked status
                                 submitClicked = false
@@ -89,7 +89,7 @@ struct InventorySubmissionView: View {
             .alert(isPresented: $showDuplicateAlert) {
                 Alert(
                     title: Text("Duplicate Count"),
-                    message: Text("One of these supplies is the same. Either change or confirm the value."),
+                    message: Text("One of these supplie counts is the same. Either change or confirm the value."),
                     dismissButton: .default(Text("OK"))
                 )
             }
@@ -374,8 +374,8 @@ struct InventorySubmissionView: View {
             viewModel.inventoryEntryType = .Check
             
             // submit an entry
-//                viewModel.submitAnInventoryEntry() {}
-            print("allTogglesConfirmed-submit counts to db: \(viewModel.inventoryEntryType)")
+            print("Submit entry as \(viewModel.inventoryEntryType).")
+            viewModel.submitAnInventoryEntry() { print("Entry completion.") }
             
             if confirmOption == .Exit {
                 // dismiss submission view

@@ -7,7 +7,13 @@
 
 import SwiftUI
 
+@MainActor
+final class ContentViewModel: ObservableObject {
+    
+}
+
 struct ContentView: View {
+    @StateObject private var viewModel = ContentViewModel()
     
     var body: some View {
         VStack {

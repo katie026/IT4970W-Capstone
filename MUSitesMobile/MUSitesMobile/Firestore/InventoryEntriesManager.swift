@@ -25,6 +25,7 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
     let timestamp: Date?
     let type: InventoryEntryType?
     let userId: String?
+    let comments: String?
     // supplies
     let colorTabloid: Int?
     let bwTabloid: Int?
@@ -41,6 +42,7 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         timestamp: Date? = nil,
         type: InventoryEntryType? = nil,
         userId: String? = nil,
+        comments: String? = nil,
         colorTabloid: Int? = nil,
         bwTabloid: Int? = nil,
         threeMSpray: Int? = nil,
@@ -54,6 +56,7 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         self.timestamp = timestamp
         self.type = type
         self.userId = userId
+        self.comments = comments
         self.colorTabloid = colorTabloid
         self.bwTabloid = bwTabloid
         self.threeMSpray = threeMSpray
@@ -69,6 +72,7 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         case timestamp = "timestamp"
         case type = "type"
         case userId = "user"
+        case comments = "comments"
         case colorTabloid = "5dbQL6Jmc3ezlsqR75Pu"
         case bwTabloid = "B17QKJXEM3oPLaoreQWn"
         case threeMSpray = "SWHMBwzJaR3EggqgWNEk"
@@ -91,6 +95,7 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         self.type = InventoryEntryType(rawValue: typeString ?? "NA")
         
         self.userId = try container.decodeIfPresent(String.self, forKey: .userId)
+        self.comments = try container.decodeIfPresent(String.self, forKey: .comments)
         self.colorTabloid = try container.decodeIfPresent(Int.self, forKey: .colorTabloid)
         self.bwTabloid = try container.decodeIfPresent(Int.self, forKey: .bwTabloid)
         self.threeMSpray = try container.decodeIfPresent(Int.self, forKey: .threeMSpray)
@@ -111,6 +116,7 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         try container.encodeIfPresent(self.type?.rawValue, forKey: .type)
         
         try container.encodeIfPresent(self.userId, forKey: .userId)
+        try container.encodeIfPresent(self.comments, forKey: .comments)
         try container.encodeIfPresent(self.colorTabloid, forKey: .colorTabloid)
         try container.encodeIfPresent(self.bwTabloid, forKey: .bwTabloid)
         try container.encodeIfPresent(self.threeMSpray, forKey: .threeMSpray)
@@ -176,20 +182,22 @@ final class InventoryEntriesManager {
     }
     
     // get entries sorted by timestamp
-    private func getAllInventoryEntriesSortedByNameQuery(descending: Bool) -> Query {
+    private func getAllInventoryEntriesSortedByDateQuery(descending: Bool) -> Query {
         inventoryEntriesCollection
             .order(by: InventoryEntry.CodingKeys.timestamp.rawValue, descending: descending)
     }
     
     // get inventory entries by __
     func getAllInventoryEntries(descending: Bool?) async throws -> [InventoryEntry] {
-        let query: Query = getAllInventoryEntriesQuery()
+        // start with basic query to get whole collection
+        var query: Query = getAllInventoryEntriesQuery()
         
-//        // if given sort
-//        if let descending {
-//            // sort whole collection
-//            query = getAllSitesSortedByNameQuery(descending: descending)
-//        }
+        // if given sort option
+        if let descending {
+            // replace query to sort whole collection first
+            query = getAllInventoryEntriesSortedByDateQuery(descending: descending)
+        }
+        
         print("Querying all inventory entries.")
         return try await query
             .getDocuments(as: InventoryEntry.self) // query inventory_entries collection

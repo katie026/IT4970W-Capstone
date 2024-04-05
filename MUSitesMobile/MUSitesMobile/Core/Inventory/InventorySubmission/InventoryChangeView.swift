@@ -241,7 +241,7 @@ struct InventoryChangeView: View {
 //            Button(action: {
 //                // Decrease the used count by 1
 //                if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
-//                    viewModel.newSupplyCounts[index].usedCount -= 1
+//                    viewModel.newSupplyCounts[index].} -= 1
 //                    // Update the count accordingly
 //                    viewModel.newSupplyCounts[index].count = (supplyCount.count ?? 0) - viewModel.newSupplyCounts[index].usedCount
 //                }
@@ -388,8 +388,8 @@ struct InventoryChangeView: View {
                     // otherwise, some supplies have been used
                     } else {
                         // submit inventory entry & update supplyCounts
-                        //                            viewModel.submitAnInventoryEntry() { print("entry done") }
-                        print("Submit Entry & Update Counts")
+                        print("Submit entry as \(viewModel.inventoryEntryType).")
+                        viewModel.submitAnInventoryEntry() { print("Entry completion.") }
                         
                         // return to DetailedInventoryView
                         path.removeLast(path.count - 1)

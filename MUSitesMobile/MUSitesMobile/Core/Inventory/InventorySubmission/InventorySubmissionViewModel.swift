@@ -75,7 +75,7 @@ final class InventorySubmissionViewModel: ObservableObject {
                 try await SupplyCountManager.shared.updateSupplyCounts(supplyCounts)
                 // Call the completion handler upon successful creation
                 completion()
-                print("Updated SupplyCount batch (\(supplyCounts.count) in Firestore")
+                print("Updated SupplyCount batch (\(supplyCounts.count)) in Firestore.")
             } catch {
                 print("Error updating SupplyCounts: \(error)")
             }
@@ -123,100 +123,53 @@ final class InventorySubmissionViewModel: ObservableObject {
         Task {
             do {
                 // create new document and get id from Firestore
-                let entryId = try await InventoryEntriesManager.shared.getNewInventoryEntryId()
+                let inventoryEntryId = try await InventoryEntriesManager.shared.getNewInventoryEntryId()
                 
                 // get current user
                 let user = try AuthenticationManager.shared.getAuthenticatedUser()
                 
-                //TODO: alter comments if needed
+                // alter comments if needed
                 if inventoryEntryType == .MoveTo {
                     comments = "Moved supplies to \(String(describing: destinationSite.name)). " + comments
                 } else if (inventoryEntryType == .MovedFrom) {
                     comments = "Moved supplies from \(String(describing: destinationSite.name)). " + comments
                 }
                 
-                // Get supply data:
-                // colorTabloid
-                let colorTabloid = supplyCounts.first(where: { $0.supplyTypeId == InventoryEntry.CodingKeys.colorTabloid.rawValue })
-                // bwTabloid
-                let bwTabloid = supplyCounts.first(where: { $0.supplyTypeId == InventoryEntry.CodingKeys.bwTabloid.rawValue })
-                // threeMSpray
-                let threeMSpray = supplyCounts.first(where: { $0.supplyTypeId == InventoryEntry.CodingKeys.threeMSpray.rawValue })
-                // bwPaper
-                let bwPaper = supplyCounts.first(where: { $0.supplyTypeId == InventoryEntry.CodingKeys.bwPaper.rawValue })
-                // colorPaper
-                let colorPaper = supplyCounts.first(where: { $0.supplyTypeId == InventoryEntry.CodingKeys.colorPaper.rawValue })
-                // wipes
-                let wipes = supplyCounts.first(where: { $0.supplyTypeId == InventoryEntry.CodingKeys.wipes.rawValue })
-                // paperTowel
-                let paperTowel = supplyCounts.first(where: { $0.supplyTypeId == InventoryEntry.CodingKeys.paperTowel.rawValue })
-                
                 // create a new InventoryEntry struct for the current site
-                let entry = InventoryEntry(
-                    id: entryId, // generated a unique ID
-                    inventorySiteId: inventorySite?.id,
+                let inventoryEntry = InventoryEntry(
+                    id: inventoryEntryId, // generated a unique ID
+                    inventorySiteId: self.inventorySite?.id,
                     timestamp: Date(),
-                    type: inventoryEntryType,
+                    type: self.inventoryEntryType,
                     userId: user.uid,
-                    colorTabloid: colorTabloid?.count,
-                    bwTabloid: bwTabloid?.count,
-                    threeMSpray: threeMSpray?.count,
-                    bwPaper: bwPaper?.count,
-                    colorPaper: colorPaper?.count,
-                    wipes: wipes?.count,
-                    paperTowel: paperTowel?.count
+                    comments: self.comments
                 )
                 
-                // update document in Firestore
-                try await InventoryEntriesManager.shared.createInventoryEntry(inventoryEntry: entry)
-                print("Created entry at origin site.")
+                // update inventory entry document in Firestore
+                try await InventoryEntriesManager.shared.createInventoryEntry(inventoryEntry: inventoryEntry)
+                print("Created inventory entry: \(inventoryEntryId).")
                 
-//                // SUBMIT ANOTHER ENTRY if entryType is .Move
-//                if inventoryEntryType == .Move {
-//                    // create another new document and get id from Firestore
-//                    let destEntryId = try await InventoryEntriesManager.shared.getNewInventoryEntryId()
-//                    
-//                    // get the current SupplyCounts from the destination site
-//                    let destinationCounts = try await SupplyCountManager.shared.getAllSupplyCountsBySite(siteId: self.destinationSite.id)
-//                    
-//                    // Get supply data:
-//                    // colorTabloid
-//                    let colorTabloid_dest = calculateNewDestinationCount(supplyId: InventoryEntry.CodingKeys.colorTabloid.rawValue, destCounts: destinationCounts, originCounts: supplyCounts)
-//                    // bwTabloid
-//                    let bwTabloid_dest = calculateNewDestinationCount(supplyId: InventoryEntry.CodingKeys.bwTabloid.rawValue, destCounts: destinationCounts, originCounts: supplyCounts)
-//                    // threeMSpray
-//                    let threeMSpray_dest = calculateNewDestinationCount(supplyId: InventoryEntry.CodingKeys.threeMSpray.rawValue, destCounts: destinationCounts, originCounts: supplyCounts)
-//                    // bwPaper
-//                    let bwPaper_dest = calculateNewDestinationCount(supplyId: InventoryEntry.CodingKeys.bwPaper.rawValue, destCounts: destinationCounts, originCounts: supplyCounts)
-//                    // colorPaper
-//                    let colorPaper_dest = calculateNewDestinationCount(supplyId: InventoryEntry.CodingKeys.colorPaper.rawValue, destCounts: destinationCounts, originCounts: supplyCounts)
-//                    // wipes
-//                    let wipes_dest = calculateNewDestinationCount(supplyId: InventoryEntry.CodingKeys.wipes.rawValue, destCounts: destinationCounts, originCounts: supplyCounts)
-//                    // paperTowel
-//                    let paperTowel_dest = calculateNewDestinationCount(supplyId: InventoryEntry.CodingKeys.paperTowel.rawValue, destCounts: destinationCounts, originCounts: supplyCounts)
-//                    
-//                    // create a new InventoryEntry struct for the destination site
-//                    let destEntry = InventoryEntry(
-//                        id: destEntryId, // generated a unique ID
-//                        inventorySiteId: destinationSite.id,
-//                        timestamp: Date(),
-//                        type: inventoryEntryType,
-//                        userId: user.uid,
-//                        colorTabloid: colorTabloid_dest,
-//                        bwTabloid: bwTabloid_dest,
-//                        threeMSpray: threeMSpray_dest,
-//                        bwPaper: bwPaper_dest,
-//                        colorPaper: colorPaper_dest,
-//                        wipes: wipes_dest,
-//                        paperTowel: paperTowel_dest
-//                    )
-//                    
-//                    // update document with new InventoryEntry
-//                    try await InventoryEntriesManager.shared.createInventoryEntry(inventoryEntry: destEntry)
-//                    print("Created entry at destination site.")
-//                    
-//                    // update supplycounts at destination here
-//                }
+                // create a new SupplyEntry for each SupplyType
+                for supplyType in self.supplyTypes {
+                    // find the SupplyCount for this SupplyType (where .supplyTypeId == supplyType.id)
+                    if let supplyCount = supplyCounts.first(where: { $0.supplyTypeId == supplyType.id }) {
+                        // create new document and get id from Firestore
+                        let supplyEntryId = try await SupplyEntriesManager.shared.getNewSupplyEntryId()
+                        
+                        // SupplyCount.count
+                        let supplyEntry = SupplyEntry(
+                            id: supplyEntryId, // use generated id
+                            inventoryEntryId: inventoryEntryId, // attach to this inventory entry
+                            supplyTypeId: supplyType.id, // per supply type
+                            count: supplyCount.count,
+                            level: nil,
+                            used: supplyCount.usedCount
+                        )
+                        
+                        // update supply entry document in Firestore
+                        try await SupplyEntriesManager.shared.createSupplyEntry(supplyEntry: supplyEntry)
+                    }
+                }
 
                 // call completion handler upon successful creation
                 completion()
@@ -226,31 +179,8 @@ final class InventorySubmissionViewModel: ObservableObject {
         }
     }
     
-    private func calculateNewDestinationCount(supplyId: String, destCounts: [SupplyCount], originCounts: [SupplyCount]) -> Int? {
-        var newDestinationCount: Int?
-        
-        let destinationCount = destCounts.first(where: { $0.supplyTypeId == supplyId })?.count
-        let originUsedCount = originCounts.first(where: { $0.supplyTypeId == supplyId })?.usedCount
-        
-        // Both destinationCount and originUsedCount are not nil
-        if let destinationCount = destinationCount,
-           let originUsedCount = originUsedCount {
-            newDestinationCount = destinationCount + originUsedCount
-        // Only destinationCount is not nil
-        } else if let destinationCount = destinationCount {
-            newDestinationCount = destinationCount
-        // Only originUsedCount is not nil
-        } else if let originUsedCount = originUsedCount {
-            newDestinationCount = originUsedCount
-        // Both destinationCount and originUsedCount are nil
-        } else {
-            newDestinationCount = nil
-        }
-        
-        return newDestinationCount
-    }
-    
     func removeMatchingCountsFromNewSupplyCounts() {
+        // the logic in InventoryChangeView should prevent this function being needed using an alert
         print("removing matches")
         // Remove SupplyCounts from newSupplyCounts where supplyId and count match those in supplyCounts
         newSupplyCounts = newSupplyCounts.filter { newSupplyCount in
@@ -274,11 +204,6 @@ final class InventorySubmissionViewModel: ObservableObject {
             }
         // else if type is .Fix, .Delivery, or .MovedFrom (newSupplyCounts only includes updated supplyTypes)
         } else if (inventoryEntryType == .Fix || inventoryEntryType == .Delivery || inventoryEntryType == .MovedFrom) {
-            // remove any matches based on SupplyType and count
-            print("newSupplyCounts has: \(newSupplyCounts.count)")
-            removeMatchingCountsFromNewSupplyCounts()
-            print("now newSupplyCounts has: \(newSupplyCounts.count)")
-            
             // send updated SupplyCounts to Firestore
             submitSupplyCounts(supplyCounts: newSupplyCounts) {}
             
@@ -290,7 +215,7 @@ final class InventorySubmissionViewModel: ObservableObject {
                 // call completion after entry is created
                 completion()
             }
-        // else type is .MoveTo or .Use (newSupplyCounts includes all supplyTypes)
+        // else type is .MoveTo or .Use (newSupplyCounts includes all supplyTypes with .usedCount property)
         } else {
             // create new list of only SupplyCounts that reported used/moved
             let updates = newSupplyCounts.filter { $0.usedCount != 0 }
