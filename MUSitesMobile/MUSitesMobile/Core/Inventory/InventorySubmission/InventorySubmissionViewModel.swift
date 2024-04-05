@@ -16,6 +16,7 @@ final class InventorySubmissionViewModel: ObservableObject {
     // Inventory Entry Default Values
     @Published var inventorySite: InventorySite? = nil // will be passed in from the View
     @Published var newSupplyCounts: [SupplyCount] = []
+    @Published var levelSupplyCounts: [SupplyCount] = [] // this is only ot hold updated levels
     @Published var inventoryEntryType: InventoryEntryType = .Check
     @Published var comments: String = ""
     @Published var destinationSite: InventorySite = InventorySite(
@@ -40,6 +41,8 @@ final class InventorySubmissionViewModel: ObservableObject {
 
             // Make a copy of each SupplyCount object and assign to newSupplyCounts
             self.newSupplyCounts = self.supplyCounts.map { $0.copy() }
+            // Make a copy of each SupplyCount object and assign to levelSupplyCounts
+            self.levelSupplyCounts = self.supplyCounts.map { $0.copy() }
         }
     }
 
@@ -55,7 +58,8 @@ final class InventorySubmissionViewModel: ObservableObject {
                     inventorySiteId: inventorySiteId,
                     supplyTypeId: supplyTypeId,
                     countMin: 0,
-                    count: 0
+                    count: 0,
+                    level: 0
                 )
 
                 // update document with new SupplyCount
@@ -162,7 +166,7 @@ final class InventorySubmissionViewModel: ObservableObject {
                             inventoryEntryId: inventoryEntryId, // attach to this inventory entry
                             supplyTypeId: supplyType.id, // per supply type
                             count: supplyCount.count,
-                            level: nil,
+                            level: supplyCount.level,
                             used: supplyCount.usedCount
                         )
                         
@@ -179,38 +183,44 @@ final class InventorySubmissionViewModel: ObservableObject {
         }
     }
     
-    func removeMatchingCountsFromNewSupplyCounts() {
-        // the logic in InventoryChangeView should prevent this function being needed using an alert
+    func removeMatchingSupplyCounts(oldCounts: [SupplyCount], newCounts: [SupplyCount]) -> [SupplyCount] {
+        print("Counts before: \(newCounts.count)")
         print("Removing matches now...")
-        // Remove SupplyCounts from newSupplyCounts where supplyId and count match those in supplyCounts
-        newSupplyCounts = newSupplyCounts.filter { newSupplyCount in
-            // check each newSupplyCount
-            !supplyCounts.contains { supplyCount in
-                // check each old supplyCount
-                
-                // don't include counts where the supplyType & count are the same
-                supplyCount.supplyTypeId == newSupplyCount.supplyTypeId && supplyCount.count == newSupplyCount.count
+        // remove SupplyCounts from newCounts where supplyId, count, & level match those in oldCounts
+        // check each newSupplyCount
+        let newCounts = newCounts.filter { newCount in
+            // check each old supplyCount
+            !oldCounts.contains { oldCount in
+                // don't include counts where the supplyType, count, and level are the same
+                oldCount.supplyTypeId == newCount.supplyTypeId && oldCount.count == newCount.count && oldCount.level == newCount.level
             }
         }
+        print("Counts after: \(newCounts.count)")
+        return newCounts
     }
     
     func submitAnInventoryEntry(completion: @escaping () -> Void) {
         // if type is .Check (newSupplyCounts is empty)
         if (inventoryEntryType == .Check) {
-            // create InventoryEntry struct from original supplyCounts and add to Firestore
-            createInventoryEntry(supplyCounts: supplyCounts) {
+            // send original SupplyCounts (with new levels) to Firestore
+            submitSupplyCounts(supplyCounts: self.supplyCounts) {}
+            
+            // create InventoryEntry struct add to Firestore
+            // send original supplyCounts (with new levels)
+            createInventoryEntry(supplyCounts: self.supplyCounts) {
                 // call completion after entry is created
                 completion()
             }
         // else if type is .Fix, .Delivery, or .MovedFrom (newSupplyCounts only includes updated supplyTypes)
         } else if (inventoryEntryType == .Fix || inventoryEntryType == .Delivery || inventoryEntryType == .MovedFrom) {
             // send updated SupplyCounts to Firestore
-            submitSupplyCounts(supplyCounts: newSupplyCounts) {}
+            submitSupplyCounts(supplyCounts: self.newSupplyCounts) {}
             
             // create new list of SupplyCounts by merging supplyCounts and newSupplyCounts
-            let allSupplyCounts = mergeSupplyCounts(originalSupplyCounts: supplyCounts, newSupplyCounts: newSupplyCounts)
+            let allSupplyCounts = mergeSupplyCounts(originalSupplyCounts: self.supplyCounts, newSupplyCounts: self.newSupplyCounts)
             
             // create InventoryEntry struct and add to Firestore
+            // send merged SupplyCounts (with new levels)
             createInventoryEntry(supplyCounts: allSupplyCounts) {
                 // call completion after entry is created
                 completion()
@@ -218,13 +228,14 @@ final class InventorySubmissionViewModel: ObservableObject {
         // else type is .MoveTo or .Use (newSupplyCounts includes all supplyTypes with .usedCount property)
         } else {
             // create new list of only SupplyCounts that reported used/moved
-            let updates = newSupplyCounts.filter { $0.usedCount != 0 }
+            let updates = self.newSupplyCounts.filter { $0.usedCount != 0 }
             
             // send updated SupplyCounts to Firestore
             submitSupplyCounts(supplyCounts: updates) { }
             
             // create InventoryEntry struct and add to Firestore
-            createInventoryEntry(supplyCounts: newSupplyCounts) { 
+            // send all newSupplyCounts (with new levels)
+            createInventoryEntry(supplyCounts: self.newSupplyCounts) {
                 // call completion after batch update
                 completion()
             }

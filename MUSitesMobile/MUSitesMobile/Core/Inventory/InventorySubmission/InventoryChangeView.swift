@@ -89,11 +89,6 @@ struct InventoryChangeView: View {
                         destinationSection
                     }
                     confirmButton
-                    
-                    // test exit button
-                    Button("Cancel") {
-                        path.removeLast(path.count - 1)
-                    }
                 }
             }
         }
@@ -102,6 +97,13 @@ struct InventoryChangeView: View {
             ToolbarItem(placement: .keyboard) {
                 Button("Done") {
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) { //TODO: test this button
+                Button(action: {
+                    path.removeLast(path.count - 1)
+                }) {
+                    Text("Cancel")
                 }
             }
         }
@@ -322,13 +324,22 @@ struct InventoryChangeView: View {
     
     // list of NewSupplyCounts for testing purposes
     private var newSupplyCountsSection: some View {
+        // Display the contents of the newSupplyCounts array
         Section(header: Text("New Supply Counts")) {
-            // Display the contents of the newSupplyCounts array
+            // for each SupplyCount in newSupplyCounts
             ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
                 HStack {
-                    Text("ID: \(supply.id)")
-                    Text("Used: \(supply.usedCount)")
-                    Text("Count: \(supply.count ?? 0)")
+                    // find the supply type for this supply count
+                    if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
+                        // display the supply name
+                        Text("\(supplyType.name)").fontWeight(.medium)
+                    } else {
+                        // if can't find supply type, display the count id
+                        Text("ID: \(supply.id)")
+                    }
+                    
+                    Text("Count: \(supply.count != nil ? "\(supply.count!)" : "nil")")
+                    Text("Level: \(supply.level != nil ? "\(supply.level!)" : "nil")")
                 }
                 .foregroundColor(Color(UIColor.label))
             }
@@ -398,6 +409,7 @@ struct InventoryChangeView: View {
                     // Label
                     Spacer()
                     Text("Submit")
+                        .background(Color.yellow)
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
