@@ -31,6 +31,8 @@ struct InventorySubmissionView: View {
         content
             // On appear
             .onAppear {
+                // tell the viewModel which inventorySite this is
+                viewModel.inventorySite = inventorySite
                 // Get supply info
                 Task {
                     viewModel.getSupplyCounts(inventorySiteId: inventorySite.id)
@@ -115,7 +117,8 @@ struct InventorySubmissionView: View {
                         .padding(.horizontal)
                     Spacer()
                 }
-                Text("\(viewModel.inventoryEntryType)")
+                Text("\(viewModel.inventoryEntryType)") // for testing
+                Text("\(viewModel.inventorySite?.name ?? "nil")") // for testing
                 
                 // Form section
                 Form {
@@ -418,7 +421,7 @@ private struct InventorySubmissionPreview: View {
     
     private var inventorySite: InventorySite = InventorySite(
         id: "TzLMIsUbadvLh9PEgqaV",
-        name: "GO BCC",
+        name: "BCC 122",
         buildingId: "yXT87CrCZCoJVRvZn5DC",
         inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
     )

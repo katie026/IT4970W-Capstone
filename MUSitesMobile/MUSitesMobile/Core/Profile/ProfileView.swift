@@ -159,16 +159,15 @@ struct ProfileView: View {
     }
 }
     
-//    #Preview {
-//        NavigationStack {
-//            //        RootView()
-//            ProfileView(showSignInView: .constant(false))
-//        }
-//    }
-//included this struct so it would run(wasnt running with the #Preview)
-struct ProfileView_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview {
+    NavigationStack {
+//        RootView()
         ProfileView(showSignInView: .constant(false))
     }
 }
-
+//included this struct so it would run(wasnt running with the #Preview)
+//struct ProfileView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ProfileView(showSignInView: .constant(false))
+//    }
+//}

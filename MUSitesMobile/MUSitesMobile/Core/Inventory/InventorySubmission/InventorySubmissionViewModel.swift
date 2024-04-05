@@ -30,7 +30,7 @@ final class InventorySubmissionViewModel: ObservableObject {
 
     func getSupplyTypes() {
         Task {
-            self.supplyTypes = try await SupplyTypeManager.shared.getAllSupplyTypes(descending: true)
+            self.supplyTypes = try await SupplyTypeManager.shared.getAllSupplyTypes(descending: false)
         }
     }
 
@@ -130,9 +130,9 @@ final class InventorySubmissionViewModel: ObservableObject {
                 
                 // alter comments if needed
                 if inventoryEntryType == .MoveTo {
-                    comments = "Moved supplies to \(String(describing: destinationSite.name)). " + comments
+                    comments = "Moved supplies to \(destinationSite.name ?? "N/A"). " + comments
                 } else if (inventoryEntryType == .MovedFrom) {
-                    comments = "Moved supplies from \(String(describing: destinationSite.name)). " + comments
+                    comments = "Moved supplies from \(destinationSite.name ?? "N/A"). " + comments
                 }
                 
                 // create a new InventoryEntry struct for the current site
@@ -181,7 +181,7 @@ final class InventorySubmissionViewModel: ObservableObject {
     
     func removeMatchingCountsFromNewSupplyCounts() {
         // the logic in InventoryChangeView should prevent this function being needed using an alert
-        print("removing matches")
+        print("Removing matches now...")
         // Remove SupplyCounts from newSupplyCounts where supplyId and count match those in supplyCounts
         newSupplyCounts = newSupplyCounts.filter { newSupplyCount in
             // check each newSupplyCount

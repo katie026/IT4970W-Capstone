@@ -26,14 +26,6 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
     let type: InventoryEntryType?
     let userId: String?
     let comments: String?
-    // supplies
-    let colorTabloid: Int?
-    let bwTabloid: Int?
-    let threeMSpray: Int?
-    let bwPaper: Int?
-    let colorPaper: Int?
-    let wipes: Int?
-    let paperTowel: Int?
     
     // create InventoryEntry manually
     init(
@@ -42,14 +34,7 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         timestamp: Date? = nil,
         type: InventoryEntryType? = nil,
         userId: String? = nil,
-        comments: String? = nil,
-        colorTabloid: Int? = nil,
-        bwTabloid: Int? = nil,
-        threeMSpray: Int? = nil,
-        bwPaper: Int? = nil,
-        colorPaper: Int? = nil,
-        wipes: Int? = nil,
-        paperTowel: Int? = nil
+        comments: String? = nil
     ) {
         self.id = id
         self.inventorySiteId = inventorySiteId
@@ -57,13 +42,6 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         self.type = type
         self.userId = userId
         self.comments = comments
-        self.colorTabloid = colorTabloid
-        self.bwTabloid = bwTabloid
-        self.threeMSpray = threeMSpray
-        self.bwPaper = bwPaper
-        self.colorPaper = colorPaper
-        self.wipes = wipes
-        self.paperTowel = paperTowel
     }
     
     enum CodingKeys: String, CodingKey {
@@ -73,13 +51,6 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         case type = "type"
         case userId = "user"
         case comments = "comments"
-        case colorTabloid = "5dbQL6Jmc3ezlsqR75Pu"
-        case bwTabloid = "B17QKJXEM3oPLaoreQWn"
-        case threeMSpray = "SWHMBwzJaR3EggqgWNEk"
-        case bwPaper = "dpj0LV4bBdw8wRVle7aD"
-        case colorPaper = "rGTzAyr1CXN2NV0sapK1"
-        case wipes = "w4V5uYVeF48AvfcgAFN1"
-        case paperTowel = "yOPDkKB4wVEB1dTK9fXy"
     }
     
     init(from decoder: any Decoder) throws {
@@ -96,13 +67,6 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         
         self.userId = try container.decodeIfPresent(String.self, forKey: .userId)
         self.comments = try container.decodeIfPresent(String.self, forKey: .comments)
-        self.colorTabloid = try container.decodeIfPresent(Int.self, forKey: .colorTabloid)
-        self.bwTabloid = try container.decodeIfPresent(Int.self, forKey: .bwTabloid)
-        self.threeMSpray = try container.decodeIfPresent(Int.self, forKey: .threeMSpray)
-        self.bwPaper = try container.decodeIfPresent(Int.self, forKey: .bwPaper)
-        self.colorPaper = try container.decodeIfPresent(Int.self, forKey: .colorPaper)
-        self.wipes = try container.decodeIfPresent(Int.self, forKey: .wipes)
-        self.paperTowel = try container.decodeIfPresent(Int.self, forKey: .paperTowel)
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -117,13 +81,6 @@ struct InventoryEntry: Identifiable, Codable, Equatable, Hashable {
         
         try container.encodeIfPresent(self.userId, forKey: .userId)
         try container.encodeIfPresent(self.comments, forKey: .comments)
-        try container.encodeIfPresent(self.colorTabloid, forKey: .colorTabloid)
-        try container.encodeIfPresent(self.bwTabloid, forKey: .bwTabloid)
-        try container.encodeIfPresent(self.threeMSpray, forKey: .threeMSpray)
-        try container.encodeIfPresent(self.bwPaper, forKey: .bwPaper)
-        try container.encodeIfPresent(self.colorPaper, forKey: .colorPaper)
-        try container.encodeIfPresent(self.wipes, forKey: .wipes)
-        try container.encodeIfPresent(self.paperTowel, forKey: .paperTowel)
     }
     
     static func == (lhs:InventoryEntry, rhs: InventoryEntry) -> Bool {
@@ -181,19 +138,42 @@ final class InventoryEntriesManager {
         inventoryEntriesCollection
     }
     
-    // get entries sorted by timestamp
+    // get entries sorted by date
     private func getAllInventoryEntriesSortedByDateQuery(descending: Bool) -> Query {
         inventoryEntriesCollection
             .order(by: InventoryEntry.CodingKeys.timestamp.rawValue, descending: descending)
     }
     
+    // get entries between two dates
+    private func getInventoryEntriesBetweenDatesQuery(startDate: Date, endDate: Date) -> Query {
+        inventoryEntriesCollection
+            .whereField(InventoryEntry.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
+            .whereField(InventoryEntry.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
+    }
+    
+    // get entries between two dates & sorted by date
+    private func getInventoryEntriesSortedBetweenDatesQuery(descending: Bool, startDate: Date, endDate: Date) -> Query {
+        inventoryEntriesCollection
+            // filter for dates
+            .whereField(InventoryEntry.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
+            .whereField(InventoryEntry.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
+            // order by dates
+            .order(by: InventoryEntry.CodingKeys.timestamp.rawValue, descending: descending)
+    }
+    
     // get inventory entries by __
-    func getAllInventoryEntries(descending: Bool?) async throws -> [InventoryEntry] {
+    func getAllInventoryEntries(descending: Bool?, startDate: Date?, endDate: Date?) async throws -> [InventoryEntry] {
         // start with basic query to get whole collection
         var query: Query = getAllInventoryEntriesQuery()
         
-        // if given sort option
-        if let descending {
+        // if given sort & dates
+        if let descending, let startDate, let endDate {
+            query = getInventoryEntriesSortedBetweenDatesQuery(descending: descending, startDate: startDate, endDate: endDate)
+        // if given only dates
+        } else if let startDate, let endDate {
+            query = getInventoryEntriesBetweenDatesQuery(startDate: startDate, endDate: endDate)
+        // if given only dates
+        } else if let descending {
             // replace query to sort whole collection first
             query = getAllInventoryEntriesSortedByDateQuery(descending: descending)
         }

@@ -183,7 +183,15 @@ final class UserManager {
         }
     }
     
-    //function to get all the users in the user collection
+    // get list of DBUsers
+    func getUsersList() async throws -> [DBUser] {
+        let query = userCollection
+        
+        return try await query
+            .getDocuments(as: DBUser.self)
+    }
+    
+    // function to get all the users in the user collection
     func getAllUsers(completion: @escaping (Result<[DBUser], Error>) -> Void) {
         Firestore.firestore().collection("users").getDocuments { snapshot, error in
             if let error = error {

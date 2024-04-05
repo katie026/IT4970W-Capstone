@@ -250,7 +250,7 @@ private struct DetailedInventorySitePreview: View {
     
     private var inventorySite: InventorySite = InventorySite(
         id: "TzLMIsUbadvLh9PEgqaV",
-        name: "GO BCC",
+        name: "BCC 122",
         buildingId: "yXT87CrCZCoJVRvZn5DC",
         inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
     )

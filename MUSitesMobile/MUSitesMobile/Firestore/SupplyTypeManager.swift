@@ -75,15 +75,15 @@ class SupplyTypeManager {
             .order(by: SupplyType.CodingKeys.name.rawValue, descending: descending)
     }
 
-    // get supply types by name
+    // get all supply types
     func getAllSupplyTypes(descending: Bool?) async throws -> [SupplyType] {
-        let query: Query = getAllSupplyTypesQuery()
+        var query = getAllSupplyTypesQuery()
 
-//        // if given sort
-//        if let descending {
-//            // sort whole collection
-//            query = getAllSitesSortedByNameQuery(descending: descending)
-//        }
+        // if given sort
+        if let descending {
+            // sort whole collection
+            query = getAllSupplyTypesSortedByNameQuery(descending: descending)
+        }
         return try await query
             .getDocuments(as: SupplyType.self) // query key_types collection
     }
