@@ -74,14 +74,28 @@ final class InventorySubmissionViewModel: ObservableObject {
     }
 
     func submitSupplyCounts(supplyCounts: [SupplyCount], completion: @escaping () -> Void) {
+        var updates = supplyCounts
+        overwriteLevels(with: self.levelSupplyCounts, overwrite: &updates)
+        
         Task {
             do {
-                try await SupplyCountManager.shared.updateSupplyCounts(supplyCounts)
+                try await SupplyCountManager.shared.updateSupplyCounts(updates)
                 // Call the completion handler upon successful creation
                 completion()
-                print("Updated SupplyCount batch (\(supplyCounts.count)) in Firestore.")
+                print("Updated SupplyCount batch (\(updates.count)) in Firestore.")
             } catch {
                 print("Error updating SupplyCounts: \(error)")
+            }
+        }
+    }
+    
+    func overwriteLevels(with levelCounts: [SupplyCount], overwrite baseCounts: inout [SupplyCount]) {
+        // iterate over baseCounts with enumerated(), access the index and element
+        for (baseIndex, baseCount) in baseCounts.enumerated() {
+            // for each baseCount, check if corresponding SupplyCount exists in levelCounts
+            if let levelIndex = levelCounts.firstIndex(where: { $0.id == baseCount.id }) {
+                // if so, use the index to read the level value and assign it to the baseCount
+                baseCounts[baseIndex].level = levelCounts[levelIndex].level
             }
         }
     }
@@ -124,6 +138,10 @@ final class InventorySubmissionViewModel: ObservableObject {
     }
     
     func createInventoryEntry(supplyCounts: [SupplyCount], completion: @escaping () -> Void) {
+        // overwrite list of SupplyCounts to update levels
+        var supplyCountsWithLevels = supplyCounts
+        overwriteLevels(with: self.levelSupplyCounts, overwrite: &supplyCountsWithLevels)
+        
         Task {
             do {
                 // create new document and get id from Firestore
@@ -156,7 +174,7 @@ final class InventorySubmissionViewModel: ObservableObject {
                 // create a new SupplyEntry for each SupplyType
                 for supplyType in self.supplyTypes {
                     // find the SupplyCount for this SupplyType (where .supplyTypeId == supplyType.id)
-                    if let supplyCount = supplyCounts.first(where: { $0.supplyTypeId == supplyType.id }) {
+                    if let supplyCount = supplyCountsWithLevels.first(where: { $0.supplyTypeId == supplyType.id }) {
                         // create new document and get id from Firestore
                         let supplyEntryId = try await SupplyEntriesManager.shared.getNewSupplyEntryId()
                         
@@ -166,7 +184,7 @@ final class InventorySubmissionViewModel: ObservableObject {
                             inventoryEntryId: inventoryEntryId, // attach to this inventory entry
                             supplyTypeId: supplyType.id, // per supply type
                             count: supplyCount.count,
-                            level: supplyCount.level,
+                            level: supplyCount.level, // updated when supplyCounts was overwritten
                             used: supplyCount.usedCount
                         )
                         
@@ -205,7 +223,7 @@ final class InventorySubmissionViewModel: ObservableObject {
             // send original SupplyCounts (with new levels) to Firestore
             submitSupplyCounts(supplyCounts: self.supplyCounts) {}
             
-            // create InventoryEntry struct add to Firestore
+            // create InventoryEntry struct & add to Firestore
             // send original supplyCounts (with new levels)
             createInventoryEntry(supplyCounts: self.supplyCounts) {
                 // call completion after entry is created
@@ -219,8 +237,8 @@ final class InventorySubmissionViewModel: ObservableObject {
             // create new list of SupplyCounts by merging supplyCounts and newSupplyCounts
             let allSupplyCounts = mergeSupplyCounts(originalSupplyCounts: self.supplyCounts, newSupplyCounts: self.newSupplyCounts)
             
-            // create InventoryEntry struct and add to Firestore
-            // send merged SupplyCounts (with new levels)
+            // create InventoryEntry struct & add to Firestore
+            // send merged SupplyCounts
             createInventoryEntry(supplyCounts: allSupplyCounts) {
                 // call completion after entry is created
                 completion()
@@ -233,8 +251,8 @@ final class InventorySubmissionViewModel: ObservableObject {
             // send updated SupplyCounts to Firestore
             submitSupplyCounts(supplyCounts: updates) { }
             
-            // create InventoryEntry struct and add to Firestore
-            // send all newSupplyCounts (with new levels)
+            // create InventoryEntry struct & add to Firestore
+            // send all newSupplyCounts
             createInventoryEntry(supplyCounts: self.newSupplyCounts) {
                 // call completion after batch update
                 completion()

@@ -11,34 +11,26 @@ struct InventorySiteCellView: View {
     let inventorySite: InventorySite
     
     var body: some View {
-        HStack(alignment: .top) {
-            VStack {
-                Spacer()
-                
-                // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
-                AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 70, height: 70)
-                        .cornerRadius(8)
-                } placeholder: {
-                    ProgressView()
-                }
-                .frame(width: 60, height: 60)
-                .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-                
-                Spacer()
+        HStack(alignment: .center, spacing: 10) {
+            // IMAGE
+            AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 70, height: 70)
+                    .cornerRadius(8)
+            } placeholder: {
+                ProgressView()
             }
+            .frame(width: 60, height: 60)
+            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+            .padding(10)
             
-            Spacer()
-            
+            // TEXT BLOCK
             VStack(alignment: .leading) {
                 Text("\(inventorySite.name ?? "N/A")")
                     .font(.headline)
-                    .foregroundStyle(.primary)
-                Text("ID: \(inventorySite.id)")
-                Text("\(inventorySite.buildingId ?? "N/A")")
+                Text("\(inventorySite.buildingId ?? "")")
                 HStack {
                     if inventorySite.inventoryTypeIds?.count ?? 0 > 0 {
                         Text("has tyepIds")
@@ -49,6 +41,7 @@ struct InventorySiteCellView: View {
             }
             .font(.callout)
             .foregroundStyle(.secondary)
+            .padding([.leading],10)
             
             Spacer()
         }

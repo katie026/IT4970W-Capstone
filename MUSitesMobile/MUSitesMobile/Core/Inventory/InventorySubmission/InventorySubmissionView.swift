@@ -16,8 +16,10 @@ struct InventorySubmissionView: View {
     @State private var reloadView = false
     @State private var confirmOption: ConfirmOption = .Exit // button selection
     @State private var submitClicked = false
+    @State private var summaryExpanded = false
     // Alerts
     @State private var showDuplicateAlert = false
+    //TODO: make this dynamic based on supplytype property
     // Supply Levels (manually list which supplies to collect level information from)
     var supplyTypeIdsWithLevels: [String] = ["yOPDkKB4wVEB1dTK9fXy"/*paper towel*/,
                                              "pzYHibgLjJ6yjh8T9Jno"/*table spray*/]
@@ -59,7 +61,7 @@ struct InventorySubmissionView: View {
             .navigationTitle("Submit Inventory")
             // Assign id to view
             .id(reloadView) // triggers update when reloadView changes
-            // EntryType Popup
+            // EntryType Popup //TODO: update how the pop up prompts the user with the .MovedFrom type
             .overlay(alignment: .bottom) {
                 // when sheetManager.present() is called -> sheetManager's enum Action == .isPresented
                 if sheetManager.action.isPresented {
@@ -107,7 +109,7 @@ struct InventorySubmissionView: View {
             .alert(isPresented: $showDuplicateAlert) {
                 Alert(
                     title: Text("Duplicate Count"),
-                    message: Text("One of these supplie counts is the same. Either change or confirm the value."),
+                    message: Text("One of these supply counts is the same. Either change or confirm the value."),
                     dismissButton: .default(Text("OK"))
                 )
             }
@@ -137,13 +139,13 @@ struct InventorySubmissionView: View {
                 // Form section
                 Form {
                     suppliesSection
-                    supplyLevelSection
+                    supplyLevelSection //TODO: consider hiding this view when there are no supplies with levels
                     commentsSection
-                    newSupplyCountsSection // for testing
                     if viewModel.inventoryEntryType == .MovedFrom {
                         destinationSection
                     }
                     movedFromSection
+                    summarySection // for testing
                 }
                 
                 // Action Button section
@@ -199,7 +201,7 @@ struct InventorySubmissionView: View {
 
         // create 1x4 grid
         return LazyVGrid(columns: [
-            GridItem(.flexible(), alignment: .center),
+            GridItem(.flexible(), alignment: .leading),
             GridItem(.flexible(), alignment: .center),
             GridItem(.flexible(), alignment: .center),
             GridItem(.flexible(), alignment: .center)
@@ -208,6 +210,7 @@ struct InventorySubmissionView: View {
             // supply name column
             Text(supplyType.name)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .font(.system(size:15))
 
             // supply count column
             Text("\(count)")
@@ -252,7 +255,6 @@ struct InventorySubmissionView: View {
         }
     }
     
-    //TODO: problem with the toggle logic now that i added slider mechanism
     private func supplySlider(for supplyTypeId: String) -> some View {
         // find the supply type from supplyTypeId
         guard let supplyType = viewModel.supplyTypes.first(where: { $0.id == supplyTypeId }) else {
@@ -260,46 +262,28 @@ struct InventorySubmissionView: View {
             return AnyView(EmptyView())
         }
         
-        // find the index of the SupplyCount in viewModel.supplyCounts with supplyTypeId
-        guard let supplyCountIndex = viewModel.supplyCounts.firstIndex(where: { $0.supplyTypeId == supplyType.id }) else {
+        // find the index of the SupplyCount in levelSupplyCounts with supplyTypeId
+        guard let supplyCountIndex = viewModel.levelSupplyCounts.firstIndex(where: { $0.supplyTypeId == supplyType.id }) else {
             // if no SupplyCount is found, return an empty view
             return AnyView(EmptyView())
         }
-        
-        // get the corresponding SupplyCount object from original supplyCounts
-        let supplyCount = viewModel.supplyCounts[supplyCountIndex]
         
         let slider =  HStack {
             Text("\(supplyType.name)")
                 .padding([.horizontal], 5)
             Slider(value: Binding(
                 get: {
-                    // get the current level from the supplyCounts list
-                    let tempSupplyCount = viewModel.supplyCounts[supplyCountIndex]
-                    return Double(tempSupplyCount.level ?? 0) // cast the Int into a Double
+                    // get the current level from the levelSupplyCounts list
+                    let supplyCount = viewModel.levelSupplyCounts[supplyCountIndex]
+                    // default to 0 is no level is specified
+                    return Double(supplyCount.level ?? 0) // cast the Int into a Double
                 },
                 set: { newValue in
                     // cast the Double into an Int
                     let intValue = Int(newValue)
                     
-                    // update the level in viewModel.supplyCounts
-                    viewModel.supplyCounts[supplyCountIndex].level = intValue
-                    
-                    // update the level in viewModel.newSupplyCounts
-                    if let newSupplyIndex = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
-                        viewModel.newSupplyCounts[newSupplyIndex].level = intValue
-                    } else {
-                        // if no SupplyCount exists in viewModel.newSupplyCounts (its count has been confirmed)
-                        // create a new one with the same info, but with the updated level
-                        let newSupplyCount = SupplyCount(
-                            id: supplyCount.id,
-                            inventorySiteId: supplyCount.inventorySiteId,
-                            supplyTypeId: supplyCount.supplyTypeId,
-                            countMin: supplyCount.countMin,
-                            count: supplyCount.count,
-                            level: intValue) // updated level
-                        viewModel.newSupplyCounts.append(newSupplyCount)
-                    }
+                    // update the level in viewModel.levelSupplyCounts
+                    viewModel.levelSupplyCounts[supplyCountIndex].level = intValue
                 }
             ), in: 0...100)
         }
@@ -314,37 +298,18 @@ struct InventorySubmissionView: View {
         Toggle(isOn: Binding( // binding establishes two-way connection between view and the underlying data
             // returns boolean binding (toggle state)
             get: {
-//                // if this supply count exists in newSupplyCounts
-//                // the .count has not been confirmed, return false
-//                !viewModel.newSupplyCounts.contains { $0.id == supplyCount.id }
-                
                 // if this supply count exists in newSupplyCounts
-                if let newSupplyCount = viewModel.newSupplyCounts.first(where: { $0.id == supplyCount.id }) {
-                    // AND if the .count is the same as the original
-                    if newSupplyCount.count == supplyCount.count {
-                        // count has been confirmed, return true
-                        return true
-                    }
-                } // else an updated supply count exists in newSupplyCounts
-                // count isn't confirmed, return false
-                return false
+                // the .count has not been confirmed, return false
+                !viewModel.newSupplyCounts.contains { $0.id == supplyCount.id }
             },
             set: { confirmed in // sets boolean binding (toggle state), receives boolean parameter "confirmed"
                 // if toggled on (confirmed)
                 if confirmed {
-                    // check if the supply count in newSupplyCounts needs to be removed
-                    // if the supplyCount exists in newSupplyCounts
-                    if let newSupplyCount = viewModel.newSupplyCounts.first(where: { $0.id == supplyCount.id }) {
-                        // AND if the .count and .level are the same as the original
-                        if newSupplyCount.count == supplyCount.count && newSupplyCount.level == supplyCount.level {
-                            // find the index of this supplyCount in newSupplyCounts
-                            if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
-                                // to remove supplyCount from newSupplyCounts
-                                viewModel.newSupplyCounts.remove(at: index)
-                            }
-                        }
+                    // remove supplyCount from newSupplyCounts array if exists
+                    if let index = viewModel.newSupplyCounts.firstIndex(where: { $0.id == supplyCount.id }) {
+                        viewModel.newSupplyCounts.remove(at: index)
                     }
-                // if toggled off (not confirmed)
+                    // if toggled off (not confirmed)
                 } else {
                     // add supplyCount to newSupplyCounts if not already added
                     if !viewModel.newSupplyCounts.contains(where: { $0.id == supplyCount.id }) {
@@ -399,11 +364,12 @@ struct InventorySubmissionView: View {
     }
     
     // list of NewSupplyCounts for testing purposes
-    private var newSupplyCountsSection: some View {
-        // Display the contents of the newSupplyCounts array
-        Section(header: Text("New Supply Counts")) {
-            // for each SupplyCount in newSupplyCounts
+    private var summarySection: some View {
+//        Section(header: Text("Summary")) {
+        DisclosureGroup(isExpanded: $summaryExpanded) {
+            // Display the contents of the newSupplyCounts array
             ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
+                // for each SupplyCount in newSupplyCounts
                 HStack {
                     // find the supply type for this supply count
                     if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
@@ -413,17 +379,54 @@ struct InventorySubmissionView: View {
                         // if can't find supply type, display the count id
                         Text("ID: \(supply.id)")
                     }
-                    
+                    Spacer()
+                    // NOTE: this does not display the level stored in viewModel.newSupplyCounts, but the level stored in viewModel.levelSupplyCounts (levels are overwritten before updating the DB or creating an inventory entry)
+                    if let levelCount = viewModel.levelSupplyCounts.first(where: { $0.id == supply.id }) {
+                        Text(levelCount.level != nil ? "Level: \(levelCount.level!)" : "")
+                    }
                     Text("Count: \(supply.count != nil ? "\(supply.count!)" : "nil")")
-                    Text("Level: \(supply.level != nil ? "\(supply.level!)" : "nil")")
                 }
                 .foregroundColor(Color(UIColor.label))
             }
+            
+            // Display any SupplyCounts where their levels have been updated, but not their counts (not in newSupplyCounts) -> this reflects what will be sbmitted after merging
+            ForEach(viewModel.levelSupplyCounts, id: \.id) { supply in
+                // for each SupplyCount in the levelSupplyCounts
+                // if it doesn't have a corresponding SupplyCount in newSupplyCounts
+                if !viewModel.newSupplyCounts.contains(where: {$0.id == supply.id}) {
+                    // find the SupplyCount in the original supplyCounts
+                    if let originalCount = viewModel.supplyCounts.first(where: { $0.id == supply.id }) {
+                        // if the level has been changed
+                        if originalCount.level != supply.level {
+                            HStack {
+                                // find the supply type for this supply count
+                                if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
+                                    // display the supply name
+                                    Text("\(supplyType.name)").fontWeight(.medium)
+                                } else {
+                                    // if can't find supply type, display the count id
+                                    Text("ID: \(supply.id)")
+                                }
+                                Spacer()
+                                
+                                // display level from viewModel.levelSupplyCounts
+                                Text(supply.level != nil ? "Level: \(supply.level!)" : "")
+                                
+                                // display count from viewModel.supplyCounts
+                                Text("Count: \(originalCount.count != nil ? "\(originalCount.count!)" : "nil")")
+                            }
+                        }
+                    }
+                }
+            }
+        } label: {
+            Text("Show Summary")
+                .font(.headline)
         }
     }
     
     private var movedFromSection: some View {
-        Section() {
+//        Section() {
             // confirm if
             HStack {
                 // Label
@@ -452,7 +455,7 @@ struct InventorySubmissionView: View {
                 Spacer()
             }
             .padding(5)
-        }
+//        }
     }
     
     private var destinationSection: some View {

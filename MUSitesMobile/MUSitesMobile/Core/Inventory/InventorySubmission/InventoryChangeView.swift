@@ -13,6 +13,7 @@ struct InventoryChangeView: View {
     // View Control
     @Binding private var path: [Route]
     @State private var reloadView = false
+    @State private var summaryExpanded = false
     // Alerts
     @State private var showNoChangesAlert = false
     // init
@@ -83,11 +84,11 @@ struct InventoryChangeView: View {
                 Form {
                     suppliesSection
                     commentsSection
-                    newSupplyCountsSection // for testing
                     entryTypeSection
                     if viewModel.inventoryEntryType == .MoveTo {
                         destinationSection
                     }
+                    summarySection // for testing
                     confirmButton
                 }
             }
@@ -99,7 +100,7 @@ struct InventoryChangeView: View {
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
             }
-            ToolbarItem(placement: .navigationBarTrailing) { //TODO: test this button
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
                     path.removeLast(path.count - 1)
                 }) {
@@ -323,9 +324,9 @@ struct InventoryChangeView: View {
     }
     
     // list of NewSupplyCounts for testing purposes
-    private var newSupplyCountsSection: some View {
+    private var summarySection: some View {
         // Display the contents of the newSupplyCounts array
-        Section(header: Text("New Supply Counts")) {
+        DisclosureGroup(isExpanded: $summaryExpanded) {
             // for each SupplyCount in newSupplyCounts
             ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
                 HStack {
@@ -337,12 +338,19 @@ struct InventoryChangeView: View {
                         // if can't find supply type, display the count id
                         Text("ID: \(supply.id)")
                     }
-                    
+                    Spacer()
+                    if let levelCount = viewModel.levelSupplyCounts.first(where: { $0.id == supply.id }) {
+                        Text(levelCount.level != nil ? "Level: \(levelCount.level!)" : "")
+                    }
+                    Text("Used: \(supply.usedCount)")
                     Text("Count: \(supply.count != nil ? "\(supply.count!)" : "nil")")
-                    Text("Level: \(supply.level != nil ? "\(supply.level!)" : "nil")")
+                    // NOTE: this does not display the level stored in viewModel.newSupplyCounts, but the level stored in viewModel.levelSupplyCounts (levels are overwritten before updating the DB or creating an inventory entry)
                 }
                 .foregroundColor(Color(UIColor.label))
             }
+        } label: {
+            Text("Show Summary")
+                .font(.headline)
         }
     }
     
@@ -396,7 +404,7 @@ struct InventoryChangeView: View {
                     if viewModel.newSupplyCounts.allSatisfy({ $0.usedCount == 0 }) {
                         // show an alert
                         showNoChangesAlert = true
-                    // otherwise, some supplies have been used
+                        // otherwise, some supplies have been used
                     } else {
                         // submit inventory entry & update supplyCounts
                         print("Submit entry as \(viewModel.inventoryEntryType).")
@@ -409,15 +417,16 @@ struct InventoryChangeView: View {
                     // Label
                     Spacer()
                     Text("Submit")
-                        .background(Color.yellow)
                         .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(Color.white)
                     Spacer()
                 }
                 Spacer()
             }
         }
+        .background(Color.green)
+        .cornerRadius(8)
         .alert(isPresented: $showNoChangesAlert) {
             Alert(
                 title: Text("No Supplies Changed"),
