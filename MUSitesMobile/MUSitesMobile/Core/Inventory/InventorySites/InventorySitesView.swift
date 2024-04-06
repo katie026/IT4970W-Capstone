@@ -12,7 +12,9 @@ final class InventorySitesViewModel: ObservableObject {
     
     @Published private(set) var inventorySites: [InventorySite] = []
     @Published var selectedSort: SortOption? = nil
+    var inventoryTypes: [InventoryType] = []
     
+    //TODO: implement getting building and group info to display
     enum SortOption: String, CaseIterable {
         // CaseIterable so we can loop through them
         case noSort
@@ -59,6 +61,12 @@ final class InventorySitesViewModel: ObservableObject {
             self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: selectedSort?.sortDescending)
         }
     }
+    
+    func getInventoryTypes() {
+        Task {
+            self.inventoryTypes = try await InventoryTypeManager.shared.getAllInventoryTypes(descending: nil)
+        }
+    }
 }
 
 enum Route: Hashable {
@@ -83,7 +91,7 @@ struct InventorySitesView: View {
 //                }
                 ForEach(viewModel.inventorySites) { inventorySite in
                     NavigationLink(value: Route.detailedInventorySite(inventorySite)) {
-                        InventorySiteCellView(inventorySite: inventorySite)
+                        InventorySiteCellView(inventorySite: inventorySite, inventoryTypes: viewModel.inventoryTypes)
                     }
                 }
             }
@@ -91,7 +99,7 @@ struct InventorySitesView: View {
             .onAppear {
                 Task {
                     viewModel.getInventorySites()
-                    //                try? await viewModel.getSite(id: "6tYFeMv41IXzfXkwbbh6")
+                    viewModel.getInventoryTypes()
                 }
             }
             .navigationDestination(for: Route.self) { view in
