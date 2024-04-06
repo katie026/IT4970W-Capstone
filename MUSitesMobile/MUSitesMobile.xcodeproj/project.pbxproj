@@ -58,6 +58,8 @@
 		6EE110762B7B57FA00747F04 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6EE110752B7B57FA00747F04 /* Preview Assets.xcassets */; };
 		E59C91972BA75DD400509FF8 /* InventorySubmissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59C91962BA75DD400509FF8 /* InventorySubmissionView.swift */; };
 		E59C91992BA75E3500509FF8 /* SupplyCountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59C91982BA75E3500509FF8 /* SupplyCountManager.swift */; };
+		E59DDF472BBE25A600E41690 /* SiteCaptainSubmissionFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59DDF462BBE25A600E41690 /* SiteCaptainSubmissionFormView.swift */; };
+		E59DDF492BBE26F600E41690 /* SiteCaptainFormViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59DDF482BBE26F600E41690 /* SiteCaptainFormViewModel.swift */; };
 		E5E52AD72BB1FE5A00E9AD27 /* SiteCaptainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E52AD62BB1FE5A00E9AD27 /* SiteCaptainManager.swift */; };
 		E5E52ADA2BB1FF1900E9AD27 /* SiteCaptainSubmissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E52AD92BB1FF1900E9AD27 /* SiteCaptainSubmissionView.swift */; };
 		E5E52ADC2BB30E5700E9AD27 /* SubmitFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E52ADB2BB30E5700E9AD27 /* SubmitFormView.swift */; };
@@ -128,6 +130,8 @@
 		6EE1108B2B7B57FA00747F04 /* MUSitesMobileUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUSitesMobileUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		E59C91962BA75DD400509FF8 /* InventorySubmissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventorySubmissionView.swift; sourceTree = "<group>"; };
 		E59C91982BA75E3500509FF8 /* SupplyCountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyCountManager.swift; sourceTree = "<group>"; };
+		E59DDF462BBE25A600E41690 /* SiteCaptainSubmissionFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainSubmissionFormView.swift; sourceTree = "<group>"; };
+		E59DDF482BBE26F600E41690 /* SiteCaptainFormViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainFormViewModel.swift; sourceTree = "<group>"; };
 		E5E52AD62BB1FE5A00E9AD27 /* SiteCaptainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainManager.swift; sourceTree = "<group>"; };
 		E5E52AD92BB1FF1900E9AD27 /* SiteCaptainSubmissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainSubmissionView.swift; sourceTree = "<group>"; };
 		E5E52ADB2BB30E5700E9AD27 /* SubmitFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmitFormView.swift; sourceTree = "<group>"; };
@@ -472,6 +476,8 @@
 		E5F67D572BBA2A1200372890 /* SubViews */ = {
 			isa = PBXGroup;
 			children = (
+				E59DDF462BBE25A600E41690 /* SiteCaptainSubmissionFormView.swift */,
+				E59DDF482BBE26F600E41690 /* SiteCaptainFormViewModel.swift */,
 			);
 			path = SubViews;
 			sourceTree = "<group>";
@@ -625,6 +631,7 @@
 				E5E52ADA2BB1FF1900E9AD27 /* SiteCaptainSubmissionView.swift in Sources */,
 				6E8C57372B7CF32100B5BF59 /* Utilities.swift in Sources */,
 				26EC33B92B966BC8001F0AEE /* SitesMap.swift in Sources */,
+				E59DDF472BBE25A600E41690 /* SiteCaptainSubmissionFormView.swift in Sources */,
 				6E3329742B7F62D9009FCD14 /* SettingsViewModel.swift in Sources */,
 				6EA65F782B990423000766C7 /* DetailedInventorySiteView.swift in Sources */,
 				6EA65F662B9120E0000766C7 /* SiteCellView.swift in Sources */,
@@ -637,6 +644,7 @@
 				F668B1E82B9AB79C000B2886 /* KeySetCellView.swift in Sources */,
 				6E8C573B2B7F068600B5BF59 /* SignInAppleHelper.swift in Sources */,
 				F6AF07102BAD980B00418304 /* HelperViews.swift in Sources */,
+				E59DDF492BBE26F600E41690 /* SiteCaptainFormViewModel.swift in Sources */,
 				E59C91992BA75E3500509FF8 /* SupplyCountManager.swift in Sources */,
 				E5E52AD72BB1FE5A00E9AD27 /* SiteCaptainManager.swift in Sources */,
 				6EA65F762B9902BE000766C7 /* InventorySiteCellView.swift in Sources */,
