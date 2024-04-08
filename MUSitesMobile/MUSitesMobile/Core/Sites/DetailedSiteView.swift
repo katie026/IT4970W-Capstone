@@ -194,7 +194,6 @@ struct DetailedSiteView: View {
                 }
             }
         }
-        .navigationTitle(site.name ?? "N/A")
         .onAppear {
             Task {
                 await viewModel.loadBuilding(site: self.site)
@@ -206,8 +205,10 @@ struct DetailedSiteView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        DetailedSiteView(site: Site(id: "6tYFeMv41IXzfXkwbbh6", name: "Clark", buildingId: "SvK0cIKPNTGCReVCw7Ln", nearestInventoryId: "345", chairCounts: [ChairCount(count: 3, type: "physics_black")], siteType: "Other", hasClock: true, hasInventory: true, hasWhiteboard: false, namePatternMac: "CLARK-MAC-##", namePatternPc: "CLARK-PC-##", namePatternPrinter: "Clark Printer ##"))
+struct DetailedSiteView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            DetailedSiteView(site: Site(id: "6tYFeMv41IXzfXkwbbh6", name: "Clark", buildingId: "SvK0cIKPNTGCReVCw7Ln", nearestInventoryId: "345", chairCounts: [ChairCount(count: 3, type: "physics_black")], siteType: "Other", hasClock: true, hasInventory: true, hasWhiteboard: false, namePatternMac: "CLARK-MAC-##", namePatternPc: "CLARK-PC-##", namePatternPrinter: "Clark Printer ##"))
+        }
     }
 }

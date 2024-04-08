@@ -14,6 +14,10 @@ struct SitesView: View {
     var body: some View {
         NavigationView {
             VStack {
+                Text("Sites")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .padding(.top, 20) 
                 TextField("Search", text: $searchText)
                     .padding()
                     .background(Color.gray.opacity(0.1))
@@ -25,9 +29,8 @@ struct SitesView: View {
                     }
                 }
             }
-            .navigationTitle("Sites")
             .onAppear {
-                viewModel.getSites() // Refresh sites when the view appears
+                viewModel.getSites()
             }
         }
     }
