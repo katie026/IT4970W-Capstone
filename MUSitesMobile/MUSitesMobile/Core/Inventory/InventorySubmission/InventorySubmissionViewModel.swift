@@ -11,6 +11,7 @@ import Foundation
 final class InventorySubmissionViewModel: ObservableObject {
     // Supply Values
     @Published var supplyTypes: [SupplyType] = []
+    @Published var supplyTypesWithLevels: [SupplyType] = []
     @Published var supplyCounts: [SupplyCount] = []
     
     // Inventory Entry Default Values
@@ -32,7 +33,13 @@ final class InventorySubmissionViewModel: ObservableObject {
     func getSupplyTypes() {
         Task {
             self.supplyTypes = try await SupplyTypeManager.shared.getAllSupplyTypes(descending: false)
+            self.supplyTypesWithLevels = self.supplyTypes.filter { $0.collectLevel != nil && $0.collectLevel == true }
         }
+    }
+    
+    func getSupplyTypesWithLevels(from supplyTypes: [SupplyType]) -> [SupplyType] {
+        // filter supply types where they collect levels
+        return supplyTypes.filter { $0.collectLevel != nil && $0.collectLevel == true }
     }
 
     func getSupplyCounts(inventorySiteId: String) {

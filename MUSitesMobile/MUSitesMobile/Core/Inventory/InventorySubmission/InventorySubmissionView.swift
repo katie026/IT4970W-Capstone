@@ -19,10 +19,6 @@ struct InventorySubmissionView: View {
     @State private var summaryExpanded = false
     // Alerts
     @State private var showDuplicateAlert = false
-    //TODO: make this dynamic based on supplytype property
-    // Supply Levels (manually list which supplies to collect level information from)
-    var supplyTypeIdsWithLevels: [String] = ["yOPDkKB4wVEB1dTK9fXy"/*paper towel*/,
-                                             "pzYHibgLjJ6yjh8T9Jno"/*table spray*/]
     
     // Initializer
     let inventorySite: InventorySite
@@ -249,18 +245,18 @@ struct InventorySubmissionView: View {
     
     private var supplyLevelSection: some View {
         Section("Supply Levels") {
-            ForEach(supplyTypeIdsWithLevels, id: \.self) { supplyTypeId in
-                supplySlider(for: supplyTypeId)
+            ForEach(viewModel.supplyTypesWithLevels, id: \.self) { supplyType in
+                supplySlider(for: supplyType)
             }
         }
     }
     
-    private func supplySlider(for supplyTypeId: String) -> some View {
-        // find the supply type from supplyTypeId
-        guard let supplyType = viewModel.supplyTypes.first(where: { $0.id == supplyTypeId }) else {
-            // if supplyType is not found, return an empty view
-            return AnyView(EmptyView())
-        }
+    private func supplySlider(for supplyType: SupplyType) -> some View {
+//        // find the supply type from supplyTypeId
+//        guard let supplyType = viewModel.supplyTypes.first(where: { $0.id == supplyTypeId }) else {
+//            // if supplyType is not found, return an empty view
+//            return AnyView(EmptyView())
+//        }
         
         // find the index of the SupplyCount in levelSupplyCounts with supplyTypeId
         guard let supplyCountIndex = viewModel.levelSupplyCounts.firstIndex(where: { $0.supplyTypeId == supplyType.id }) else {
@@ -426,7 +422,7 @@ struct InventorySubmissionView: View {
     }
     
     private var movedFromSection: some View {
-//        Section() {
+        Section() {
             // confirm if
             HStack {
                 // Label
@@ -455,7 +451,7 @@ struct InventorySubmissionView: View {
                 Spacer()
             }
             .padding(5)
-//        }
+        }
     }
     
     private var destinationSection: some View {

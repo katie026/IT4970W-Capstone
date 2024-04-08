@@ -9,21 +9,24 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct SupplyType: Codable {
+struct SupplyType: Codable, Hashable {
     let id: String
     let name: String
     let notes: String?
+    let collectLevel: Bool?
 
-    init(id: String, name: String, notes: String?) {
+    init(id: String, name: String, notes: String?, collectLevel: Bool?) {
         self.id = id
         self.name = name
         self.notes = notes
+        self.collectLevel = collectLevel
     }
 
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case name = "name"
         case notes = "notes"
+        case collectLevel = "collect_level"
     }
 }
 
