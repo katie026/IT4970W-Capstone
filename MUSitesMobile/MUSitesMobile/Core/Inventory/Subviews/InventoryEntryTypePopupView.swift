@@ -24,21 +24,23 @@ struct EntryTypePopupView: View {
                 .padding(.vertical, 20)
                 .padding(.horizontal, 28)
                 .foregroundColor(Color.black)
-
-            RadioButton(text: "Yes, there is a discrepancy.", isSelected: selectedOption == .Fix) {
-                selectedOption = .Fix
-            }
-            .padding(.bottom)
             
-            RadioButton(text: "Yes, I moved these supplies.", isSelected: selectedOption == .MovedFrom) {
-                selectedOption = .MovedFrom
+            if selectedOption == .MovedFrom {
+                RadioButton(text: "Yes, I moved these supplies.", isSelected: selectedOption == .MovedFrom) {
+                    selectedOption = .MovedFrom
+                }
+                .padding(.bottom)
+            } else {
+                RadioButton(text: "Yes, there is a discrepancy.", isSelected: selectedOption == .Fix) {
+                    selectedOption = .Fix
+                }
+                .padding(.bottom)
+                
+                RadioButton(text: "Yes, there was a delivery.", isSelected: selectedOption == .Delivery) {
+                    selectedOption = .Delivery
+                }
+                .padding(.bottom)
             }
-            .padding(.bottom)
-
-            RadioButton(text: "Yes, there was a delivery.", isSelected: selectedOption == .Delivery) {
-                selectedOption = .Delivery
-            }
-            .padding(.bottom)
 
             Divider()
 
@@ -59,7 +61,11 @@ struct EntryTypePopupView: View {
         .transition(.move(edge: .bottom))
         .onAppear {
             // set default option
-            selectedOption = .Fix
+            if (selectedOption != .MovedFrom && selectedOption != .Fix && selectedOption != .Delivery) {
+                selectedOption = .Fix
+            } else {
+                selectedOption = selectedOption
+            }
         }
     }
 }
@@ -74,8 +80,6 @@ struct EntryTypePopupView: View {
 private extension EntryTypePopupView {
     var close: some View {
         Button(action: {
-            // reset entry type
-            selectedOption = .Check
             // call closure
             didClose()
         }) {

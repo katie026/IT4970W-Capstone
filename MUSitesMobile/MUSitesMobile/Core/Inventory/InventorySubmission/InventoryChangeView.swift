@@ -84,9 +84,15 @@ struct InventoryChangeView: View {
                 Form {
                     suppliesSection
                     commentsSection
-                    entryTypeSection
                     if viewModel.inventoryEntryType == .MoveTo {
-                        destinationSection
+                        Section ("Entry Type") {
+                            entryTypeSection
+                            destinationSection
+                        }
+                    } else {
+                        Section ("Entry Type") {
+                            entryTypeSection
+                        }
                     }
                     summarySection // for testing
                     confirmButton
@@ -326,31 +332,32 @@ struct InventoryChangeView: View {
     // list of NewSupplyCounts for testing purposes
     private var summarySection: some View {
         // Display the contents of the newSupplyCounts array
-        DisclosureGroup(isExpanded: $summaryExpanded) {
-            // for each SupplyCount in newSupplyCounts
-            ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
-                HStack {
-                    // find the supply type for this supply count
-                    if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
-                        // display the supply name
-                        Text("\(supplyType.name)").fontWeight(.medium)
-                    } else {
-                        // if can't find supply type, display the count id
-                        Text("ID: \(supply.id)")
+        Section("Summary") {
+            DisclosureGroup(isExpanded: $summaryExpanded) {
+                // for each SupplyCount in newSupplyCounts
+                ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
+                    HStack {
+                        // find the supply type for this supply count
+                        if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
+                            // display the supply name
+                            Text("\(supplyType.name)").fontWeight(.medium)
+                        } else {
+                            // if can't find supply type, display the count id
+                            Text("ID: \(supply.id)")
+                        }
+                        Spacer()
+                        if let levelCount = viewModel.levelSupplyCounts.first(where: { $0.id == supply.id }) {
+                            Text(levelCount.level != nil ? "Level: \(levelCount.level!)" : "")
+                        }
+                        Text("Used: \(supply.usedCount)")
+                        Text("Count: \(supply.count != nil ? "\(supply.count!)" : "nil")")
+                        // NOTE: this does not display the level stored in viewModel.newSupplyCounts, but the level stored in viewModel.levelSupplyCounts (levels are overwritten before updating the DB or creating an inventory entry)
                     }
-                    Spacer()
-                    if let levelCount = viewModel.levelSupplyCounts.first(where: { $0.id == supply.id }) {
-                        Text(levelCount.level != nil ? "Level: \(levelCount.level!)" : "")
-                    }
-                    Text("Used: \(supply.usedCount)")
-                    Text("Count: \(supply.count != nil ? "\(supply.count!)" : "nil")")
-                    // NOTE: this does not display the level stored in viewModel.newSupplyCounts, but the level stored in viewModel.levelSupplyCounts (levels are overwritten before updating the DB or creating an inventory entry)
+                    .foregroundColor(Color(UIColor.label))
                 }
-                .foregroundColor(Color(UIColor.label))
+            } label: {
+                Text("Show Summary")
             }
-        } label: {
-            Text("Show Summary")
-                .font(.headline)
         }
     }
     
@@ -422,12 +429,11 @@ struct InventoryChangeView: View {
                         .foregroundColor(Color.white)
                     Spacer()
                 }
+                .frame(maxWidth: .infinity)
                 Spacer()
             }
         }
-        .listRowBackground(Color.clear)
-        .background(Color.green)
-        .cornerRadius(8)
+        .listRowBackground(Color.green)
         .alert(isPresented: $showNoChangesAlert) {
             Alert(
                 title: Text("No Supplies Changed"),

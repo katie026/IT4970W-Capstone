@@ -57,7 +57,7 @@ struct InventorySubmissionView: View {
             .navigationTitle("Submit Inventory")
             // Assign id to view
             .id(reloadView) // triggers update when reloadView changes
-            // EntryType Popup //TODO: update how the pop up prompts the user with the .MovedFrom type
+            // EntryType Popup
             .overlay(alignment: .bottom) {
                 // when sheetManager.present() is called -> sheetManager's enum Action == .isPresented
                 if sheetManager.action.isPresented {
@@ -135,12 +135,18 @@ struct InventorySubmissionView: View {
                 // Form section
                 Form {
                     suppliesSection
-                    supplyLevelSection //TODO: consider hiding this view when there are no supplies with levels
+                    supplyLevelSection()
                     commentsSection
                     if viewModel.inventoryEntryType == .MovedFrom {
-                        destinationSection
+                        Section("Moves") {
+                            destinationSection
+                            movedFromSection
+                        }
+                    } else {
+                        Section("Moves") {
+                            movedFromSection
+                        }
                     }
-                    movedFromSection
                     summarySection // for testing
                 }
                 
@@ -243,21 +249,36 @@ struct InventorySubmissionView: View {
         .id(supplyType.id) // Specify the id parameter explicitly
     }
     
-    private var supplyLevelSection: some View {
-        Section("Supply Levels") {
-            ForEach(viewModel.supplyTypesWithLevels, id: \.self) { supplyType in
-                supplySlider(for: supplyType)
+    private func supplyLevelSection() -> some View {
+        var hasSuppliesThatCollectLevel = false
+        
+        // check each of the supplyTypesWithLevels
+        for supplyType in viewModel.supplyTypesWithLevels {
+            // look for a SupplyCount in levelSupplyCounts with that supplyTypeId
+            if viewModel.levelSupplyCounts.contains(where: { $0.supplyTypeId == supplyType.id }) {
+                hasSuppliesThatCollectLevel = true
+                break
             }
         }
+        
+        // if there is a SupplyCount that collects levels
+        if (hasSuppliesThatCollectLevel) {
+            // show the Supply Levels Section
+            let view = Section("Supply Levels") {
+                // for each supplyTypesWithLevels
+                ForEach(viewModel.supplyTypesWithLevels, id: \.self) { supplyType in
+                    // display a slider
+                    supplySlider(for: supplyType)
+                }
+            }
+            
+            return AnyView(view)
+        }
+        // return nothing if there aren't any SupplyCounts that collect levels
+        return AnyView(EmptyView())
     }
     
     private func supplySlider(for supplyType: SupplyType) -> some View {
-//        // find the supply type from supplyTypeId
-//        guard let supplyType = viewModel.supplyTypes.first(where: { $0.id == supplyTypeId }) else {
-//            // if supplyType is not found, return an empty view
-//            return AnyView(EmptyView())
-//        }
-        
         // find the index of the SupplyCount in levelSupplyCounts with supplyTypeId
         guard let supplyCountIndex = viewModel.levelSupplyCounts.firstIndex(where: { $0.supplyTypeId == supplyType.id }) else {
             // if no SupplyCount is found, return an empty view
@@ -361,108 +382,104 @@ struct InventorySubmissionView: View {
     
     // list of NewSupplyCounts for testing purposes
     private var summarySection: some View {
-//        Section(header: Text("Summary")) {
-        DisclosureGroup(isExpanded: $summaryExpanded) {
-            // Display the contents of the newSupplyCounts array
-            ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
-                // for each SupplyCount in newSupplyCounts
-                HStack {
-                    // find the supply type for this supply count
-                    if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
-                        // display the supply name
-                        Text("\(supplyType.name)").fontWeight(.medium)
-                    } else {
-                        // if can't find supply type, display the count id
-                        Text("ID: \(supply.id)")
+        Section("Summary") {
+            DisclosureGroup(isExpanded: $summaryExpanded) {
+                // Display the contents of the newSupplyCounts array
+                ForEach(viewModel.newSupplyCounts, id: \.id) { supply in
+                    // for each SupplyCount in newSupplyCounts
+                    HStack {
+                        // find the supply type for this supply count
+                        if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
+                            // display the supply name
+                            Text("\(supplyType.name)").fontWeight(.medium)
+                        } else {
+                            // if can't find supply type, display the count id
+                            Text("ID: \(supply.id)")
+                        }
+                        Spacer()
+                        // NOTE: this does not display the level stored in viewModel.newSupplyCounts, but the level stored in viewModel.levelSupplyCounts (levels are overwritten before updating the DB or creating an inventory entry)
+                        if let levelCount = viewModel.levelSupplyCounts.first(where: { $0.id == supply.id }) {
+                            Text(levelCount.level != nil ? "Level: \(levelCount.level!)" : "")
+                        }
+                        Text("Count: \(supply.count != nil ? "\(supply.count!)" : "nil")")
                     }
-                    Spacer()
-                    // NOTE: this does not display the level stored in viewModel.newSupplyCounts, but the level stored in viewModel.levelSupplyCounts (levels are overwritten before updating the DB or creating an inventory entry)
-                    if let levelCount = viewModel.levelSupplyCounts.first(where: { $0.id == supply.id }) {
-                        Text(levelCount.level != nil ? "Level: \(levelCount.level!)" : "")
-                    }
-                    Text("Count: \(supply.count != nil ? "\(supply.count!)" : "nil")")
+                    .foregroundColor(Color(UIColor.label))
                 }
-                .foregroundColor(Color(UIColor.label))
-            }
-            
-            // Display any SupplyCounts where their levels have been updated, but not their counts (not in newSupplyCounts) -> this reflects what will be sbmitted after merging
-            ForEach(viewModel.levelSupplyCounts, id: \.id) { supply in
-                // for each SupplyCount in the levelSupplyCounts
-                // if it doesn't have a corresponding SupplyCount in newSupplyCounts
-                if !viewModel.newSupplyCounts.contains(where: {$0.id == supply.id}) {
-                    // find the SupplyCount in the original supplyCounts
-                    if let originalCount = viewModel.supplyCounts.first(where: { $0.id == supply.id }) {
-                        // if the level has been changed
-                        if originalCount.level != supply.level {
-                            HStack {
-                                // find the supply type for this supply count
-                                if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
-                                    // display the supply name
-                                    Text("\(supplyType.name)").fontWeight(.medium)
-                                } else {
-                                    // if can't find supply type, display the count id
-                                    Text("ID: \(supply.id)")
+                
+                // Display any SupplyCounts where their levels have been updated, but not their counts (not in newSupplyCounts) -> this reflects what will be sbmitted after merging
+                ForEach(viewModel.levelSupplyCounts, id: \.id) { supply in
+                    // for each SupplyCount in the levelSupplyCounts
+                    // if it doesn't have a corresponding SupplyCount in newSupplyCounts
+                    if !viewModel.newSupplyCounts.contains(where: {$0.id == supply.id}) {
+                        // find the SupplyCount in the original supplyCounts
+                        if let originalCount = viewModel.supplyCounts.first(where: { $0.id == supply.id }) {
+                            // if the level has been changed
+                            if originalCount.level != supply.level {
+                                HStack {
+                                    // find the supply type for this supply count
+                                    if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supply.supplyTypeId }) {
+                                        // display the supply name
+                                        Text("\(supplyType.name)").fontWeight(.medium)
+                                    } else {
+                                        // if can't find supply type, display the count id
+                                        Text("ID: \(supply.id)")
+                                    }
+                                    Spacer()
+                                    
+                                    // display level from viewModel.levelSupplyCounts
+                                    Text(supply.level != nil ? "Level: \(supply.level!)" : "")
+                                    
+                                    // display count from viewModel.supplyCounts
+                                    Text("Count: \(originalCount.count != nil ? "\(originalCount.count!)" : "nil")")
                                 }
-                                Spacer()
-                                
-                                // display level from viewModel.levelSupplyCounts
-                                Text(supply.level != nil ? "Level: \(supply.level!)" : "")
-                                
-                                // display count from viewModel.supplyCounts
-                                Text("Count: \(originalCount.count != nil ? "\(originalCount.count!)" : "nil")")
                             }
                         }
                     }
                 }
+            } label: {
+                Text("Show Summary")
             }
-        } label: {
-            Text("Show Summary")
-                .font(.headline)
         }
     }
     
     private var movedFromSection: some View {
-        Section() {
-            // confirm if
-            HStack {
-                // Label
-                Text("Moved supplies from another site: ")
-                
-                // Toggle
-                Toggle(isOn: Binding(
-                    // returns boolean binding (toggle state)
-                    get: {
-                        // toggle on if type is .MovedFrom
-                        viewModel.inventoryEntryType == .MovedFrom
-                    },
-                    // sets boolean binding (toggle state)
-                    set: { toggled in
-                        // if toggled on
-                        if toggled {
-                            viewModel.inventoryEntryType = .MovedFrom
+        // confirm if
+        HStack {
+            // Label
+            Text("Moved supplies from another site: ")
+            
+            // Toggle
+            Toggle(isOn: Binding(
+                // returns boolean binding (toggle state)
+                get: {
+                    // toggle on if type is .MovedFrom
+                    viewModel.inventoryEntryType == .MovedFrom
+                },
+                // sets boolean binding (toggle state)
+                set: { toggled in
+                    // if toggled on
+                    if toggled {
+                        viewModel.inventoryEntryType = .MovedFrom
                         // if toggled off
-                        } else {
-                            viewModel.inventoryEntryType = .Check
-                        }
+                    } else {
+                        viewModel.inventoryEntryType = .Check
                     }
-                )) {
-
                 }
-                Spacer()
+            )) {
+                
             }
-            .padding(5)
+            Spacer()
         }
+        .padding(5)
     }
     
     private var destinationSection: some View {
-        Section("Moves") {
-            // Destination (origin) Site Picker
-            Picker("Moved supplies from:", selection: $viewModel.destinationSite) {
-                // for each site in InventorySite list
-                ForEach(viewModel.inventorySites) { site in
-                    // dispay the name
-                    Text(site.name ?? "N/A").tag(site) // tag associates each InventorySite with itself
-                }
+        // Destination (origin) Site Picker
+        Picker("Moved supplies from:", selection: $viewModel.destinationSite) {
+            // for each site in InventorySite list
+            ForEach(viewModel.inventorySites) { site in
+                // dispay the name
+                Text(site.name ?? "N/A").tag(site) // tag associates each InventorySite with itself
             }
         }
     }
