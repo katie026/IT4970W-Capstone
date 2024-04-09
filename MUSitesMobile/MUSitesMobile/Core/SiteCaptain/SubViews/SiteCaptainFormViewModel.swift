@@ -7,7 +7,10 @@
 import Foundation
 import SwiftUI
 import Combine
+import FirebaseFirestore
+
 class SiteCaptainViewModel: ObservableObject {
+    
   @Published var siteCleanedToggle = false
   @Published var selectedThingsToClean = [Bool](repeating: false, count: 7)
   @Published var selectedThingsToDo = [Bool](repeating: false, count: 4)
@@ -20,17 +23,22 @@ class SiteCaptainViewModel: ObservableObject {
   @Published var inventoryChecked = false
   @Published var showSubmissionConfirmation = false
   @Published var submissionError: Error?
+    
 
     private var cancellables = Set<AnyCancellable>()
     private let siteCaptainManager = SiteCaptainManager()
 
-    func submitSiteCaptainEntry(for siteId: String, userId: String) {
+    func submitSiteCaptainEntry(for siteId: String, userId: String, siteName: String) {
         let issues = needsRepair ? [Issue(issue: issueDescription, ticket: Int(ticketNumber) ?? 1111111)] : []
         let labelsForReplacement = needsLabelReplacement ? labelsToReplace.components(separatedBy: ",") : []
         let suppliesNeeded: [SupplyNeeded] = [] // Populate this based on your requirements
 
+        let firestore = Firestore.firestore()
+        let newDocumentReference = firestore.collection("site_captain_entries").document()
         let computingSite = ComputingSite(
-            id: siteId,
+            id: newDocumentReference.documentID,
+            siteId: siteId,
+            siteName: siteName,
             issues: issues,
             labelsForReplacement: labelsForReplacement,
             suppliesNeeded: suppliesNeeded,
@@ -47,7 +55,6 @@ class SiteCaptainViewModel: ObservableObject {
             }
         }
     }
-
     
   func resetForm()
     {

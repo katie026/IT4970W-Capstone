@@ -12,6 +12,8 @@ import Combine
 
 struct ComputingSite: Codable {
     let id: String
+    let siteId:String
+    let siteName: String
     let issues: [Issue]
     let labelsForReplacement: [String]
     let suppliesNeeded: [SupplyNeeded]
@@ -21,6 +23,8 @@ struct ComputingSite: Codable {
     
     init(
         id: String,
+        siteId:String,
+        siteName:String,
         issues: [Issue]?,
         labelsForReplacement:[String]?,
         suppliesNeeded:[SupplyNeeded]?,
@@ -31,6 +35,8 @@ struct ComputingSite: Codable {
     ) {
         
         self.id = id
+        self.siteId = siteId
+        self.siteName = siteName
         self.issues = issues ?? []
         self.labelsForReplacement = labelsForReplacement ?? []
         self.suppliesNeeded = suppliesNeeded ?? []
@@ -41,6 +47,8 @@ struct ComputingSite: Codable {
     
     enum CodingKeys: String, CodingKey {
         case id = "id"
+        case siteId = "siteId"
+        case siteName = "siteName"
         case issues = "issues"
         case labelsForReplacement = "labels_for_replacement"
         case suppliesNeeded = "supplies_needed"
@@ -52,6 +60,8 @@ struct ComputingSite: Codable {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(String.self, forKey: .id)
+        self.siteId = try container.decode(String.self, forKey: .id)
+        self.siteName = try container.decode(String.self, forKey:.id)
         self.issues = try container.decode([Issue].self, forKey: .issues)
         self.labelsForReplacement = try container.decode([String].self, forKey: .labelsForReplacement)
         self.suppliesNeeded = try container.decode([SupplyNeeded].self, forKey: .suppliesNeeded)
@@ -65,6 +75,8 @@ struct ComputingSite: Codable {
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.id, forKey: .id)
+        try container.encode(self.siteId, forKey: .id)
+        try container.encode(self.siteName, forKey: .id)
         try container.encode(self.issues, forKey: .issues)
         try container.encode(self.labelsForReplacement, forKey: .labelsForReplacement)
         try container.encode(self.suppliesNeeded, forKey: .suppliesNeeded)

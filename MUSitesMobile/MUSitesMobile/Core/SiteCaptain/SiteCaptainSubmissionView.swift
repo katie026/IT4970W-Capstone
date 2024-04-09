@@ -70,12 +70,12 @@ struct SiteCaptainSubmissionView: View {
         }
     }
     
-    private func submitSiteCaptain() {
+    func submitSiteCaptain() {
         guard let currentUser = Auth.auth().currentUser else {
             errorMessage = "Unable to get current user information."
             return
         }
         
-        viewModel.submitSiteCaptainEntry(for: "site-123", userId: currentUser.uid)
+        viewModel.submitSiteCaptainEntry(for: "site-123", userId: currentUser.uid, siteName: siteName)
     }
 }
