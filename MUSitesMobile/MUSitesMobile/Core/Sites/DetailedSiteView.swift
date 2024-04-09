@@ -65,7 +65,18 @@ struct DetailedSiteView: View {
         .navigationTitle(site.name ?? "N/A")
         .onAppear {
             Task {
-                await viewModel.loadBuilding(site: self.site)
+                // get building
+                viewModel.loadBuilding(site: self.site) {
+                    // then get group
+                    if let siteGroupId = viewModel.building?.siteGroupId {
+                        viewModel.loadSiteGroup(siteGroupId: siteGroupId) {}
+                    }
+                }
+                // get site type
+                if let siteTypeId = self.site.siteTypeId {
+                    viewModel.loadSiteType(siteTypeId: siteTypeId) {}
+                }
+                
                 //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
                 await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
                 await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
@@ -79,10 +90,11 @@ struct DetailedSiteView: View {
                 isExpanded: $informationSectionExpanded,
                 content: {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("**Group:** \(viewModel.building?.siteGroup ?? "N/A")")
+                        Text("**Group:** \(viewModel.siteGroup?.name ?? "N/A")")
                         Text("**Building:** \(viewModel.building?.name ?? "N/A")")
-                        Text("**Site Type:** \(self.site.siteType ?? "N/A")")
-                        Text("**SS Captain:** \(viewModel.building?.siteGroup ?? "N/A")")
+                        Text("**Site Type:** \(viewModel.siteType?.name ?? "N/A")")
+                        //TODO: get site captains
+                        Text("**SS Captain:** \(viewModel.building?.siteGroupId ?? "N/A")")
                     }
                     .listRowInsets(EdgeInsets())
                 },
@@ -349,7 +361,7 @@ struct DetailedSiteView: View {
                 buildingId: "SvK0cIKPNTGCReVCw7Ln",
                 nearestInventoryId: "345",
                 chairCounts: [ChairCount(count: 3, type: "physics_black")],
-                siteType: "Other",
+                siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
                 hasClock: true,
                 hasInventory: true,
                 hasWhiteboard: false,

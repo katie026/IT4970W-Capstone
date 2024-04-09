@@ -10,6 +10,7 @@ import SwiftUI
 struct SitesView: View {
     @StateObject private var viewModel = SitesViewModel()
     @State private var searchText = ""
+    @State private var isLoading = true
     
     var body: some View {
         VStack {
@@ -19,15 +20,24 @@ struct SitesView: View {
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(10)
                 .padding(.horizontal)
-            List {
-                ForEach(sortedSites) { site in
-                    SiteCellView(site: site)
+            if isLoading {
+                ProgressView()
+            } else {
+                List {
+                    ForEach(sortedSites) { site in
+                        SiteCellView(site: site, buildings: viewModel.buildings, siteTypes: viewModel.siteTypes, siteGroups: viewModel.siteGroups)
+                    }
                 }
             }
         }
         .navigationTitle("Sites")
         .onAppear {
-            viewModel.getSites() // Refresh sites when the view appears
+            viewModel.getSites{}
+            viewModel.getSiteTypes{}
+            viewModel.getBuildings{}
+            viewModel.getSiteGroups{
+                isLoading = false
+            }
         }
     }
     

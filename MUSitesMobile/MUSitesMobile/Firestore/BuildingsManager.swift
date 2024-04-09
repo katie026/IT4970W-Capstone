@@ -29,7 +29,7 @@ struct Building: Identifiable, Codable, Equatable { // allow encoding and decodi
     let coordinates: GeoPoint?
     let isLibrary: Bool?
     let isReshall: Bool?
-    let siteGroup: String?
+    let siteGroupId: String?
     
     // create Building manually
     init(
@@ -39,7 +39,7 @@ struct Building: Identifiable, Codable, Equatable { // allow encoding and decodi
         coordinates: GeoPoint? = nil,
         isLibrary: Bool? = nil,
         isReshall: Bool? = nil,
-        siteGroup: String? = nil
+        siteGroupId: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -47,7 +47,7 @@ struct Building: Identifiable, Codable, Equatable { // allow encoding and decodi
         self.coordinates = coordinates
         self.isLibrary = isLibrary
         self.isReshall = isReshall
-        self.siteGroup = siteGroup
+        self.siteGroupId = siteGroupId
     }
     
     enum CodingKeys: String, CodingKey {
@@ -57,7 +57,7 @@ struct Building: Identifiable, Codable, Equatable { // allow encoding and decodi
         case coordinates = "coordinates"
         case isLibrary = "is_library"
         case isReshall = "is_reshall"
-        case siteGroup = "site_group"
+        case siteGroupId = "site_group"
     }
     
     init(from decoder: Decoder) throws {
@@ -68,7 +68,7 @@ struct Building: Identifiable, Codable, Equatable { // allow encoding and decodi
         self.coordinates = try container.decodeIfPresent(GeoPoint.self, forKey: .coordinates)
         self.isLibrary = try container.decodeIfPresent(Bool.self, forKey: .isLibrary)
         self.isReshall = try container.decodeIfPresent(Bool.self, forKey: .isReshall)
-        self.siteGroup = try container.decodeIfPresent(String.self, forKey: .siteGroup)
+        self.siteGroupId = try container.decodeIfPresent(String.self, forKey: .siteGroupId)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -79,7 +79,7 @@ struct Building: Identifiable, Codable, Equatable { // allow encoding and decodi
         try container.encodeIfPresent(self.coordinates, forKey: .coordinates)
         try container.encodeIfPresent(self.isLibrary, forKey: .isLibrary)
         try container.encodeIfPresent(self.isReshall, forKey: .isReshall)
-        try container.encodeIfPresent(self.siteGroup, forKey: .siteGroup)
+        try container.encodeIfPresent(self.siteGroupId, forKey: .siteGroupId)
     }
     
     static func == (lhs:Building, rhs: Building) -> Bool {
@@ -152,18 +152,18 @@ final class BuildingsManager {
     }
     
     // get buildings filtered by Group
-    private func getAllBuildingsFilteredByGroupQuery(siteGroup: String) -> Query {
+    private func getAllBuildingsFilteredByGroupQuery(siteGroupId: String) -> Query {
         buildingsCollection
-            .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: siteGroup)
+            .whereField(Building.CodingKeys.siteGroupId.rawValue, isEqualTo: siteGroupId)
     }
     
     // get buildings filtered by group & sorted name
     private func getAllBuildingsByGroupAndNameQuery(nameDescending: Bool, group: String) -> Query {
         buildingsCollection
             // filter by group
-            .whereField(Building.CodingKeys.siteGroup.rawValue, isEqualTo: group)
+            .whereField(Building.CodingKeys.siteGroupId.rawValue, isEqualTo: group)
             // sort by name
-            .order(by: Building.CodingKeys.siteGroup.rawValue, descending: nameDescending)
+            .order(by: Building.CodingKeys.siteGroupId.rawValue, descending: nameDescending)
     }
     
     // get buildings by Group and/or Name
@@ -181,7 +181,7 @@ final class BuildingsManager {
         // if given filter
         } else if let group {
             // filter whole collection
-            query = getAllBuildingsFilteredByGroupQuery(siteGroup: group)
+            query = getAllBuildingsFilteredByGroupQuery(siteGroupId: group)
         }
         
         return try await query

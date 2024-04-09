@@ -32,7 +32,7 @@ struct BuildingCellView: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
                 Text("ID: \(building.id)")
-                Text("\(building.siteGroup ?? "N/A")")
+                Text("\(building.siteGroupId ?? "N/A")")
                 HStack {
                     if building.isReshall == true {
                         Text("ResHall")
@@ -55,5 +55,5 @@ struct BuildingCellView: View {
 }
 
 #Preview {
-    BuildingCellView(building: Building(id: "001", name: "EBW", address: Address(city: "Columbia", country: "US", state: "MO", street: "1400 Treelane Dr.", zipCode: "65211"), coordinates:GeoPoint(latitude: 1.1, longitude: 2.2) , isLibrary: true, isReshall: true, siteGroup: "G1"))
+    BuildingCellView(building: Building(id: "001", name: "EBW", address: Address(city: "Columbia", country: "US", state: "MO", street: "1400 Treelane Dr.", zipCode: "65211"), coordinates:GeoPoint(latitude: 1.1, longitude: 2.2) , isLibrary: true, isReshall: true, siteGroupId: "G1"))
 }

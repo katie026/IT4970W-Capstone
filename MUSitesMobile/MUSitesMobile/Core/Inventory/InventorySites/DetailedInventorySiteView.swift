@@ -99,7 +99,7 @@ struct DetailedInventorySiteView: View {
         // Basic Info
         HStack {
             VStack(alignment: .leading, spacing: 8) {
-                Text("**Group:** \(viewModel.building?.siteGroup ?? "N/A")")
+                Text("**Group:** \(viewModel.building?.siteGroupId ?? "N/A")")
                     .font(.subheadline)
                     .foregroundColor(.primary)
                 

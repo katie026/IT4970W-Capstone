@@ -42,6 +42,7 @@ struct InventorySiteCellView: View {
                 
                 // subtitle
                 HStack {
+                    //TODO: get group
                     Text("Group here")
                     Spacer()
                 }

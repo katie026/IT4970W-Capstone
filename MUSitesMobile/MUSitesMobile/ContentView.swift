@@ -9,7 +9,16 @@ import SwiftUI
 
 @MainActor
 final class ContentViewModel: ObservableObject {
-    
+    var siteGroups: [SiteGroup] = []
+    func getSiteGroups() {
+        Task {
+            do {
+                self.siteGroups = try await SiteGroupManager.shared.getAllSiteGroups(descending: nil)
+            } catch {
+                print("Error getting site groups: \(error)")
+            }
+        }
+    }
 }
 
 struct ContentView: View {
@@ -20,8 +29,16 @@ struct ContentView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
+            List {
+                ForEach(viewModel.siteGroups) { group in
+                    Text(group.name)
+                }
+            }
         }
         .padding()
+        .onAppear {
+            viewModel.getSiteGroups()
+        }
     }
 }
 

@@ -6,15 +6,15 @@
 //
 
 import SwiftUI
+import FirebaseFirestore // for Preview
 
 struct SiteCellView: View {
     // init
     let site: Site
+    let buildings: [Building]
+    let siteTypes: [SiteType]
+    let siteGroups: [SiteGroup]
     
-    //TODO: get site group
-    @State private var siteGroup: String? // State to hold the site group information
-    
-    @State private var isFetching = false // State to track if data is being fetched
     var hasComputers = true
     var hasPrinters = true
     
@@ -28,6 +28,13 @@ struct SiteCellView: View {
     
     //TODO: update to NavigationStack?
     var body: some View {
+        // get site type from site
+        let siteType = siteTypes.first(where: { $0.id == site.siteTypeId })
+        // get building from site
+        let building = buildings.first(where: { $0.id == site.buildingId })
+        // get group from building
+        let group = siteGroups.first(where: { $0.id == building?.siteGroupId })
+        
         NavigationLink(destination: DetailedSiteView(site: site)) {
             HStack(alignment: .center, spacing: 10) {
                 // IMAGE
@@ -48,37 +55,31 @@ struct SiteCellView: View {
                 VStack(alignment: .leading) {
                     // name and type icons
                     HStack() {
-                        // name
+                        // SITE NAME
                         Text("\(site.name ?? "N/A")")
                             .font(.headline)
                             .foregroundStyle(.primary)
-                        // type icons
+                        // feature icons
                         siteFeatureIcons
                         Spacer()
                     }
                     
                     // subtitle
                     HStack {
-                        Text("Group Here - \(site.siteType ?? "N/A")")
+                        // GROUP & TYPE
+                        Text("\(group?.name ?? "G?") - \(siteType?.name ?? "Unkown Type")")
                         Spacer()
                     }
                     .font(.callout)
                     .foregroundStyle(.secondary)
                 }
-                .onAppear {
-                    // Trigger fetching when view appears
-                    if siteGroup == nil && !isFetching {
-                        fetchBuilding()
-                    }
-                }
             }
-            .padding(.horizontal, -16)
             .background(Color.clear)
         }
         .buttonStyle(PlainButtonStyle())
     }
     
-    private var siteFeatureIcons: some View {
+    var siteFeatureIcons: some View {
         HStack(alignment: .center, spacing: 10) {
             if site.hasInventory == true {
                 Image(systemName: "cabinet")
@@ -95,35 +96,21 @@ struct SiteCellView: View {
                     .foregroundColor(.pink)
             }
             
-            if site.hasClock == true {
-                Image(systemName: "clock")
-                    .foregroundColor(.orange)
+            if site.hasPosterBoard == true {
+                Image(systemName: "rectangle.3.offgrid.fill")
+                    .foregroundColor(.pink)
             }
             
-            if site.hasWhiteboard == true {
-                Image(systemName: "rectangle.inset.filled.and.person.filled")
-                    .foregroundColor(.blue)
-            }
+//            if site.hasClock == true {
+//                Image(systemName: "clock")
+//                    .foregroundColor(.orange)
+//            }
+//            
+//            if site.hasWhiteboard == true {
+//                Image(systemName: "rectangle.inset.filled.and.person.filled")
+//                    .foregroundColor(.blue)
+//            }
         }.padding(.leading, 5)
-    }
-    
-    // Fetch building information associated with the site
-    private func fetchBuilding() {
-        if let buildingId = site.buildingId {
-            isFetching = true
-            Task {
-                do {
-                    // Fetch the building from the BuildingsManager
-                    let building = try await BuildingsManager.shared.getBuilding(buildingId: buildingId)
-                    // Update the state with the retrieved site group
-                    self.siteGroup = building.siteGroup
-                    isFetching = false
-                } catch {
-                    print("Error fetching building: \(error.localizedDescription)")
-                    isFetching = false
-                }
-            }
-        }
     }
 }
 
@@ -132,16 +119,51 @@ struct SiteCellView: View {
         site: Site(
             id: "001",
             name: "Naka",
-            buildingId: "EBW",
+            buildingId: "VYUlFVzdSeVTBkNuPQWT",
             nearestInventoryId: "Naka",
             chairCounts: [ChairCount(count: 4, type: "black_physics")],
-            siteType: "Classroom",
+            siteTypeId: "9VXZ0Njs0C46ehpN2kYY",
             hasClock: true,
             hasInventory: true,
             hasWhiteboard: true,
+            hasPosterBoard: true,
             namePatternMac: "NAKA-MAC-##",
             namePatternPc: "NAKA-PC-##",
             namePatternPrinter: "Naka Printer #"
-        )
+        ),
+        buildings: [
+            Building(
+                id: "VYUlFVzdSeVTBkNuPQWT",
+                name: "Arts & Science",
+                address: Address(city: "Columbia", country: "United States", state: "MO", street: "902 Conley Ave", zipCode: "65201"),
+                coordinates: GeoPoint(latitude: 1.1, longitude: 2.2),
+                isLibrary: false,
+                isReshall: false,
+                siteGroupId: "zw1TFIf7KQxMNrThdfD1"
+            ),
+            Building(
+                id: "OcMzHSE1L1urLvGiaPBV",
+                name: "Bingham Hall",
+                address: Address(city: "Columbia", country: "US", state: "MO", street: "1400 Treelane Dr.", zipCode: "65211"),
+                coordinates:GeoPoint(latitude: 1.1, longitude: 2.2) ,
+                isLibrary: true,
+                isReshall: true,
+                siteGroupId: "CgLht1pwcSdyDe7tJWVN"
+            )
+        ],
+        siteTypes: [
+            SiteType(id: "9VXZ0Njs0C46ehpN2kYY", name: "Classroom", notes: ""),
+            SiteType(id: "xbkeVv7ml47lTknpbEKY", name: "Library", notes: ""),
+            SiteType(id: "Y3GyB3xhDxKg2CuQcXAA", name: "Other", notes: ""),
+            SiteType(id: "ZGgC7bgULE6Kp3bmTVAe", name: "Printer Only", notes: ""),
+            SiteType(id: "u699TGf4zrEK3Vu0B6U1", name: "ResHall", notes: "")
+        ],
+        siteGroups: [
+            SiteGroup(id: "gkRTxs7OyARmxGHHPuMV", name: "G1", notes: ""),
+            SiteGroup(id: "kxeYimfnOx1YnB9TVXp9", name: "G2", notes: ""),
+            SiteGroup(id: "zw1TFIf7KQxMNrThdfD1", name: "G3", notes: ""),
+            SiteGroup(id: "LM0MN0spXlHfd2oZSahO", name: "R1", notes: ""),
+            SiteGroup(id: "CgLht1pwcSdyDe7tJWVN", name: "R2", notes: "")
+        ]
     )
 }

@@ -90,6 +90,8 @@
 		F69D74302BA0EE440095A817 /* DetailedUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69D742F2BA0EE440095A817 /* DetailedUserView.swift */; };
 		F6AB560A2BC472CD005727D2 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB56092BC472CD005727D2 /* WebView.swift */; };
 		F6AB560C2BC4C092005727D2 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB560B2BC4C092005727D2 /* Route.swift */; };
+		F6AB560E2BC4D5FD005727D2 /* SiteTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */; };
+		F6AB56102BC4D9EE005727D2 /* SiteGroupsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB560F2BC4D9EE005727D2 /* SiteGroupsManager.swift */; };
 		F6B4E1C42BBF91DC009644DB /* SupplyEntriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B4E1C32BBF91DC009644DB /* SupplyEntriesView.swift */; };
 		F6B4E1C62BBFBC9E009644DB /* InventoryEntryCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B4E1C52BBFBC9E009644DB /* InventoryEntryCellView.swift */; };
 /* End PBXBuildFile section */
@@ -175,6 +177,8 @@
 		F69D742F2BA0EE440095A817 /* DetailedUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedUserView.swift; sourceTree = "<group>"; };
 		F6AB56092BC472CD005727D2 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		F6AB560B2BC4C092005727D2 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
+		F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteTypeManager.swift; sourceTree = "<group>"; };
+		F6AB560F2BC4D9EE005727D2 /* SiteGroupsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteGroupsManager.swift; sourceTree = "<group>"; };
 		F6B4E1C32BBF91DC009644DB /* SupplyEntriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyEntriesView.swift; sourceTree = "<group>"; };
 		F6B4E1C52BBFBC9E009644DB /* InventoryEntryCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryEntryCellView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -284,6 +288,8 @@
 				F6246A7B2BA12FD400828DAE /* KeyManager.swift */,
 				F668B1E22B9AB392000B2886 /* KeySetManager.swift */,
 				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
+				F6AB560F2BC4D9EE005727D2 /* SiteGroupsManager.swift */,
+				F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */,
 				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
 				D5B5E0762BB3458600AFCE3C /* StorageManager.swift */,
 				F63F46BD2BBAA50200ADEB9D /* SupplyCountManager.swift */,
@@ -665,6 +671,7 @@
 				6E3329772B7F6389009FCD14 /* AuthenticationViewModel.swift in Sources */,
 				6EA65F5F2B911B34000766C7 /* SitesManager.swift in Sources */,
 				F68E1B052BBBE4B300EBE6AC /* TempChangeView.swift in Sources */,
+				F6AB56102BC4D9EE005727D2 /* SiteGroupsManager.swift in Sources */,
 				D5225A672BB73D76007F14E2 /* DetailedSitePosterBoardView.swift in Sources */,
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				D5B5E07B2BB35DFB00AFCE3C /* ImageUploadView.swift in Sources */,
@@ -717,6 +724,7 @@
 				26EC33B92B966BC8001F0AEE /* SitesMapView.swift in Sources */,
 				F69D742D2BA0EAA50095A817 /* NonAuthUserCellView.swift in Sources */,
 				6E3329742B7F62D9009FCD14 /* SettingsViewModel.swift in Sources */,
+				F6AB560E2BC4D5FD005727D2 /* SiteTypeManager.swift in Sources */,
 				D5225A652BB733AF007F14E2 /* SiteListView.swift in Sources */,
 				6EA65F782B990423000766C7 /* DetailedInventorySiteView.swift in Sources */,
 				6EA65F662B9120E0000766C7 /* SiteCellView.swift in Sources */,

@@ -111,6 +111,7 @@ struct InventoryChangeView: View {
                     path.removeLast(path.count - 1)
                 }) {
                     Text("Cancel")
+                        .foregroundColor(Color.white)
                 }
             }
         }

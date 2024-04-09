@@ -14,16 +14,44 @@ import FirebaseStorage
 
 @MainActor
 final class DetailedSiteViewModel: ObservableObject {
-    @Published var building: Building?
+    var building: Building?
+    var siteType: SiteType?
+    var siteGroup: SiteGroup?
+    
     @Published var imageURLs: [URL] = []
     @Published var boardImageURLs: [URL] = []
     
-    func loadBuilding(site: Site) async {
-        do {
-            self.building = try await BuildingsManager.shared.getBuilding(buildingId: site.buildingId ?? "")
-        } catch {
-            print("Error loading building: \(error.localizedDescription)")
-            // Handle the error, e.g., show an alert or update the UI accordingly
+    func loadBuilding(site: Site, completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.building = try await BuildingsManager.shared.getBuilding(buildingId: site.buildingId ?? "")
+                completion()
+            } catch {
+                print("Error loading building: \(error.localizedDescription)")
+                // Handle the error, e.g., show an alert or update the UI accordingly
+            }
+        }
+    }
+    
+    func loadSiteType(siteTypeId: String, completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.siteType = try await SiteTypeManager.shared.getSiteType(siteTypeId: siteTypeId)
+                completion()
+            } catch {
+                print("Error loading site type: \(error)")
+            }
+        }
+    }
+    
+    func loadSiteGroup(siteGroupId: String, completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.siteGroup = try await SiteGroupManager.shared.getSiteGroup(siteGroupId: siteGroupId)
+                completion()
+            } catch {
+                print("Error loading site group: \(error)")
+            }
         }
     }
 

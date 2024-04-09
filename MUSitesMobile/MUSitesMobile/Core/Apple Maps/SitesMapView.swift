@@ -87,7 +87,7 @@ struct MapView: UIViewRepresentable {
             if let coordinates = building.coordinates {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude)
-                switch building.siteGroup {
+                switch building.siteGroupId {
                                 case "R1":
                                     annotation.subtitle = "R1"
                                 case "G1":
