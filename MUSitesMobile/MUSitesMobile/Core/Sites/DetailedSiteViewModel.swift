@@ -17,6 +17,7 @@ final class DetailedSiteViewModel: ObservableObject {
     @Published var building: Building?
     @Published var imageURLs: [URL] = []
     @Published var boardImageURLs: [URL] = []
+    @Published var InventoryImageURLs: [URL] = []
     
     func loadBuilding(site: Site) async {
         do {
@@ -30,6 +31,8 @@ final class DetailedSiteViewModel: ObservableObject {
     func fetchSiteSpecificImageURLs(siteName: String, category: String) async {
         // The reference should include the site name and the category (e.g., "Posters").
         let siteCategoryImagesRef = Storage.storage().reference(withPath: "Sites/\(siteName)/\(category)")
+        
+        print("Attempting to access image path: Sites/\(siteName)/\(category)")
 
         do {
             // List all images in the specific site's category folder
@@ -38,11 +41,16 @@ final class DetailedSiteViewModel: ObservableObject {
 
             for item in siteSpecificImages {
                 // Asynchronously get the download URL for each item
+                print("Accessing image: \(item.name)")
                 let downloadURL = try await item.downloadURL()
+                print("Fetched download URL: \(downloadURL)")
                 if category == "Posters" {
                     self.imageURLs.append(downloadURL)
                 } else if category == "Board" {
                     self.boardImageURLs.append(downloadURL)
+                } else if category == "Inventory" {
+                    self.InventoryImageURLs.append(downloadURL)
+                    print("Appending the downloadURL: \(downloadURL)")
                 }
             }
         } catch {

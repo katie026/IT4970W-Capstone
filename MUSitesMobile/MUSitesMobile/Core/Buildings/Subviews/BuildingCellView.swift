@@ -15,18 +15,18 @@ struct BuildingCellView: View {
     var body: some View {
         HStack(alignment: .top) {
             // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
-            AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 50, height: 50)
-                    .cornerRadius(8)
-            } placeholder: {
-                ProgressView()
-            }
-            .frame(width: 60, height: 60)
-            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-            
+//            AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in
+//                image
+//                    .resizable()
+//                    .scaledToFill()
+//                    .frame(width: 50, height: 50)
+//                    .cornerRadius(8)
+//            } placeholder: {
+//                ProgressView()
+//            }
+//            .frame(width: 60, height: 60)
+//            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+//            
             VStack(alignment: .leading) {
                 Text("\(building.name ?? "N/A")")
                     .font(.headline)

@@ -45,6 +45,9 @@ final class DetailedInventorySiteViewModel: ObservableObject {
 
 struct DetailedInventorySiteView: View {
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
+    @StateObject private var SiteViewModel = DetailedSiteViewModel()
+
+    
     @State private var showInventorySubmission = false
     
     private var inventorySite: InventorySite
@@ -123,19 +126,8 @@ struct DetailedInventorySiteView: View {
                         .cornerRadius(8)
                     }
                     
-                    // Pictures
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach(0..<3) { _ in
-                                Image(systemName: "photo")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 100)
-                                    .padding(4)
-                                    .background(Color.gray.opacity(0.3))
-                                    .cornerRadius(8)
-                            }
-                        }
+                    Section(header: Text("Inventory")) {
+                        InventoryView(imageURLs: SiteViewModel.InventoryImageURLs)
                     }
                     
                     Spacer()
@@ -148,6 +140,7 @@ struct DetailedInventorySiteView: View {
             Task {
                 await viewModel.loadBuilding(buildingId: inventorySite.buildingId ?? "")
                 await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
+                await SiteViewModel.fetchSiteSpecificImageURLs(siteName: inventorySite.name ?? "Clark", category: "Inventory")
             }
         }
     }
