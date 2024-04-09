@@ -137,6 +137,7 @@ struct InventoryEntryCellView: View {
                     )],
                     users: [DBUser(
                         userId: "oeWvTMrqMza2nebC8mImsFOaNVL2",
+                        studentId: 12572353,
                         isAnonymous: false,
                         hasAuthentication: true,
                         email: "ka@gmail.com",

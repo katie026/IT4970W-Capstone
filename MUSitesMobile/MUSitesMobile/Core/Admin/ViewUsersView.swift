@@ -6,31 +6,57 @@
 //
 import SwiftUI
 
-struct ViewUsersView: View {
-    @State private var users = [DBUser]()
-    @State private var isLoading = true
-    @State private var errorMessage: String?
-
-    var body: some View {
-        List(users) { user in
-            VStack(alignment: .leading) {
-                Text(user.fullName ?? "No Name")
-                    .font(.headline)
-                Text(user.email ?? "No Email")
-                    .font(.subheadline)
-            }
-        }
-        .navigationTitle("View Users")
-        .onAppear {
-            isLoading = true
+@MainActor
+final class ViewUsersViewModel: ObservableObject {
+    @Published var users: [DBUser] = []
+    
+    func loadUsers(completion: @escaping () -> Void) {
+        Task {
             UserManager.shared.getAllUsers { result in
                 switch result {
                 case .success(let fetchedUsers):
                     self.users = fetchedUsers
                 case .failure(let error):
-                    self.errorMessage = error.localizedDescription
+                    print(error.localizedDescription)
                 }
-                self.isLoading = false
+                
+                completion()
+            }
+        }
+    }
+}
+
+struct ViewUsersView: View {
+    // View Model
+    @StateObject private var viewModel = ViewUsersViewModel()
+    // Search Bar
+    @State private var searchText = ""
+    // View Control
+    @State private var isLoading = true
+
+    var body: some View {
+        VStack {
+            TextField("Search", text: $searchText)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(10)
+                .padding(.horizontal)
+            
+            List(sortedUsers) { user in
+                VStack(alignment: .leading) {
+                    Text(user.fullName ?? "No Name")
+                        .font(.headline)
+                    Text(user.email ?? "No Email")
+                        .font(.subheadline)
+                }
+            }
+        }
+        .navigationTitle("User Accounts")
+        .onAppear {
+            isLoading = true
+            viewModel.loadUsers {
+                isLoading = false
             }
         }
         .overlay {
@@ -39,5 +65,22 @@ struct ViewUsersView: View {
             }
         }
     }
+    
+    //TODO: create option to sort by other properties
+    private var sortedUsers: [DBUser] {
+        if searchText.isEmpty {
+            return viewModel.users.sorted { $0.fullName?.localizedCaseInsensitiveCompare($1.fullName ?? "") == .orderedAscending }
+        } else {
+            return viewModel.users.filter {
+                $0.fullName?.localizedCaseInsensitiveContains(searchText) ?? false
+            }
+            .sorted { $0.fullName?.localizedCaseInsensitiveCompare($1.fullName ?? "") == .orderedAscending }
+        }
+    }
 }
 
+#Preview {
+    NavigationStack {
+        ViewUsersView()
+    }
+}

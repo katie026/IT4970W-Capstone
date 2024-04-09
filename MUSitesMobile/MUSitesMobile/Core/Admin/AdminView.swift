@@ -11,7 +11,8 @@ struct AdminView: View {
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("Admin")) {
+                // USER SECTION
+                Section("Users") {
                     //this is set up correctly(will show all users in the user collection
                     NavigationLink(destination: ViewUsersView()) {
                         Text("View Users")
@@ -20,16 +21,21 @@ struct AdminView: View {
                     NavigationLink(destination: CreateUserView()) {
                         Text("Create User")
                     }
-                    //listing all the sites(takes the user to a "new view" that shows all the sites)
-                    NavigationLink(destination: SiteListView()) {
-                        Text("Upload Images")
+                }
+                
+                // INVENTORY SECTION
+                Section("Inventory") {
+                    NavigationLink(destination: InventorySitesView()) {
+                        Text("View Inventory Sites")
+                    }
+                    NavigationLink(destination: InventoryEntriesView()) {
+                        Text("View Inventory Entries")
                     }
                 }
                 
-                //not set up yet
-                Section(header: Text("Inventory")) {
-                    NavigationLink(destination: ViewInventorySitesView()) {
-                        Text("View Inventory Sites")
+                Section("Images") {
+                    NavigationLink(destination: SiteListView()) { // we should rename this
+                        Text("Upload Images")
                     }
                 }
             }
@@ -43,18 +49,7 @@ struct AdminView: View {
 struct CreateUserView: View {
     var body: some View { Text("Create User Content") }
 }
-struct ViewInventorySitesView: View {
-    var body: some View { Text("View Inventory Sites Content") }
+
+#Preview {
+    AdminView()
 }
-// ... Add the rest of the destination views similarly
-
-struct AdminView_Previews: PreviewProvider {
-    static var previews: some View {
-        AdminView()
-    }
-}
-
-
-
-
-

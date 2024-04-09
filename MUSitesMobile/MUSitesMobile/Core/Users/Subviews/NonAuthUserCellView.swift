@@ -41,5 +41,18 @@ struct NonAuthUserCellView: View {
 }
 
 #Preview {
-    NonAuthUserCellView(user: DBUser(userId: "oeWvTMrqMza2nebC8mImsFOaNVL2", isAnonymous: false, hasAuthentication: true, email: "ka@gmail.com", fullName: "Example Name", photoURL: "https://lh3.googleusercontent.com/a/ACg8ocIonA7UjQCTfY-8P4NDZM2HB8K8_K-ZOnj3CJl5fikw=s96-c", dateCreated: Date(timeIntervalSinceNow: TimeInterval(0)), isClockedIn: true, positions: ["CO","SS","CS"], chairReport: ChairReport(chairType: "physics_black", chairCount: 20)))
+    NonAuthUserCellView(
+        user: DBUser(
+            userId: "oeWvTMrqMza2nebC8mImsFOaNVL2",
+            studentId: 12572353,
+            isAnonymous: false,
+            hasAuthentication: true,
+            email: "ka@gmail.com",
+            fullName: "Example Name", photoURL: "https://lh3.googleusercontent.com/a/ACg8ocIonA7UjQCTfY-8P4NDZM2HB8K8_K-ZOnj3CJl5fikw=s96-c",
+            dateCreated: Date(timeIntervalSinceNow: TimeInterval(0)),
+            isClockedIn: true,
+            positions: ["CO","SS","CS"],
+            chairReport: ChairReport(chairType: "physics_black", chairCount: 20)
+        )
+    )
 }

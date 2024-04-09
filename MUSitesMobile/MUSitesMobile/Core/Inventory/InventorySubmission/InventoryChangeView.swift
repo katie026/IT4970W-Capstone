@@ -425,6 +425,7 @@ struct InventoryChangeView: View {
                 Spacer()
             }
         }
+        .listRowBackground(Color.clear)
         .background(Color.green)
         .cornerRadius(8)
         .alert(isPresented: $showNoChangesAlert) {

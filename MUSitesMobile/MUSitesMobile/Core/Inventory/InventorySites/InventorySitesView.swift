@@ -69,13 +69,6 @@ final class InventorySitesViewModel: ObservableObject {
     }
 }
 
-enum Route: Hashable {
-    case inventorySitesList
-    case detailedInventorySite(InventorySite)
-    case inventorySubmission(InventorySite)
-    case inventoryChange(InventorySite)
-}
-
 struct InventorySitesView: View {
     // View Model
     @StateObject private var viewModel = InventorySitesViewModel()
@@ -84,6 +77,7 @@ struct InventorySitesView: View {
     @State private var path: [Route] = []
     
     var body: some View {
+        //TODO: move the navigation stack to the root view
         NavigationStack (path: $path) { // will trigger nav destination if $path changes
             List {
 //                ForEach(viewModel.inventorySites) { inventorySite in

@@ -32,6 +32,7 @@ struct Site: Identifiable, Codable, Equatable {
     let namePatternMac: String?
     let namePatternPc: String?
     let namePatternPrinter: String?
+    let calendarName: String?
     
     // create Site manually
     init(
@@ -46,7 +47,8 @@ struct Site: Identifiable, Codable, Equatable {
         hasWhiteboard: Bool? = nil,
         namePatternMac: String? = nil,
         namePatternPc: String? = nil,
-        namePatternPrinter: String? = nil
+        namePatternPrinter: String? = nil,
+        calendarName: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -60,6 +62,7 @@ struct Site: Identifiable, Codable, Equatable {
         self.namePatternMac = namePatternMac
         self.namePatternPc = namePatternPc
         self.namePatternPrinter = namePatternPrinter
+        self.calendarName = calendarName
     }
     
     enum CodingKeys: String, CodingKey {
@@ -75,6 +78,7 @@ struct Site: Identifiable, Codable, Equatable {
         case namePatternMac = "name_pattern_mac"
         case namePatternPc = "name_pattern_pc"
         case namePatternPrinter = "name_pattern_printer"
+        case calendarName = "calendar_name"
     }
     
     init(from decoder: Decoder) throws {
@@ -91,6 +95,7 @@ struct Site: Identifiable, Codable, Equatable {
         self.namePatternMac = try container.decodeIfPresent(String.self, forKey: .namePatternMac)
         self.namePatternPc = try container.decodeIfPresent(String.self, forKey: .namePatternPc)
         self.namePatternPrinter = try container.decodeIfPresent(String.self, forKey: .namePatternPrinter)
+        self.calendarName = try container.decodeIfPresent(String.self, forKey: .calendarName)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -107,6 +112,7 @@ struct Site: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(self.namePatternMac, forKey: .namePatternMac)
         try container.encodeIfPresent(self.namePatternPc, forKey: .namePatternPc)
         try container.encodeIfPresent(self.namePatternPrinter, forKey: .namePatternPrinter)
+        try container.encodeIfPresent(self.calendarName, forKey: .calendarName)
     }
     
     static func == (lhs:Site, rhs: Site) -> Bool {

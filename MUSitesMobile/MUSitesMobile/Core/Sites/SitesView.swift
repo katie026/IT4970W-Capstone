@@ -12,23 +12,22 @@ struct SitesView: View {
     @State private var searchText = ""
     
     var body: some View {
-        NavigationView {
-            VStack {
-                TextField("Search", text: $searchText)
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-                List {
-                    ForEach(sortedSites) { site in
-                        SiteCellView(site: site)
-                    }
+        VStack {
+            TextField("Search", text: $searchText)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(10)
+                .padding(.horizontal)
+            List {
+                ForEach(sortedSites) { site in
+                    SiteCellView(site: site)
                 }
             }
-            .navigationTitle("Sites")
-            .onAppear {
-                viewModel.getSites() // Refresh sites when the view appears
-            }
+        }
+        .navigationTitle("Sites")
+        .onAppear {
+            viewModel.getSites() // Refresh sites when the view appears
         }
     }
     
@@ -43,9 +42,8 @@ struct SitesView: View {
     }
 }
 
-struct SitesView_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview {
+    NavigationView {
         SitesView()
     }
 }
-

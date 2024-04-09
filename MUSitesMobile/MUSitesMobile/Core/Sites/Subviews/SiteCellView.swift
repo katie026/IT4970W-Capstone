@@ -8,46 +8,62 @@
 import SwiftUI
 
 struct SiteCellView: View {
+    // init
     let site: Site
-    @State private var siteGroup: String? // State to hold the site group information
-    @State private var isFetching = false // State to track if data is being fetched
     
+    //TODO: get site group
+    @State private var siteGroup: String? // State to hold the site group information
+    
+    @State private var isFetching = false // State to track if data is being fetched
+    var hasComputers = true
+    var hasPrinters = true
+    
+    func getEquipmentInfo() -> Void {
+        //TODO: get equipment info
+        // query computers collection to see if there is one at this site.id
+        // assign hasComputers
+        // query printers collection to see if there is one at this site.id
+        // assign hasPrinters
+    }
+    
+    //TODO: update to NavigationStack?
     var body: some View {
         NavigationLink(destination: DetailedSiteView(site: site)) {
-            HStack(alignment: .top) {
-                // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
-                AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in
+            HStack(alignment: .center, spacing: 10) {
+                // IMAGE
+                AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
                     image
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 50, height: 50)
+                        .frame(width: 70, height: 70)
                         .cornerRadius(8)
                 } placeholder: {
                     ProgressView()
                 }
                 .frame(width: 60, height: 60)
                 .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+                .padding(10)
                 
+                // INFO BLOCK
                 VStack(alignment: .leading) {
-                    Text("\(site.name ?? "N/A")")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                    Text("ID: \(site.id)")
-                    Text("\(site.buildingId ?? "N/A")")
-                    HStack {
-                        if site.hasClock == true {
-                            Image(systemName: "clock")
-                              .foregroundColor(.orange)
-                        }
-                        
-                        if site.hasInventory == true {
-                          HStack {
-                              Image(systemName: "cabinet")
-                                .foregroundColor(.green)
-                          }
-                        }
+                    // name and type icons
+                    HStack() {
+                        // name
+                        Text("\(site.name ?? "N/A")")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                        // type icons
+                        siteFeatureIcons
+                        Spacer()
                     }
-                    .padding(.leading, 8)
+                    
+                    // subtitle
+                    HStack {
+                        Text("Group Here - \(site.siteType ?? "N/A")")
+                        Spacer()
+                    }
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
                 }
                 .onAppear {
                     // Trigger fetching when view appears
@@ -60,6 +76,35 @@ struct SiteCellView: View {
             .background(Color.clear)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+    
+    private var siteFeatureIcons: some View {
+        HStack(alignment: .center, spacing: 10) {
+            if site.hasInventory == true {
+                Image(systemName: "cabinet")
+                    .foregroundColor(.green)
+            }
+            
+            if hasComputers == true {
+                Image(systemName: "desktopcomputer")
+                    .foregroundColor(.purple)
+            }
+            
+            if hasPrinters == true {
+                Image(systemName: "printer")
+                    .foregroundColor(.pink)
+            }
+            
+            if site.hasClock == true {
+                Image(systemName: "clock")
+                    .foregroundColor(.orange)
+            }
+            
+            if site.hasWhiteboard == true {
+                Image(systemName: "rectangle.inset.filled.and.person.filled")
+                    .foregroundColor(.blue)
+            }
+        }.padding(.leading, 5)
     }
     
     // Fetch building information associated with the site
@@ -83,5 +128,20 @@ struct SiteCellView: View {
 }
 
 #Preview {
-    SiteCellView(site: Site(id: "001", name: "Naka", buildingId: "EBW", nearestInventoryId: "Naka", chairCounts: [ChairCount(count: 4, type: "black_physics")], hasClock: true, hasInventory: true, hasWhiteboard: true, namePatternMac: "NAKA-MAC-##", namePatternPc: "NAKA-PC-##", namePatternPrinter: "Naka Printer #"))
+    SiteCellView(
+        site: Site(
+            id: "001",
+            name: "Naka",
+            buildingId: "EBW",
+            nearestInventoryId: "Naka",
+            chairCounts: [ChairCount(count: 4, type: "black_physics")],
+            siteType: "Classroom",
+            hasClock: true,
+            hasInventory: true,
+            hasWhiteboard: true,
+            namePatternMac: "NAKA-MAC-##",
+            namePatternPc: "NAKA-PC-##",
+            namePatternPrinter: "Naka Printer #"
+        )
+    )
 }
