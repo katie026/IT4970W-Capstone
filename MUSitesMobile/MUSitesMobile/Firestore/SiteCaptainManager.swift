@@ -86,82 +86,24 @@ struct SupplyNeeded: Codable {
 
 
 class SiteCaptainManager {
-    static let shared = SiteCaptainManager()
-    private init() { }
-    
     private let db = Firestore.firestore()
-    private let computingSitesCollection = "computing_sites"
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    func addComputingSite(_ computingSite: ComputingSite) -> AnyPublisher<Void, Error> {
-        let document = db.collection(computingSitesCollection).document(computingSite.id)
-        return Future<Void, Error> { promise in
-            do {
-                try document.setData(from: computingSite) { error in
-                    if let error = error {
-                        promise(.failure(error))
-                    } else {
-                        promise(.success(()))
-                    }
-                }
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    func updateComputingSite(_ computingSite: ComputingSite) -> AnyPublisher<Void, Error> {
-        let document = db.collection(computingSitesCollection).document(computingSite.id)
-        return Future<Void, Error> { promise in
-            do {
-                try document.setData(from: computingSite, merge: true) { error in
-                    if let error = error {
-                        promise(.failure(error))
-                    } else {
-                        promise(.success(()))
-                    }
-                }
-            } catch {
-                promise(.failure(error))
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    func removeComputingSite(withId siteId: String) -> AnyPublisher<Void, Error> {
-        let document = db.collection(computingSitesCollection).document(siteId)
-        return Future<Void, Error> { promise in
-            document.delete { error in
+    private let siteCaptainEntry = "site_captain_entries"
+
+
+
+    func submitSiteCaptainEntry(_ computingSite: ComputingSite, completion: @escaping (Error?) -> Void) {
+        do {
+            try db.collection(siteCaptainEntry).document(computingSite.id).setData(from: computingSite) { error in
                 if let error = error {
-                    promise(.failure(error))
+                    print("Error submitting site captain entry: \(error.localizedDescription)") // Add this line
+                    completion(error)
                 } else {
-                    promise(.success(()))
+                    print("Site captain entry submitted successfully!") // Add this line
+                    completion(nil)
                 }
             }
+        } catch {
+            print("Error encoding site captain entry: \(error.localizedDescription)") // Add this line
+            completion(error)
         }
-        .eraseToAnyPublisher()
-    }
-    
-    func getComputingSite(withId siteId: String) -> AnyPublisher<ComputingSite?, Error> {
-        let document = db.collection(computingSitesCollection).document(siteId)
-        return Future<ComputingSite?, Error> { promise in
-            document.getDocument { snapshot, error in
-                if let error = error {
-                    promise(.failure(error))
-                } else if let snapshot = snapshot, snapshot.exists {
-                    do {
-                        let computingSite = try snapshot.data(as: ComputingSite.self)
-                        promise(.success(computingSite))
-                    } catch {
-                        promise(.failure(error))
-                    }
-                } else {
-                    promise(.success(nil))
-                }
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-}
+    }}
