@@ -25,7 +25,7 @@ struct BuildingCellView: View {
             }
             .frame(width: 60, height: 60)
             .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-            
+
             VStack(alignment: .leading) {
                 Text("\(building.name ?? "N/A")")
                     .font(.headline)

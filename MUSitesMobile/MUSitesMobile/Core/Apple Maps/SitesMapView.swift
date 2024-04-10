@@ -29,6 +29,7 @@ struct SitesMapView: View {
                             }) {
                                 Text("All")
                             }
+
                             //TODO: get site_groups from firestore
                             Button(action: {
                                 selectedSiteGroup = "LM0MN0spXlHfd2oZSahO"
@@ -38,6 +39,7 @@ struct SitesMapView: View {
                             
                             Button(action: {
                                 selectedSiteGroup = "gkRTxs7OyARmxGHHPuMV"
+
                             }) {
                                 Text("G1")
                             }
@@ -50,6 +52,7 @@ struct SitesMapView: View {
                             
                             Button(action: {
                                 selectedSiteGroup = "zw1TFIf7KQxMNrThdfD1"
+
                             }) {
                                 Text("G3")
                             }
@@ -194,3 +197,4 @@ struct MapView: UIViewRepresentable {
 #Preview {
     SitesMapView()
 }
+

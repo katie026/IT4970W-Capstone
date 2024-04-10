@@ -74,7 +74,6 @@ struct DetailedInventorySiteView: View {
                 MapSection
                 PictureSection
             }
-            .padding()
         }
         // View Title
         .navigationTitle("Inventory: \(inventorySite.name ?? "N/A")")

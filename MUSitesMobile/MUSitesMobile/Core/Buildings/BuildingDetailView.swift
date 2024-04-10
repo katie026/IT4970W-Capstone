@@ -10,7 +10,6 @@ import FirebaseFirestore
 
 
 struct BuildingDetailView: View {
-
     let building: Building
     @State private var filteredSites: [Site] = []
     @State private var filteredInventorySites: [InventorySite] = []
