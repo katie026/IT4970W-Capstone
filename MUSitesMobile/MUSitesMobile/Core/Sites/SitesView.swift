@@ -25,17 +25,14 @@ struct SitesView: View {
             } else {
                 List {
                     ForEach(sortedSites) { site in
-                        SiteCellView(site: site, buildings: viewModel.buildings, siteTypes: viewModel.siteTypes, siteGroups: viewModel.siteGroups)
+                        SiteCellView(site: site)
                     }
                 }
             }
         }
         .navigationTitle("Sites")
         .onAppear {
-            viewModel.getSites{}
-            viewModel.getSiteTypes{}
-            viewModel.getBuildings{}
-            viewModel.getSiteGroups{
+            viewModel.getSites{
                 isLoading = false
             }
         }

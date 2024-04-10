@@ -85,7 +85,7 @@ struct InventorySitesView: View {
 //                }
                 ForEach(viewModel.inventorySites) { inventorySite in
                     NavigationLink(value: Route.detailedInventorySite(inventorySite)) {
-                        InventorySiteCellView(inventorySite: inventorySite, inventoryTypes: viewModel.inventoryTypes)
+                        InventorySiteCellView(inventorySite: inventorySite)
                     }
                 }
             }
@@ -93,7 +93,7 @@ struct InventorySitesView: View {
             .onAppear {
                 Task {
                     viewModel.getInventorySites()
-                    viewModel.getInventoryTypes()
+                    //viewModel.getInventoryTypes()
                 }
             }
             .navigationDestination(for: Route.self) { view in

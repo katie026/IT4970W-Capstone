@@ -9,47 +9,102 @@ import SwiftUI
 import MapKit
 
 struct SitesMapView: View {
-    @State private var buildings: [Building] = []
+    @State private var selectedBuilding: Building? = nil
+    @State private var selectedSiteGroup: String? = nil
+    
     
     var body: some View {
-        ZStack {
-            MapView(buildings: buildings)
-                .edgesIgnoringSafeArea(.all)
-            
-            
-            VStack {
-                Spacer()
-                Button(action: {
-                    fetchBuildingsFromFirestore()
-                }) {
-                    Text("Refresh Buildings")
+            NavigationView {
+                ZStack {
+                    MapView(selectedBuilding: $selectedBuilding, selectedSiteGroup: $selectedSiteGroup)
+                        .edgesIgnoringSafeArea(.top)
+                    
+                    VStack {
+                        Spacer()
+                        
+                        
+                        Menu {
+                            Button(action: {
+                                selectedSiteGroup = nil
+                            }) {
+                                Text("All")
+                            }
+                            //TODO: get site_groups from firestore
+                            Button(action: {
+                                selectedSiteGroup = "LM0MN0spXlHfd2oZSahO"
+                            }) {
+                                Text("R1")
+                            }
+                            
+                            Button(action: {
+                                selectedSiteGroup = "gkRTxs7OyARmxGHHPuMV"
+                            }) {
+                                Text("G1")
+                            }
+                            
+                            Button(action: {
+                                selectedSiteGroup = "kxeYimfnOx1YnB9TVXp9"
+                            }) {
+                                Text("G2")
+                            }
+                            
+                            Button(action: {
+                                selectedSiteGroup = "zw1TFIf7KQxMNrThdfD1"
+                            }) {
+                                Text("G3")
+                            }
+                            Button(action: {
+                                selectedSiteGroup = ""
+                            }) {
+                                Text("None")
+                            }
+                            
+                            // Add more site groups as needed
+                        } label: {
+                            Text("Select Site Group")
+                        }
+                        .padding()
+                        .background(Color.white)
+                        Text("Selected Option: \(selectedSiteGroup ?? "None")")
+                        .padding()
+                                    
+                        
+                    }
                 }
-                .padding()
+                .navigationTitle("Map")
+                .navigationBarHidden(true)
+                .background(
+                    //TODO: update to NagivationStack? Renable link to in BuildingDetailView
+                    NavigationLink(
+                        destination: selectedBuilding != nil ? BuildingDetailView(building: selectedBuilding!) : nil,
+                        isActive: Binding<Bool>(
+                            get: { selectedBuilding != nil },
+                            set: { newValue in
+                                if !newValue { // NavigationLink became inactive
+                                    selectedBuilding = nil // Reset selectedBuilding
+                                }
+                            }
+                        )
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                )
             }
         }
     }
-    
-    private func fetchBuildingsFromFirestore() {
-        Task {
-            do {
-                let fetchedBuildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: nil)
-                DispatchQueue.main.async {
-                    self.buildings = fetchedBuildings
-                }
-            } catch {
-                print("Error fetching buildings: \(error)")
-            }
-        }
-    }
-}
+   
 
 
 
 struct MapView: UIViewRepresentable {
     @State private var userTrackingMode: MKUserTrackingMode = .follow
+    @Binding var selectedBuilding: Building?
+    @Binding var selectedSiteGroup: String?
+    
     private let locationManager = CLLocationManager()
     
-    let buildings: [Building]
+    @State private var buildings: [Building] = []
     
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -66,6 +121,11 @@ struct MapView: UIViewRepresentable {
         
         addAnnotations(to: mapView)
         
+        fetchBuildingsFromFirestore { fetchedBuildings in
+                    self.buildings = fetchedBuildings
+                    addAnnotations(to: mapView)
+                }
+        
         return mapView
     }
     
@@ -78,28 +138,27 @@ struct MapView: UIViewRepresentable {
         Coordinator(self)
     }
     
+    private func fetchBuildingsFromFirestore(completion: @escaping ([Building]) -> Void) {
+            Task {
+                do {
+                    let fetchedBuildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: nil)
+                    DispatchQueue.main.async {
+                        completion(fetchedBuildings)
+                    }
+                } catch {
+                    print("Error fetching buildings: \(error)")
+                }
+            }
+        }
+    
     private func addAnnotations(to mapView: MKMapView) {
         mapView.removeAnnotations(mapView.annotations)
         
-        
-        
         for building in buildings {
-            if let coordinates = building.coordinates {
+            if let coordinates = building.coordinates, selectedSiteGroup == nil || building.siteGroupId == selectedSiteGroup {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude)
-                switch building.siteGroupId {
-                                case "R1":
-                                    annotation.subtitle = "R1"
-                                case "G1":
-                                    annotation.subtitle = "G1"
-                                case "G2":
-                                    annotation.subtitle = "G2"
-                                case "G3":
-                                    annotation.subtitle = "G3"
-                                // Add more cases as needed
-                                default:
-                                    annotation.subtitle = "No site group"
-                            }
+                annotation.subtitle = building.siteGroupId
                 annotation.title =  building.name ?? ""
                 mapView.addAnnotation(annotation)
             }
@@ -114,6 +173,13 @@ struct MapView: UIViewRepresentable {
         init(_ parent: MapView) {
             self.parent = parent
         }
+        
+        func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+                    if let annotationTitle = view.annotation?.title, let buildingName = annotationTitle {
+                        // Find the selected building from the buildings array
+                        parent.selectedBuilding = parent.buildings.first(where: { $0.name == buildingName })
+                    }
+                }
         
         func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
             if status == .authorizedWhenInUse {

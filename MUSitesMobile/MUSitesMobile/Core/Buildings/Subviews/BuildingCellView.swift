@@ -14,8 +14,7 @@ struct BuildingCellView: View {
     
     var body: some View {
         HStack(alignment: .top) {
-            // AsyncImage(url: URL(string: building.thumbnail ?? "")) { image in
-            AsyncImage(url: URL(string: "https://i.dummyjson.com/data/products/19/1.jpg")) {image in
+            AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
                 image
                     .resizable()
                     .scaledToFill()

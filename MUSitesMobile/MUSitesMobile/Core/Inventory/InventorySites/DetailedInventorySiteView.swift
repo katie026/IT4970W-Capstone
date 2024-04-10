@@ -47,8 +47,9 @@ final class DetailedInventorySiteViewModel: ObservableObject {
 }
 
 struct DetailedInventorySiteView: View {
-    // View Model
+    // View Models
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
+    @StateObject private var siteViewModel = DetailedSiteViewModel()
     // View Managing
     @Binding private var path: [Route]
     @StateObject var sheetManager = SheetManager()
@@ -82,6 +83,7 @@ struct DetailedInventorySiteView: View {
             Task {
                 await viewModel.loadBuilding(buildingId: inventorySite.buildingId ?? "")
                 await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
+                await siteViewModel.fetchSiteSpecificImageURLs(siteName: inventorySite.name ?? "Clark", category: "Inventory")
             }
         }
     }
@@ -197,20 +199,7 @@ struct DetailedInventorySiteView: View {
             DisclosureGroup(
                 isExpanded: $pictureSectionExpanded,
                 content: {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach(0..<3) { _ in
-                                Image(systemName: "photo")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 100)
-                                    .padding(4)
-                                    .background(Color.gray.opacity(0.3))
-                                    .cornerRadius(8)
-                            }
-                        }
-                    }
-                    .padding(.top, 10)
+                    InventoryPictureView(imageURLs: siteViewModel.inventoryImageURLs)
                 },
                 label: {
                     ZStack {

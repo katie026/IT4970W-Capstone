@@ -10,7 +10,18 @@ import SwiftUI
 struct InventorySiteCellView: View {
     // Init
     let inventorySite: InventorySite
-    let inventoryTypes: [InventoryType]
+    @State private var inventoryTypes: [InventoryType] = []
+    
+    func getInventoryTypes(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.inventoryTypes = try await InventoryTypeManager.shared.getAllInventoryTypes(descending: false)
+                completion()
+            } catch {
+                print("Error getting inventoryTypes: \(error)")
+            }
+        }
+    }
     
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
@@ -52,6 +63,9 @@ struct InventorySiteCellView: View {
             
             Spacer()
         }
+        .onAppear {
+            getInventoryTypes{}
+        }
     }
     
     func inventoryTypeIcons() -> some View {
@@ -92,13 +106,14 @@ struct InventorySiteCellView: View {
             name: "BCC 122",
             buildingId: "yXT87CrCZCoJVRvZn5DC",
             inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0", "fRM2GZq5XgvWRYiqIv81", "XzRJMtaGOtUKCg5WJGU0"]
-        ),
-        inventoryTypes: [
-            InventoryType(id: "OzLYzERgjICtUQoQTt7t", name: "File Cabinet", keyTypeId: "Di3zmEFSss6TNR6PtOBo"),
-            InventoryType(id: "TNkr3dS4rBnWTn5glEw0", name: "Closet", keyTypeId: "Di3zmEFSss6TNR6PtOBo"),
-            InventoryType(id: "XzRJMtaGOtUKCg5WJGU0", name: "Tall Cabinet", keyTypeId: "Di3zmEFSss6TNR6PtOBo"),
-            InventoryType(id: "bSoWm67vYcQ61fn7U4z0", name: "Locker", keyTypeId: "Di3zmEFSss6TNR6PtOBo"),
-            InventoryType(id: "fRM2GZq5XgvWRYiqIv81", name: "Short Cabinet", keyTypeId: "Di3zmEFSss6TNR6PtOBo")
-        ]
+        )
+//        ,
+//        inventoryTypes: [
+//            InventoryType(id: "OzLYzERgjICtUQoQTt7t", name: "File Cabinet", keyTypeId: "Di3zmEFSss6TNR6PtOBo"),
+//            InventoryType(id: "TNkr3dS4rBnWTn5glEw0", name: "Closet", keyTypeId: "Di3zmEFSss6TNR6PtOBo"),
+//            InventoryType(id: "XzRJMtaGOtUKCg5WJGU0", name: "Tall Cabinet", keyTypeId: "Di3zmEFSss6TNR6PtOBo"),
+//            InventoryType(id: "bSoWm67vYcQ61fn7U4z0", name: "Locker", keyTypeId: "Di3zmEFSss6TNR6PtOBo"),
+//            InventoryType(id: "fRM2GZq5XgvWRYiqIv81", name: "Short Cabinet", keyTypeId: "Di3zmEFSss6TNR6PtOBo")
+//        ]
     )
 }

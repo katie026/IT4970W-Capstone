@@ -54,7 +54,7 @@ final class SitesViewModel: ObservableObject {
             }
         }
     }
-    
+
     func getSiteTypes(completion: @escaping () -> Void) {
         Task {
             do {
