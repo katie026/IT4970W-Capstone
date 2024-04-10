@@ -29,27 +29,30 @@ struct SitesMapView: View {
                             }) {
                                 Text("All")
                             }
-                            
+
+                            //TODO: get site_groups from firestore
                             Button(action: {
-                                selectedSiteGroup = "R1"
+                                selectedSiteGroup = "LM0MN0spXlHfd2oZSahO"
                             }) {
                                 Text("R1")
                             }
                             
                             Button(action: {
-                                selectedSiteGroup = "G1"
+                                selectedSiteGroup = "gkRTxs7OyARmxGHHPuMV"
+
                             }) {
                                 Text("G1")
                             }
                             
                             Button(action: {
-                                selectedSiteGroup = "G2"
+                                selectedSiteGroup = "kxeYimfnOx1YnB9TVXp9"
                             }) {
                                 Text("G2")
                             }
                             
                             Button(action: {
-                                selectedSiteGroup = "G3"
+                                selectedSiteGroup = "zw1TFIf7KQxMNrThdfD1"
+
                             }) {
                                 Text("G3")
                             }
@@ -74,6 +77,7 @@ struct SitesMapView: View {
                 .navigationTitle("Map")
                 .navigationBarHidden(true)
                 .background(
+                    //TODO: update to NagivationStack? Renable link to in BuildingDetailView
                     NavigationLink(
                         destination: selectedBuilding != nil ? BuildingDetailView(building: selectedBuilding!) : nil,
                         isActive: Binding<Bool>(
@@ -153,13 +157,11 @@ struct MapView: UIViewRepresentable {
     private func addAnnotations(to mapView: MKMapView) {
         mapView.removeAnnotations(mapView.annotations)
         
-        
-        
         for building in buildings {
-            if let coordinates = building.coordinates, selectedSiteGroup == nil || building.siteGroup == selectedSiteGroup {
+            if let coordinates = building.coordinates, selectedSiteGroup == nil || building.siteGroupId == selectedSiteGroup {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude)
-                annotation.subtitle = building.siteGroup
+                annotation.subtitle = building.siteGroupId
                 annotation.title =  building.name ?? ""
                 mapView.addAnnotation(annotation)
             }

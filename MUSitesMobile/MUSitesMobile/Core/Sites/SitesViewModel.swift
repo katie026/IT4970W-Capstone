@@ -10,10 +10,11 @@ import Foundation
 @MainActor
 final class SitesViewModel: ObservableObject {
     @Published private(set) var sites: [Site] = []
-    @Published private(set) var siteTest: Site? = nil
     @Published var selectedSort: SortOption? = nil
     @Published var selectedFilter: FilterOption? = nil
-    @Published private(set) var buildings: [Building] = [] // Add buildings property
+    var buildings: [Building] = [] // Add buildings property
+    var siteTypes: [SiteType] = []
+    var siteGroups: [SiteGroup] = []
     
     enum SortOption: String, CaseIterable {
         // CaseIterable so we can loop through them
@@ -43,24 +44,50 @@ final class SitesViewModel: ObservableObject {
         }
     }
     
-    func getAllBuildings() async throws {
-        self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: nil)
+    func getBuildings(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: nil)
+                completion()
+            } catch {
+                print("Error getting buildings: \(error)")
+            }
+        }
+    }
+
+    func getSiteTypes(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.siteTypes = try await SiteTypeManager.shared.getAllSiteTypes(descending: nil)
+                completion()
+            } catch {
+                print("Error getting site types: \(error)")
+            }
+        }
     }
     
-    func getSite(id: String) async throws {
-        self.siteTest = try await SitesManager.shared.getSite(siteId: id)
+    func getSiteGroups(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.siteGroups = try await SiteGroupManager.shared.getAllSiteGroups(descending: nil)
+                completion()
+            } catch {
+                print("Error getting site groups: \(error)")
+            }
+        }
     }
     
     func sortSelected(option: SortOption) async throws {
         // set sort option
         self.selectedSort = option
         // get sites again
-        self.getSites()
+        self.getSites{}
     }
     
-    func getSites() {
+    func getSites(completion: @escaping () -> Void) {
         Task {
             self.sites = try await SitesManager.shared.getAllSites(descending: selectedSort?.sortDescending)
+            completion()
         }
     }
 }

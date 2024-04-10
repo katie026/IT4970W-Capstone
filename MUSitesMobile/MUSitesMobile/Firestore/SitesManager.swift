@@ -25,13 +25,15 @@ struct Site: Identifiable, Codable, Equatable {
     let buildingId: String?
     let nearestInventoryId: String?
     let chairCounts: [ChairCount]?
-    let siteType: String?
+    let siteTypeId: String?
     let hasClock: Bool?
     let hasInventory: Bool?
     let hasWhiteboard: Bool?
+    let hasPosterBoard: Bool?
     let namePatternMac: String?
     let namePatternPc: String?
     let namePatternPrinter: String?
+    let calendarName: String?
     
     // create Site manually
     init(
@@ -40,26 +42,30 @@ struct Site: Identifiable, Codable, Equatable {
         buildingId: String? = nil,
         nearestInventoryId: String? = nil,
         chairCounts: [ChairCount]? = nil,
-        siteType: String? = nil,
+        siteTypeId: String? = nil,
         hasClock: Bool? = nil,
         hasInventory: Bool? = nil,
         hasWhiteboard: Bool? = nil,
+        hasPosterBoard: Bool? = nil,
         namePatternMac: String? = nil,
         namePatternPc: String? = nil,
-        namePatternPrinter: String? = nil
+        namePatternPrinter: String? = nil,
+        calendarName: String? = nil
     ) {
         self.id = id
         self.name = name
         self.buildingId = buildingId
         self.nearestInventoryId = nearestInventoryId
         self.chairCounts = chairCounts
-        self.siteType = siteType
+        self.siteTypeId = siteTypeId
         self.hasClock = hasClock
         self.hasInventory = hasInventory
         self.hasWhiteboard = hasWhiteboard
+        self.hasPosterBoard = hasPosterBoard
         self.namePatternMac = namePatternMac
         self.namePatternPc = namePatternPc
         self.namePatternPrinter = namePatternPrinter
+        self.calendarName = calendarName
     }
     
     enum CodingKeys: String, CodingKey {
@@ -68,13 +74,15 @@ struct Site: Identifiable, Codable, Equatable {
         case buildingId = "building"
         case nearestInventoryId = "nearest_inventory"
         case chairCounts = "chair_counts"
-        case siteType = "site_type"
+        case siteTypeId = "site_type"
         case hasClock = "has_clock"
         case hasInventory = "has_inventory"
         case hasWhiteboard = "has_whiteboard"
+        case hasPosterBoard = "has_poster_board"
         case namePatternMac = "name_pattern_mac"
         case namePatternPc = "name_pattern_pc"
         case namePatternPrinter = "name_pattern_printer"
+        case calendarName = "calendar_name"
     }
     
     init(from decoder: Decoder) throws {
@@ -84,13 +92,15 @@ struct Site: Identifiable, Codable, Equatable {
         self.buildingId = try container.decodeIfPresent(String.self, forKey: .buildingId)
         self.nearestInventoryId = try container.decodeIfPresent(String.self, forKey: .nearestInventoryId)
         self.chairCounts = try container.decodeIfPresent([ChairCount].self, forKey: .chairCounts)
-        self.siteType = try container.decodeIfPresent(String.self, forKey: .siteType)
+        self.siteTypeId = try container.decodeIfPresent(String.self, forKey: .siteTypeId)
         self.hasClock = try container.decodeIfPresent(Bool.self, forKey: .hasClock)
         self.hasInventory = try container.decodeIfPresent(Bool.self, forKey: .hasInventory)
         self.hasWhiteboard = try container.decodeIfPresent(Bool.self, forKey: .hasWhiteboard)
+        self.hasPosterBoard = try container.decodeIfPresent(Bool.self, forKey: .hasPosterBoard)
         self.namePatternMac = try container.decodeIfPresent(String.self, forKey: .namePatternMac)
         self.namePatternPc = try container.decodeIfPresent(String.self, forKey: .namePatternPc)
         self.namePatternPrinter = try container.decodeIfPresent(String.self, forKey: .namePatternPrinter)
+        self.calendarName = try container.decodeIfPresent(String.self, forKey: .calendarName)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -100,13 +110,15 @@ struct Site: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(self.buildingId, forKey: .buildingId)
         try container.encodeIfPresent(self.nearestInventoryId, forKey: .nearestInventoryId)
         try container.encodeIfPresent(self.chairCounts, forKey: .chairCounts)
-        try container.encodeIfPresent(self.siteType, forKey: .siteType)
+        try container.encodeIfPresent(self.siteTypeId, forKey: .siteTypeId)
         try container.encodeIfPresent(self.hasClock, forKey: .hasClock)
         try container.encodeIfPresent(self.hasInventory, forKey: .hasInventory)
         try container.encodeIfPresent(self.hasWhiteboard, forKey: .hasWhiteboard)
+        try container.encodeIfPresent(self.hasPosterBoard, forKey: .hasPosterBoard)
         try container.encodeIfPresent(self.namePatternMac, forKey: .namePatternMac)
         try container.encodeIfPresent(self.namePatternPc, forKey: .namePatternPc)
         try container.encodeIfPresent(self.namePatternPrinter, forKey: .namePatternPrinter)
+        try container.encodeIfPresent(self.calendarName, forKey: .calendarName)
     }
     
     static func == (lhs:Site, rhs: Site) -> Bool {

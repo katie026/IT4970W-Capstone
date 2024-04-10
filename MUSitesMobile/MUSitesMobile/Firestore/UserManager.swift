@@ -18,6 +18,7 @@ struct ChairReport: Codable {
 struct DBUser: Codable, Identifiable { // allow encoding and decoding
     var id: String { userId } // conform to identifiable
     let userId: String
+    let studentId: Int?
     let isAnonymous: Bool?
     let hasAuthentication: Bool?
     let email: String?
@@ -31,6 +32,7 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
     // create DBUser manually
     init(
         userId: String,
+        studentId: Int?,
         isAnonymous: Bool? = nil,
         hasAuthentication: Bool? = nil,
         email: String? = nil,
@@ -42,6 +44,7 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
         chairReport: ChairReport? = nil
     ) {
         self.userId = userId
+        self.studentId = studentId
         self.isAnonymous = isAnonymous
         self.hasAuthentication = hasAuthentication
         self.email = email
@@ -56,6 +59,7 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
     // create DBUser from AuthDataResultModel
     init(auth: AuthDataResultModel) {
         self.userId = auth.uid
+        self.studentId = nil
         self.isAnonymous = auth.isAnonymous
         self.hasAuthentication = true
         self.email = auth.email
@@ -82,6 +86,7 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
     
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
+        case studentId = "student_id"
         case isAnonymous = "is_anonymous"
         case hasAuthentication = "has_authentication"
         case email = "email"
@@ -98,6 +103,7 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.userId = try container.decode(String.self, forKey: .userId)
+        self.studentId = try container.decodeIfPresent(Int.self, forKey: .studentId)
         self.isAnonymous = try container.decodeIfPresent(Bool.self, forKey: .isAnonymous)
         self.hasAuthentication = try container.decodeIfPresent(Bool.self, forKey: .hasAuthentication)
         self.email = try container.decodeIfPresent(String.self, forKey: .email)
@@ -112,6 +118,7 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.userId, forKey: .userId)
+        try container.encodeIfPresent(self.studentId, forKey: .isAnonymous)
         try container.encodeIfPresent(self.isAnonymous, forKey: .isAnonymous)
         try container.encodeIfPresent(self.hasAuthentication, forKey: .hasAuthentication)
         try container.encodeIfPresent(self.email, forKey: .email)
@@ -183,7 +190,15 @@ final class UserManager {
         }
     }
     
-    //function to get all the users in the user collection
+    // get list of DBUsers
+    func getUsersList() async throws -> [DBUser] {
+        let query = userCollection
+        
+        return try await query
+            .getDocuments(as: DBUser.self)
+    }
+    
+    // function to get all the users in the user collection
     func getAllUsers(completion: @escaping (Result<[DBUser], Error>) -> Void) {
         Firestore.firestore().collection("users").getDocuments { snapshot, error in
             if let error = error {

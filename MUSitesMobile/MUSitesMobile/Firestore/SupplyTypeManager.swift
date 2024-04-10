@@ -9,21 +9,24 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct SupplyType: Codable {
+struct SupplyType: Codable, Hashable {
     let id: String
     let name: String
     let notes: String?
+    let collectLevel: Bool?
 
-    init(id: String, name: String, notes: String?) {
+    init(id: String, name: String, notes: String?, collectLevel: Bool?) {
         self.id = id
         self.name = name
         self.notes = notes
+        self.collectLevel = collectLevel
     }
 
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case name = "name"
         case notes = "notes"
+        case collectLevel = "collect_level"
     }
 }
 
@@ -75,15 +78,15 @@ class SupplyTypeManager {
             .order(by: SupplyType.CodingKeys.name.rawValue, descending: descending)
     }
 
-    // get supply types by name
+    // get all supply types
     func getAllSupplyTypes(descending: Bool?) async throws -> [SupplyType] {
-        let query: Query = getAllSupplyTypesQuery()
+        var query = getAllSupplyTypesQuery()
 
-//        // if given sort
-//        if let descending {
-//            // sort whole collection
-//            query = getAllSitesSortedByNameQuery(descending: descending)
-//        }
+        // if given sort
+        if let descending {
+            // sort whole collection
+            query = getAllSupplyTypesSortedByNameQuery(descending: descending)
+        }
         return try await query
             .getDocuments(as: SupplyType.self) // query key_types collection
     }

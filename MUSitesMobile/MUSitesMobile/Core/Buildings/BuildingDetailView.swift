@@ -10,12 +10,11 @@ import FirebaseFirestore
 
 
 struct BuildingDetailView: View {
-    
     let building: Building
     @State private var filteredSites: [Site] = []
     @State private var filteredInventorySites: [InventorySite] = []
     @State private var searchText = ""
-    
+
     var body: some View {
         NavigationView {
             VStack {
@@ -25,7 +24,7 @@ struct BuildingDetailView: View {
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(10)
                     .padding(.horizontal)
-                
+
                 // Regular Sites Section
                 NavigationView {
                     List {
@@ -35,7 +34,7 @@ struct BuildingDetailView: View {
                     }
                     .navigationTitle("Sites")
                 }
-                
+
                 // Inventory Sites Section
                 NavigationView {
                     List {
@@ -53,7 +52,7 @@ struct BuildingDetailView: View {
                     // Fetch regular sites for the selected building using SitesManager
                     let sites = try await SitesManager.shared.getAllSites(descending: nil)
                     filteredSites = sites.filter { $0.buildingId == building.id }
-                    
+
                     // Fetch inventory sites for the selected building using InventorySitesManager
                     let inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: nil)
                     filteredInventorySites = inventorySites.filter { $0.buildingId == building.id }
@@ -64,7 +63,7 @@ struct BuildingDetailView: View {
             }
         }
     }
-    
+
     // Filtered and sorted regular sites based on search text
     private var sortedSites: [Site] {
         if searchText.isEmpty {
@@ -81,5 +80,15 @@ struct BuildingDetailView: View {
 
 
 #Preview {
-    BuildingDetailView(building: Building(id: "001", name: "EBW", address: Address(city: "Columbia", country: "US", state: "MO", street: "1400 Treelane Dr.", zipCode: "65211"), coordinates:GeoPoint(latitude: 1.1, longitude: 2.2) , isLibrary: true, isReshall: true, siteGroup: "G1"))
+    BuildingDetailView(
+        building: Building(
+            id: "VYUlFVzdSeVTBkNuPQWT",
+            name: "Arts & Science",
+            address: Address(city: "Columbia", country: "US", state: "MO", street: "1400 Treelane Dr.", zipCode: "65211"),
+            coordinates:GeoPoint(latitude: 1.1, longitude: 2.2) ,
+            isLibrary: true,
+            isReshall: true,
+            siteGroupId: "zw1TFIf7KQxMNrThdfD1"
+        )
+    )
 }

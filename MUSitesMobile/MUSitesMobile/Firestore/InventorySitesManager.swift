@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct InventorySite: Identifiable, Codable, Equatable {
+struct InventorySite: Identifiable, Codable, Equatable, Hashable {
     let id: String
     let name: String?
     let buildingId: String?
@@ -113,7 +113,7 @@ final class InventorySitesManager {
 //            // sort whole collection
 //            query = getAllSitesSortedByNameQuery(descending: descending)
 //        }
-        print("trying to query inventory sites collection, query: \(query)")
+        print("Querying all inventory sites.")
         return try await query
             .getDocuments(as: InventorySite.self) // query inventory_site collection
     }

@@ -70,9 +70,8 @@ struct BoardView: View {
     }
 }
 
-public struct InventoryView: View {
+public struct InventoryPictureView: View {
     public var imageURLs: [URL]
-    
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {

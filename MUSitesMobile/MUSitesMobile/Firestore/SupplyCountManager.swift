@@ -14,22 +14,16 @@ protocol Copyable {
 }
 
 struct SupplyCount: Identifiable, Codable, Copyable {
+    // Properties
     var id: String
     // vars because they may need to be changed
     var inventorySiteId: String?
     var supplyTypeId: String?
     var countMin: Int?
+    var level: Int?
     var count: Int?
-    
-    // calculated values
-    var supplyTypeName: Task<String?, Error> {
-        Task {
-            // check if there's a supplyId
-            guard let supplyTypeId = supplyTypeId else { throw SupplyCountManagerError.noSupplyTypeId }
-            // if so, return the supply type name
-            return await SupplyCountManager.shared.getSupplyTypeName(supplyTypeId: supplyTypeId)
-        }
-    }
+    // will not be coded
+    var usedCount: Int = 0
     
     // create SupplyCount manually
     init(
@@ -37,13 +31,15 @@ struct SupplyCount: Identifiable, Codable, Copyable {
         inventorySiteId: String? = nil,
         supplyTypeId: String? = nil,
         countMin: Int? = nil,
-        count: Int? = nil
+        count: Int? = nil,
+        level: Int? = nil
     ) {
         self.id = id
         self.inventorySiteId = inventorySiteId
         self.supplyTypeId = supplyTypeId
         self.countMin = countMin
         self.count = count
+        self.level = level
     }
     
     enum CodingKeys: String, CodingKey {
@@ -52,6 +48,7 @@ struct SupplyCount: Identifiable, Codable, Copyable {
         case supplyTypeId = "supply_type"
         case countMin = "minimum"
         case count = "count"
+        case level = "level"
     }
     
     init(from decoder: Decoder) throws {
@@ -61,6 +58,7 @@ struct SupplyCount: Identifiable, Codable, Copyable {
         self.supplyTypeId = try container.decodeIfPresent(String.self, forKey: .supplyTypeId)
         self.countMin = try container.decodeIfPresent(Int.self, forKey: .countMin)
         self.count = try container.decodeIfPresent(Int.self, forKey: .count)
+        self.level = try container.decodeIfPresent(Int.self, forKey: .level)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -70,6 +68,7 @@ struct SupplyCount: Identifiable, Codable, Copyable {
         try container.encodeIfPresent(self.supplyTypeId, forKey: .supplyTypeId)
         try container.encodeIfPresent(self.countMin, forKey: .countMin)
         try container.encodeIfPresent(self.count, forKey: .count)
+        try container.encodeIfPresent(self.level, forKey: .level)
     }
     
     // Copyable Protocal
@@ -79,7 +78,8 @@ struct SupplyCount: Identifiable, Codable, Copyable {
             inventorySiteId: self.inventorySiteId,
             supplyTypeId: self.supplyTypeId,
             countMin: self.countMin,
-            count: self.count
+            count: self.count,
+            level: self.level
         )
     }
 }
@@ -202,7 +202,6 @@ class SupplyCountManager {
         
         // Commit the batched write operation
         try await batch.commit()
-        print("tried to commit batch")
     }
     
 }

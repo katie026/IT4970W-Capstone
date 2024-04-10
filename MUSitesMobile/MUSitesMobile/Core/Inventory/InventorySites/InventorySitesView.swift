@@ -11,9 +11,10 @@ import SwiftUI
 final class InventorySitesViewModel: ObservableObject {
     
     @Published private(set) var inventorySites: [InventorySite] = []
-    @Published private(set) var inventorySiteTest: InventorySite? = nil
     @Published var selectedSort: SortOption? = nil
+    var inventoryTypes: [InventoryType] = []
     
+    //TODO: implement getting building and group info to display
     enum SortOption: String, CaseIterable {
         // CaseIterable so we can loop through them
         case noSort
@@ -60,26 +61,52 @@ final class InventorySitesViewModel: ObservableObject {
             self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: selectedSort?.sortDescending)
         }
     }
+    
+    func getInventoryTypes() {
+        Task {
+            self.inventoryTypes = try await InventoryTypeManager.shared.getAllInventoryTypes(descending: nil)
+        }
+    }
 }
 
-
 struct InventorySitesView: View {
+    // View Model
     @StateObject private var viewModel = InventorySitesViewModel()
     
+    // View Control
+    @State private var path: [Route] = []
+    
     var body: some View {
-        List {
-            ForEach(viewModel.inventorySites) { inventorySite in
-                InventorySiteCellView(inventorySite: inventorySite)
+        //TODO: move the navigation stack to the root view
+        NavigationStack (path: $path) { // will trigger nav destination if $path changes
+            List {
+//                ForEach(viewModel.inventorySites) { inventorySite in
+//                    InventorySiteCellView(inventorySite: inventorySite)
+//                }
+                ForEach(viewModel.inventorySites) { inventorySite in
+                    NavigationLink(value: Route.detailedInventorySite(inventorySite)) {
+                        InventorySiteCellView(inventorySite: inventorySite)
+                    }
+                }
             }
-//            if let site = viewModel.siteTest {
-//                SiteCellView(site: site)
-//            }
-        }
-        .navigationTitle("Inventory Sites")
-        .onAppear {
-            Task {
-                viewModel.getInventorySites()
-//                try? await viewModel.getSite(id: "6tYFeMv41IXzfXkwbbh6")
+            .navigationTitle("Inventory Sites")
+            .onAppear {
+                Task {
+                    viewModel.getInventorySites()
+                    //viewModel.getInventoryTypes()
+                }
+            }
+            .navigationDestination(for: Route.self) { view in
+                switch view {
+                case .inventorySitesList:
+                    InventorySitesView()
+                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
+                case .inventorySubmission(let inventorySite):
+                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
+                        .environmentObject(SheetManager())
+                case .inventoryChange(let inventorySite):
+                    InventoryChangeView(path: $path, inventorySite: inventorySite)
+                }
             }
         }
     }
@@ -88,6 +115,5 @@ struct InventorySitesView: View {
 #Preview {
     NavigationStack {
         InventorySitesView()
-//        RootView()
     }
 }
