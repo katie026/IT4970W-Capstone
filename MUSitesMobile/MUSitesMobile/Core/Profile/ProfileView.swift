@@ -17,7 +17,7 @@ struct ProfileView: View {
     // Disclosure Groups
     @State private var keySetExpanded = false
     
-    let positionOptions: [String] = ["CO", "SS", "CS"]
+//    let positionOptions: [String] = ["CO", "SS", "CS"]
     
     private func userHasPosition(text: String) -> Bool {
         viewModel.user?.positions?.contains(text) == true
@@ -43,12 +43,11 @@ struct ProfileView: View {
                         keysGroup
                         
                         // POSITIONS
-                        positionsSection(user: user)
+                        positionsSection()
                         
                         // CHAIR COUNT (for testing)
 //                        chairCountsSection(user: user)
                     }
-                    
                     Section() {
                         // ADMIN LINK
                         if isAdmin {
@@ -81,8 +80,15 @@ struct ProfileView: View {
                     Image(systemName: "gear")
                     .font(.headline)}
             }
-        }.task {
+        }
+        .task {
             try? await viewModel.loadCurrentUser()
+        }
+    }
+    
+    private func positionsSection() -> some View {
+        Section() {
+            Text("**Positions**: \(viewModel.positions.joined(separator: ","))")
         }
     }
     
@@ -158,33 +164,33 @@ struct ProfileView: View {
         return AnyView(EmptyView())
     }
     
-    private func positionsSection(user: DBUser) -> some View {
-        VStack {
-            Text("**Positions**: \((user.positions ?? []).joined(separator: ", "))")
-                .frame(maxWidth: .infinity, alignment: .leading)
-            HStack {
-                // make a button for each position option above
-                // positionOptions conforms to hashable (using id: \.self)
-                ForEach(positionOptions, id: \.self) { string in
-                    Button(string) {
-                        // if user has the position
-                        if userHasPosition(text: string) {
-                            // delete the position
-                            viewModel.removeUserPosition(text: string)
-                        } else {
-                            // otherwise add the position
-                            viewModel.addUserPosition(text: string)
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    // green if user already has position, red otherwise
-                    .tint(userHasPosition(text: string) ? .green : .red)
-                }
-                
-                Spacer()
-            }
-        }
-    }
+//    private func positionsSection(user: DBUser) -> some View {
+//        VStack {
+//            Text("**Positions**: \((user.positions ?? []).joined(separator: ", "))")
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//            HStack {
+//                // make a button for each position option above
+//                // positionOptions conforms to hashable (using id: \.self)
+//                ForEach(positionOptions, id: \.self) { string in
+//                    Button(string) {
+//                        // if user has the position
+//                        if userHasPosition(text: string) {
+//                            // delete the position
+//                            viewModel.removeUserPosition(text: string)
+//                        } else {
+//                            // otherwise add the position
+//                            viewModel.addUserPosition(text: string)
+//                        }
+//                    }
+//                    .buttonStyle(.borderedProminent)
+//                    // green if user already has position, red otherwise
+//                    .tint(userHasPosition(text: string) ? .green : .red)
+//                }
+//                
+//                Spacer()
+//            }
+//        }
+//    }
     
     private func chairCountsSection(user: DBUser) -> some View {
         Button {

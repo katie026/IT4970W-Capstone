@@ -14,6 +14,7 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var keySet: KeySet? = nil
     @Published private(set) var keys: [Key]? = nil
     @Published private(set) var keyTypeCodeMap: [String: String] = [:]
+    @Published var positions: [String] = []
     
     func loadCurrentUser() async throws {
         // get authData for current user
@@ -34,6 +35,8 @@ final class ProfileViewModel: ObservableObject {
                 print("Error fetching key types: \(error)")
             }
         }
+        
+        self.positions = user?.positions ?? []
     }
     
     func toggleClockInStatus() {

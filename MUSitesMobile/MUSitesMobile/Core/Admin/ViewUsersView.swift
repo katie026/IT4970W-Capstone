@@ -43,14 +43,23 @@ struct ViewUsersView: View {
                 .cornerRadius(10)
                 .padding(.horizontal)
             
+//            List(sortedUsers) { user in
+//                VStack(alignment: .leading) {
+//                    Text(user.fullName ?? "No Name")
+//                        .font(.headline)
+//                    Text(user.email ?? "No Email")
+//                        .font(.subheadline)
+//                }
+//            }
             List(sortedUsers) { user in
-                VStack(alignment: .leading) {
-                    Text(user.fullName ?? "No Name")
-                        .font(.headline)
-                    Text(user.email ?? "No Email")
-                        .font(.subheadline)
+                NavigationLink(destination: AdminUserProfileView(user: user)) {
+                    VStack(alignment: .leading) {
+                        Text(user.fullName ?? "No Name").font(.headline)
+                        Text(user.email ?? "No Email").font(.subheadline)
+                    }
                 }
             }
+
         }
         .navigationTitle("User Accounts")
         .onAppear {

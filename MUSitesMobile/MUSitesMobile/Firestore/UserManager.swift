@@ -397,6 +397,20 @@ final class UserManager {
         self.userBuildingsListener = listener
         return publisher
     }
+    
+    func updateUserPositions(userId: String, positions: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        let docRef = db.collection("users").document(userId)
+
+        docRef.updateData(["positions": positions]) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
 }
 
 struct UserBuilding: Codable {
