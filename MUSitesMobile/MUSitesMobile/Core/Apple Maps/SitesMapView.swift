@@ -11,6 +11,8 @@ import MapKit
 struct SitesMapView: View {
     @State private var selectedBuilding: Building? = nil
     @State private var selectedSiteGroup: String? = nil
+    @State private var showSiteGroup: String? = nil
+    
     
     
     var body: some View {
@@ -26,6 +28,7 @@ struct SitesMapView: View {
                         Menu {
                             Button(action: {
                                 selectedSiteGroup = nil
+                                showSiteGroup = "All"
                             }) {
                                 Text("All")
                             }
@@ -33,12 +36,14 @@ struct SitesMapView: View {
                             //TODO: get site_groups from firestore
                             Button(action: {
                                 selectedSiteGroup = "LM0MN0spXlHfd2oZSahO"
+                                showSiteGroup = "R1"
                             }) {
                                 Text("R1")
                             }
                             
                             Button(action: {
                                 selectedSiteGroup = "gkRTxs7OyARmxGHHPuMV"
+                                showSiteGroup = "G1"
 
                             }) {
                                 Text("G1")
@@ -46,18 +51,21 @@ struct SitesMapView: View {
                             
                             Button(action: {
                                 selectedSiteGroup = "kxeYimfnOx1YnB9TVXp9"
+                                showSiteGroup = "G2"
                             }) {
                                 Text("G2")
                             }
                             
                             Button(action: {
                                 selectedSiteGroup = "zw1TFIf7KQxMNrThdfD1"
+                                showSiteGroup = "G3"
 
                             }) {
                                 Text("G3")
                             }
                             Button(action: {
                                 selectedSiteGroup = ""
+                                showSiteGroup = "None"
                             }) {
                                 Text("None")
                             }
@@ -66,10 +74,18 @@ struct SitesMapView: View {
                         } label: {
                             Text("Select Site Group")
                         }
-                        .padding()
-                        .background(Color.white)
-                        Text("Selected Option: \(selectedSiteGroup ?? "None")")
-                        .padding()
+                        .padding(5)
+                        .background(Color.yellow)
+                        .cornerRadius(10)
+                        .foregroundColor(.black)
+                        .font(.system(size: 24))
+                        
+                        Text("Selected Option: \(showSiteGroup ?? "None")")
+                            .padding(5)
+                            .background(Color.black.opacity(0.5))
+                            .foregroundColor(.yellow) // Set text color to yellow
+                            .font(.system(size: 14))
+                            .padding()
                                     
                         
                     }
