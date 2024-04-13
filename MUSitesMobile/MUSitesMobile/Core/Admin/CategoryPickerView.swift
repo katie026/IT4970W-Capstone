@@ -17,7 +17,7 @@ struct CategoryPickerView: View {
     var selectedSiteName: String
 
     var body: some View {
-        List(["Posters", "Board", "Inventory"], id: \.self) { category in
+        List(["Posters", "Board", "Inventory", "ProfilePicture"], id: \.self) { category in
             NavigationLink(destination: ImageUploadView(siteName: selectedSiteName, category: category)) {
                 Text(category)
             }

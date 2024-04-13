@@ -26,7 +26,7 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
     let photoURL: String?
     let dateCreated: Date?
     let isClockedIn: Bool?
-    let positions: [String]?
+    var positions: [String]?
     let chairReport: ChairReport?
     
     // create DBUser manually
@@ -398,18 +398,21 @@ final class UserManager {
         return publisher
     }
     
-    func updateUserPositions(userId: String, positions: [String], completion: @escaping (Result<Void, Error>) -> Void) {
-        let db = Firestore.firestore()
-        let docRef = db.collection("users").document(userId)
 
-        docRef.updateData(["positions": positions]) { error in
+    func updateUserPosition(userId: String, newPosition: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        print("Firestore update initiated for user ID: \(userId) with position: \(newPosition)")
+        db.collection("users").document(userId).updateData(["positions": [newPosition]]) { error in
             if let error = error {
+                print("Firestore update failed for user ID: \(userId) with error: \(error.localizedDescription)")
                 completion(.failure(error))
             } else {
+                print("Firestore update succeeded for user ID: \(userId) with new position: \(newPosition)")
                 completion(.success(()))
             }
         }
     }
+
 
 }
 
