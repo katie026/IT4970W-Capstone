@@ -11,9 +11,12 @@ import FirebaseFirestore // for Preview
 struct SiteCellView: View {
     // init
     let site: Site
+//    @ObservedObject var viewModel: DetailedSiteViewModel
+    @StateObject private var viewModel = DetailedSiteViewModel()
     @State private var siteType: SiteType? = nil
     @State private var building: Building? = nil
     @State private var siteGroup: SiteGroup? = nil
+    @State private var profilePictureUrl: URL?
     
     var hasComputers = true
     var hasPrinters = true
@@ -80,18 +83,8 @@ struct SiteCellView: View {
         NavigationLink(destination: DetailedSiteView(site: site)) {
             HStack(alignment: .center, spacing: 10) {
                 // IMAGE
-                AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 70, height: 70)
-                        .cornerRadius(8)
-                } placeholder: {
-                    ProgressView()
-                }
-                .frame(width: 60, height: 60)
-                .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-                .padding(10)
+                ProfileImageView(imageURL: viewModel.profilePicture.first)
+
                 
                 // INFO BLOCK
                 VStack(alignment: .leading) {
@@ -122,6 +115,10 @@ struct SiteCellView: View {
                 getBuilding {
                     getSiteGroup{}
                 }
+                Task {
+                        // Ensure viewModel has the function fetchSiteSpecificImageURLs defined as async
+                        await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "", category: "ProfilePicture")
+                    }
             }
         }
         .buttonStyle(PlainButtonStyle())

@@ -21,6 +21,7 @@ final class DetailedSiteViewModel: ObservableObject {
     @Published var imageURLs: [URL] = []
     @Published var boardImageURLs: [URL] = []
     @Published var inventoryImageURLs: [URL] = []
+    @Published var profilePicture: [URL] = []
     
     func loadBuilding(site: Site, completion: @escaping () -> Void) {
         Task {
@@ -78,6 +79,8 @@ final class DetailedSiteViewModel: ObservableObject {
                 } else if category == "Inventory" {
                     self.inventoryImageURLs.append(downloadURL)
                     print("Appending the downloadURL: \(downloadURL)")
+                } else if category == "ProfilePicture" {
+                    self.profilePicture.append(downloadURL)
                 }
             }
         } catch {

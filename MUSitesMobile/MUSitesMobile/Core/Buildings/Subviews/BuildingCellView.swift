@@ -11,20 +11,12 @@ import FirebaseFirestore // for Preview
 struct BuildingCellView: View {
     
     let building: Building
+    @StateObject private var viewModel = DetailedSiteViewModel()
+    @State private var profilePictureUrl: URL?
     
     var body: some View {
         HStack(alignment: .top) {
-            AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 50, height: 50)
-                    .cornerRadius(8)
-            } placeholder: {
-                ProgressView()
-            }
-            .frame(width: 60, height: 60)
-            .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
+            ProfileImageView(imageURL: viewModel.profilePicture.first)
 
             VStack(alignment: .leading) {
                 Text("\(building.name ?? "N/A")")
@@ -48,6 +40,12 @@ struct BuildingCellView: View {
             }
             .font(.callout)
             .foregroundStyle(.secondary)
+            .onAppear {
+                Task {
+                        // Ensure viewModel has the function fetchSiteSpecificImageURLs defined as async
+                        await viewModel.fetchSiteSpecificImageURLs(siteName: building.name ?? "", category: "ProfilePicture")
+                    }
+            }
             
         }
     }
