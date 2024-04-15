@@ -247,29 +247,38 @@ struct DetailedSiteView: View {
             .listRowBackground(Color.clear)
         }
     }
+
     
     private var postersSection: some View {
-        Section() {
-            DisclosureGroup(
-                isExpanded: $postersSectionExpanded,
-                content: {
-                    Section(header: Text("Posters")) {
-                        PostersView(imageURLs: viewModel.imageURLs)
+        Section {
+            // Use DisclosureGroup only if you need the section to be collapsible
+            if !viewModel.imageURLs.isEmpty || !viewModel.boardImageURLs.isEmpty {
+                DisclosureGroup(
+                    isExpanded: $postersSectionExpanded,
+                    content: {
+                        if !viewModel.imageURLs.isEmpty {
+                            Section(header: Text("Posters")) {
+                                PostersView(imageURLs: viewModel.imageURLs)
+                            }
+                        }
+                        if !viewModel.boardImageURLs.isEmpty {
+                            Section(header: Text("Board")) {
+                                BoardView(imageURLs: viewModel.boardImageURLs)
+                            }
+                        }
+                    },
+                    label: {
+                        Text("Poster Board")
+                            .font(.title)
+                            .fontWeight(.bold)
                     }
-                    Section(header: Text("Board")) {
-                        BoardView(imageURLs: viewModel.boardImageURLs)
-                    }
-                },
-                label: {
-                    Text("Poster Board")
-                        .font(.title)
-                        .fontWeight(.bold)
-                }
-            )
-            .padding(.top, 10.0)
-            .listRowBackground(Color.clear)
+                )
+                .padding(.top, 10.0)
+                .listRowBackground(Color.clear)
+            }
         }
     }
+
     
     private var calendarSection: some View {
         Section() {

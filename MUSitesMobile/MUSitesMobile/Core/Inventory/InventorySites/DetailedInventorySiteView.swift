@@ -198,7 +198,7 @@ struct DetailedInventorySiteView: View {
             DisclosureGroup(
                 isExpanded: $pictureSectionExpanded,
                 content: {
-                    InventoryPictureView(imageURLs: siteViewModel.inventoryImageURLs)
+                    InventoryView(imageURLs: siteViewModel.inventoryImageURLs)
                 },
                 label: {
                     ZStack {
