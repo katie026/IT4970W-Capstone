@@ -19,7 +19,7 @@ struct ChairCount: Codable {
     }
 }
 
-struct Site: Identifiable, Codable, Equatable {
+struct Site: Identifiable, Codable, Equatable, Hashable {
     let id: String
     let name: String?
     let buildingId: String?
@@ -121,9 +121,17 @@ struct Site: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(self.calendarName, forKey: .calendarName)
     }
     
+    // Equatable
     static func == (lhs:Site, rhs: Site) -> Bool {
         // if two sites have the same ID, we're going to say they're equal to eachother
         return lhs.id == rhs.id
+    }
+    
+    // Hashable
+    func hash(into hasher: inout Hasher) {
+        // Combine the hash values of all properties that contribute to the uniqueness of the Site
+        hasher.combine(id)
+        hasher.combine(name)
     }
 }
 
@@ -176,14 +184,15 @@ final class SitesManager {
     
     // get sites by name
     func getAllSites(descending: Bool?) async throws -> [Site] {
-        let query: Query = getAllSitesQuery()
+        var query: Query = getAllSitesQuery()
         
-//        // if given sort
-//        if let descending {
-//            // sort whole collection
-//            query = getAllSitesSortedByNameQuery(descending: descending)
-//        }
-        print("trying to query sites collection, query: \(query)")
+        // if given sort
+        if let descending {
+            // sort whole collection
+            query = getAllSitesSortedByNameQuery(descending: descending)
+        }
+        
+        print("Trying to query sites collection, query: \(query)")
         return try await query
             .getDocuments(as: Site.self) // query Sites collection
     }
