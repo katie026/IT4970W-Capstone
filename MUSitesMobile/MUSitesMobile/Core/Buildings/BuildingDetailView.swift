@@ -8,54 +8,47 @@
 import SwiftUI
 import FirebaseFirestore
 
-
 struct BuildingDetailView: View {
     let building: Building
     @State private var filteredSites: [Site] = []
-    @State private var filteredInventorySites: [InventorySite] = []
     @State private var searchText = ""
 
     var body: some View {
         NavigationView {
             VStack {
-                Text(building.name ?? "")
+                
                 TextField("Search", text: $searchText)
                     .padding()
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(10)
                     .padding(.horizontal)
 
-                // Regular Sites Section
-                NavigationView {
-                    List {
+                // Combined Sites Section
+                List {
+                    Section(header: Text("Sites")) {
                         ForEach(filteredSites) { site in
                             SiteCellView(site: site)
                         }
                     }
-                    .navigationTitle("Sites")
-                }
-
-                // Inventory Sites Section
-                NavigationView {
-                    List {
-                        ForEach(filteredInventorySites) { inventorySite in
-                            InventorySiteCellView(inventorySite: inventorySite)
+                    Section(header: Text("Inventory Sites")) {
+                        ForEach(filteredSites.filter { $0 is InventorySite }) { site in
+                            InventorySiteCellView(inventorySite: site as! InventorySite)
                         }
                     }
-                    .navigationTitle("Inventory Sites")
                 }
+                .listStyle(GroupedListStyle())
+                .navigationTitle(building.name ??
+                "")
+                
+                
             }
         }
         .onAppear {
             Task {
                 do {
-                    // Fetch regular sites for the selected building using SitesManager
+                    // Fetch sites for the selected building using SitesManager
                     let sites = try await SitesManager.shared.getAllSites(descending: nil)
                     filteredSites = sites.filter { $0.buildingId == building.id }
-
-                    // Fetch inventory sites for the selected building using InventorySitesManager
-                    let inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: nil)
-                    filteredInventorySites = inventorySites.filter { $0.buildingId == building.id }
                 } catch {
                     print("Error fetching sites: \(error.localizedDescription)")
                     // Handle error if needed
@@ -64,7 +57,7 @@ struct BuildingDetailView: View {
         }
     }
 
-    // Filtered and sorted regular sites based on search text
+    // Filtered and sorted sites based on search text
     private var sortedSites: [Site] {
         if searchText.isEmpty {
             return filteredSites.sorted { $0.name?.localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending }
@@ -75,6 +68,7 @@ struct BuildingDetailView: View {
         }
     }
 }
+
 
 
 
