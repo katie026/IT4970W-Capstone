@@ -57,11 +57,11 @@ struct ComputingSite: Codable {
         case user = "user"
     }
     
-    init(from decoder: any Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(String.self, forKey: .id)
-        self.siteId = try container.decode(String.self, forKey: .id)
-        self.siteName = try container.decode(String.self, forKey:.id)
+        self.siteId = try container.decode(String.self, forKey: .siteId)
+        self.siteName = try container.decode(String.self, forKey: .siteName)
         self.issues = try container.decode([Issue].self, forKey: .issues)
         self.labelsForReplacement = try container.decode([String].self, forKey: .labelsForReplacement)
         self.suppliesNeeded = try container.decode([SupplyNeeded].self, forKey: .suppliesNeeded)
@@ -70,13 +70,11 @@ struct ComputingSite: Codable {
         self.user = try container.decode(String.self, forKey: .user)
     }
     
-    
-    
-    func encode(to encoder: any Encoder) throws {
+    func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.id, forKey: .id)
-        try container.encode(self.siteId, forKey: .id)
-        try container.encode(self.siteName, forKey: .id)
+        try container.encode(self.siteId, forKey: .siteId)
+        try container.encode(self.siteName, forKey: .siteName)
         try container.encode(self.issues, forKey: .issues)
         try container.encode(self.labelsForReplacement, forKey: .labelsForReplacement)
         try container.encode(self.suppliesNeeded, forKey: .suppliesNeeded)
@@ -84,13 +82,13 @@ struct ComputingSite: Codable {
         try container.encode(self.updatedInventory, forKey: .updatedInventory)
         try container.encode(self.user, forKey: .user)
     }
+
 }
 
 struct Issue: Codable {
     let issue: String
-    let ticket: Int
+    let ticket: String
 }
-
 struct SupplyNeeded: Codable {
     let count: Int
     let supply: String
