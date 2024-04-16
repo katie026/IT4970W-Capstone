@@ -28,17 +28,18 @@ class SiteCaptainViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let siteCaptainManager = SiteCaptainManager()
 
-    func submitSiteCaptainEntry(for siteId: String, userId: String, siteName: String) {
-        let issues = needsRepair ? [Issue(issue: issueDescription, ticket: Int(ticketNumber) ?? 1111111)] : []
+    func submitSiteCaptainEntry(for siteId: String, siteName: String, userId: String) {
+        let issues = needsRepair ? [Issue(issue: issueDescription, ticket: ticketNumber.isEmpty ? "-" : ticketNumber)] : []
         let labelsForReplacement = needsLabelReplacement ? labelsToReplace.components(separatedBy: ",") : []
         let suppliesNeeded: [SupplyNeeded] = [] // Populate this based on your requirements
 
         let firestore = Firestore.firestore()
         let newDocumentReference = firestore.collection("site_captain_entries").document()
+
         let computingSite = ComputingSite(
             id: newDocumentReference.documentID,
             siteId: siteId,
-            siteName: siteName,
+            siteName: siteName, // Use the provided siteName
             issues: issues,
             labelsForReplacement: labelsForReplacement,
             suppliesNeeded: suppliesNeeded,

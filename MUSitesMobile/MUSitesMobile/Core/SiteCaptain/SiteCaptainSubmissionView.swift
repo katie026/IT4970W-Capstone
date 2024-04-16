@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseAuth
 
 struct SiteCaptainSubmissionView: View {
+    var siteId: String
     var siteName: String
     @StateObject private var viewModel = SiteCaptainViewModel()
     @State private var errorMessage: String?
@@ -51,7 +52,7 @@ struct SiteCaptainSubmissionView: View {
                         .padding()
                 }
             }
-            .navigationTitle("Site Captain Form for \(siteName)")
+            .navigationTitle("Site Captain Form for \\(siteName)")
             .navigationBarTitleDisplayMode(.inline)
             .alert(isPresented: $viewModel.showSubmissionConfirmation) {
                 Alert(title: Text("Submission Successful"),
@@ -76,6 +77,6 @@ struct SiteCaptainSubmissionView: View {
             return
         }
         
-        viewModel.submitSiteCaptainEntry(for: "site-123", userId: currentUser.uid, siteName: siteName)
+        viewModel.submitSiteCaptainEntry(for: siteId, siteName: siteName, userId: currentUser.uid)
     }
 }

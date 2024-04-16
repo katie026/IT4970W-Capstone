@@ -8,28 +8,21 @@
 import SwiftUI
 
 struct SubmitView: View {
-    var siteName: String
+    let site: Site
     
     var body: some View {
-        VStack {
-            Text("Submit View for \(siteName)")
-                .font(.title)
-                .padding()
-            
-            NavigationLink(destination: SiteCaptainSubmissionView(siteName: siteName)) {
-                Text("Go to Site Captain Form")
+        NavigationLink(destination: SiteCaptainSubmissionView(siteId: site.id, siteName: site.name ?? "")) {
+            HStack {
+                Spacer(minLength: 4)
+                Text("Submit a Form")
                     .font(.headline)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.blue)
+                Spacer()
             }
+            .padding(.horizontal)
+            .padding(.vertical)
         }
     }
 }
 
-#Preview {
-    NavigationView {
-        SubmitView(siteName: "Sample Site")
-    }
-}
