@@ -21,6 +21,9 @@ struct AdminView: View {
                     NavigationLink(destination: CreateUserView()) {
                         Text("Create User")
                     }
+                    NavigationLink(destination: NonAuthUsersView()) {
+                        Text("Non authenticated users")
+                    }
                 }
                 
                 // INVENTORY SECTION

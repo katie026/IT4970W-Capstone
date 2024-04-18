@@ -67,15 +67,15 @@ struct TabBarView: View {
                 Image(systemName: "person.crop.circle")
                 Text(isAdmin ? "Admin" : "Profile")
             }
-            
-            // NonAuthUser View
-            NavigationStack {
-                NonAuthUsersView()
-            }
-            .tabItem {
-                Image(systemName: "person.circle")
-                Text("Non-Auth Users")
-            }
+//            
+//             NonAuthUser View
+//            NavigationStack {
+//                NonAuthUsersView()
+//            }
+//            .tabItem {
+//                Image(systemName: "person.circle")
+//                Text("Non-Auth Users")
+//            }
         }
     }
 }
