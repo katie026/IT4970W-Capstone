@@ -14,6 +14,7 @@ struct AuthenticationView: View {
     @StateObject private var viewModel = AuthenticationViewModel()
     // recieve and link to the showSignInView variable that belongs to RootView
     @Binding var showSignInView: Bool
+    @State private var showInvalidEmailAlert: Bool = false
     
     var body: some View {
         VStack {
@@ -57,9 +58,15 @@ struct AuthenticationView: View {
                 Task {
                     do {
                         // try to sign in using Google
-                        try await viewModel.signInGoogle()
-                        // turn off the SignInView
-                        showSignInView = false;
+                        let signedIn = try await viewModel.signInGoogle()
+                        if signedIn == true {
+                            // turn off the SignInView
+                            showSignInView = false
+                        } else {
+                            //dont turn off signInView if user cant login(doesnt have authenticated email)
+                            //show alert
+                            showInvalidEmailAlert = true
+                        }
                     } catch {
                         print(error)
                     }
@@ -88,6 +95,11 @@ struct AuthenticationView: View {
         }
         .padding()
         .navigationTitle("Sign In")
+        .alert("Invalid Email", isPresented: $showInvalidEmailAlert) {
+            Button("OK") { }
+        } message: {
+            Text("Email must end in umsystem.edu")
+        }
     }
 }
 

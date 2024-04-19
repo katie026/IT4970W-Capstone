@@ -21,6 +21,9 @@ struct AdminView: View {
                     NavigationLink(destination: CreateUserView()) {
                         Text("Create User")
                     }
+                    NavigationLink(destination: NonAuthUsersView()) {
+                        Text("Non authenticated users")
+                    }
                 }
                 
                 // INVENTORY SECTION
@@ -45,10 +48,7 @@ struct AdminView: View {
     }
 }
 
-// Placeholder views for navigation destinations
-struct CreateUserView: View {
-    var body: some View { Text("Create User Content") }
-}
+
 
 #Preview {
     AdminView()

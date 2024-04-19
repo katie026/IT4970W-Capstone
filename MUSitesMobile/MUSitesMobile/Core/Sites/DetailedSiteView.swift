@@ -60,6 +60,8 @@ struct DetailedSiteView: View {
                 if (site.calendarName != nil && site.calendarName != "") {
                     calendarSection
                 }
+                
+                submitForm(site: site) // Pass the site property here
             }
         }
         .navigationTitle(site.name ?? "N/A")
@@ -84,6 +86,7 @@ struct DetailedSiteView: View {
         }
     }
     
+
     private var informationSection: some View {
         Section() {
             DisclosureGroup(
@@ -361,6 +364,21 @@ struct DetailedSiteView: View {
     }()
 }
 
+private func submitForm(site: Site) -> some View {
+    //Submit a Form section
+    NavigationLink(destination: SubmitView(siteName: site.name ?? "")) {
+        HStack {
+            Spacer(minLength: 4)
+            Text("Submit a Form")
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(.blue)
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical)
+    }
+}
 #Preview {
     NavigationStack {
         DetailedSiteView(
