@@ -34,7 +34,7 @@ class SupplyTypeManager {
     static let shared = SupplyTypeManager()
     private init() { }
 
-    private var supplyTypes: [SupplyType] = []
+    @Published var supplyTypes: [SupplyType] = []
 
     // get the collection as CollectionReference
     private let supplyTypesCollection: CollectionReference = Firestore.firestore().collection("supply_types")
@@ -95,5 +95,15 @@ class SupplyTypeManager {
     // we can use this to determine if we need to use pagination
     func allSupplyTypesCount() async throws -> Int {
         try await supplyTypesCollection.aggregateCount()
+    }
+    
+    func fetchSupplyTypes() {
+        Task {
+            do {
+                supplyTypes = try await getAllSupplyTypes(descending: false)
+            } catch {
+                print("Error fetching supply types: \(error)")
+            }
+        }
     }
 }

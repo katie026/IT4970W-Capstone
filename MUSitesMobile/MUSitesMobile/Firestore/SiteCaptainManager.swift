@@ -98,22 +98,53 @@ struct SupplyNeeded: Codable {
 class SiteCaptainManager {
     private let db = Firestore.firestore()
     private let siteCaptainEntry = "site_captain_entries"
-    
+    private let supplyRequestCollection = "supply_requests"
     
     func submitSiteCaptainEntry(_ computingSite: ComputingSite, completion: @escaping (Error?) -> Void) {
         do {
-            try db.collection(siteCaptainEntry).document(computingSite.id).setData(from: computingSite) { error in
+            try db.collection(siteCaptainEntry).document(computingSite.id).setData(from: computingSite) { [weak self] error in
                 if let error = error {
-                    print("Error submitting site captain entry: \(error.localizedDescription)") // Add this line
+                    print("Error submitting site captain entry: \(error.localizedDescription)")
                     completion(error)
                 } else {
-                    print("Site captain entry submitted successfully!") // Add this line
-                    completion(nil)
+                    print("Site captain entry submitted successfully!")
+                    self?.createSupplyRequests(for: computingSite, completion: completion)
                 }
             }
         } catch {
-            print("Error encoding site captain entry: \(error.localizedDescription)") // Add this line
+            print("Error encoding site captain entry: \(error.localizedDescription)")
             completion(error)
         }
     }
+    
+    private func createSupplyRequests(for computingSite: ComputingSite, completion: @escaping (Error?) -> Void) {
+        let supplyRequests = computingSite.suppliesNeeded.map { supplyNeeded -> SupplyRequest in
+            return SupplyRequest(
+                id: UUID().uuidString,
+                countNeeded: supplyNeeded.count,
+                reportID: computingSite.id,
+                reportType: "site_captain",
+                resolved: false,
+                supplyType: supplyNeeded.supply
+            )
+        }
+        
+        let batch = db.batch()
+        
+        for supplyRequest in supplyRequests {
+            let supplyRequestRef = db.collection(supplyRequestCollection).document(supplyRequest.id)
+            batch.setData(try! Firestore.Encoder().encode(supplyRequest), forDocument: supplyRequestRef)
+        }
+        
+        batch.commit { error in
+            if let error = error {
+                print("Error creating supply requests: \(error.localizedDescription)")
+                completion(error)
+            } else {
+                print("Supply requests created successfully!")
+                completion(nil)
+            }
+        }
+    }
 }
+
