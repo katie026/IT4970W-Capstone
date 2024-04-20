@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct SiteReadySurveyView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -24,19 +25,42 @@ struct SiteReadySurveyView: View {
                 }
                 Spacer()
                 Button(action: {
-                    // Add your submit logic here
-                    // For example, you can print the form data
-                    print("Form submitted!")
-                }) {
-                    Text("Submit")
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-                .padding(.vertical)
+                    let db = Firestore.firestore()
+                        
+                        // Create a document reference
+                        let docRef = db.collection("site_ready_entries").document()
+                        
+                        // Create a dictionary with the form data
+                        let data: [String: Any] = [
+                            "bw_printer_count": viewModel.bwPrinterCount,
+                            "chair_count": viewModel.chairCount,
+                            "color_printer_count": viewModel.colorPrinterCount,
+                            "comments": viewModel.additionalComments,
+                            "computing_site": "6tYFeMv41IXzfXkwbbh6", // Replace with your actual computing site
+                            "id": docRef.documentID,
+                            "mac_count": viewModel.macCount,
+                            "pc_count": viewModel.pcCount,
+                            // Add other properties as needed
+                        ]
+                        
+                        // Write data to Firestore
+                        docRef.setData(data) { error in
+                            if let error = error {
+                                print("Error writing document: \(error)")
+                            } else {
+                                print("Document successfully written!")
+                            }
+                        }
+                    }) {
+                        Text("Submit")
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                    }
+                    .padding(.vertical)
             }
             .navigationTitle("Site Ready Survey")
             .navigationBarItems(leading: Button(action: {
