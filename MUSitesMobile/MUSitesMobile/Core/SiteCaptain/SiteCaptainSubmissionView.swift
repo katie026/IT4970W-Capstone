@@ -13,7 +13,10 @@ struct SiteCaptainSubmissionView: View {
     var siteName: String
     @StateObject private var viewModel = SiteCaptainViewModel()
     @State private var errorMessage: String?
-    
+    @State private var selectedSupplyType: SupplyType?
+    @State private var needsSupplies: Bool = false
+    @State private var suppliesNeededCount: Int = 1 // Initialize with default value
+
     var body: some View {
         ScrollView {
             VStack {
@@ -21,7 +24,7 @@ struct SiteCaptainSubmissionView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding()
-                
+
                 SiteCaptainFormView(
                     siteCleanedToggle: $viewModel.siteCleanedToggle,
                     selectedThingsToClean: $viewModel.selectedThingsToClean,
@@ -32,9 +35,13 @@ struct SiteCaptainSubmissionView: View {
                     needsLabelReplacement: $viewModel.needsLabelReplacement,
                     labelsToReplace: $viewModel.labelsToReplace,
                     hasInventoryLocation: $viewModel.hasInventoryLocation,
-                    inventoryChecked: $viewModel.inventoryChecked
+                    inventoryChecked: $viewModel.inventoryChecked,
+                    suppliesNeeded: $viewModel.suppliesNeeded, // Pass suppliesNeeded binding
+                    suppliesNeededCount: $suppliesNeededCount, // Pass suppliesNeededCount binding
+                    selectedSupplyType: $selectedSupplyType,
+                    needsSupplies: $needsSupplies
                 )
-                
+
                 Button(action: submitSiteCaptain) {
                     Text("Submit Site Captain Entry")
                         .font(.headline)
@@ -45,21 +52,21 @@ struct SiteCaptainSubmissionView: View {
                         .cornerRadius(10)
                 }
                 .padding()
-                
+
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .padding()
                 }
             }
-            .navigationTitle("Site Captain Form for \\(siteName)")
+            .navigationTitle("Site Captain Form for \(siteName)")
             .navigationBarTitleDisplayMode(.inline)
             .alert(isPresented: $viewModel.showSubmissionConfirmation) {
                 Alert(title: Text("Submission Successful"),
                       message: Text("Your site captain entry has been submitted."),
                       dismissButton: .default(Text("OK"), action: {
-                    viewModel.resetForm()
-                }))
+                        viewModel.resetForm()
+                      }))
             }
             .onReceive(viewModel.$submissionError) { error in
                 if let error = error {
@@ -69,14 +76,25 @@ struct SiteCaptainSubmissionView: View {
                 }
             }
         }
+        .onAppear {
+            SupplyTypeManager.shared.fetchSupplyTypes()
+        }
     }
-    
+
     func submitSiteCaptain() {
         guard let currentUser = Auth.auth().currentUser else {
             errorMessage = "Unable to get current user information."
             return
         }
-        
-        viewModel.submitSiteCaptainEntry(for: siteId, siteName: siteName, userId: currentUser.uid)
+
+        if let selectedSupplyType = selectedSupplyType {
+            viewModel.addSupply(supply: selectedSupplyType, count: suppliesNeededCount)
+        }
+
+        viewModel.submitSiteCaptainEntry(
+            for: siteId,
+            siteName: siteName,
+            userId: currentUser.uid
+        )
     }
 }

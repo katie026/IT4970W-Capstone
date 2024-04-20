@@ -18,6 +18,12 @@ struct SiteCaptainFormView: View {
     @Binding var labelsToReplace: String
     @Binding var hasInventoryLocation: Bool
     @Binding var inventoryChecked: Bool
+    @Binding var suppliesNeeded: [SupplyNeeded]
+    @Binding var suppliesNeededCount: Int
+    @Binding var selectedSupplyType: SupplyType?
+    @Binding var needsSupplies: Bool
+    
+    
     
     let thingsToClean = [
         "Wipe down the keyboards, mice, all desks, and monitors for each workstation",
@@ -181,6 +187,46 @@ struct SiteCaptainFormView: View {
                                     .foregroundColor(inventoryChecked ? .primary : .blue)
                             }
                         }
+                    }
+                }
+                
+                Text("Are there any supplies needed for your site?")
+                    .padding()
+                
+                HStack {
+                    Button(action: {
+                        needsSupplies = false
+                        selectedSupplyType = nil
+                    }) {
+                        Text("No")
+                            .foregroundColor(needsSupplies ? .primary : .blue)
+                    }
+                    
+                    Button(action: {
+                        needsSupplies = true
+                    }) {
+                        Text("Yes")
+                            .foregroundColor(needsSupplies ? .blue : .primary)
+                    }
+                }
+                
+                if needsSupplies {
+                    HStack {
+                        Picker("Select Supply Type", selection: $selectedSupplyType) {
+                            Text("Select a supply type").tag(nil as SupplyType?)
+                            ForEach(SupplyTypeManager.shared.supplyTypes, id: \.self) { supplyType in
+                                Text(supplyType.name).tag(supplyType as SupplyType?)
+                            }
+                        }
+                        Text("Count Needed:")
+                        Picker("Select Count Needed", selection: $suppliesNeededCount) {
+                            ForEach(1...10, id: \.self) { count in
+                                Text("\(count)")
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .pickerStyle(SegmentedPickerStyle())
+                        .padding()
                     }
                 }
             }
