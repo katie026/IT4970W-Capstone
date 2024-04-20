@@ -29,6 +29,8 @@ struct DetailedSiteView: View {
     @State private var mapSectionExpanded: Bool = false
     @State private var postersSectionExpanded: Bool = false
     @State private var calendarSectionExpanded: Bool = false
+    @State private var isSiteReadySurveyViewPresented = false
+
     
     init(site: Site) {
         self.site = site
@@ -61,25 +63,45 @@ struct DetailedSiteView: View {
                     calendarSection
                 }
             }
-        }
-        .navigationTitle(site.name ?? "N/A")
-        .onAppear {
-            Task {
-                // get building
-                viewModel.loadBuilding(site: self.site) {
-                    // then get group
-                    if let siteGroupId = viewModel.building?.siteGroupId {
-                        viewModel.loadSiteGroup(siteGroupId: siteGroupId) {}
+            .navigationTitle(site.name ?? "N/A")
+            .onAppear {
+                Task {
+                    // get building
+                    viewModel.loadBuilding(site: self.site) {
+                        // then get group
+                        if let siteGroupId = viewModel.building?.siteGroupId {
+                            viewModel.loadSiteGroup(siteGroupId: siteGroupId) {}
+                        }
                     }
+                    // get site type
+                    if let siteTypeId = self.site.siteTypeId {
+                        viewModel.loadSiteType(siteTypeId: siteTypeId) {}
+                    }
+                    
+                    //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
+                    await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
+                    await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
                 }
-                // get site type
-                if let siteTypeId = self.site.siteTypeId {
-                    viewModel.loadSiteType(siteTypeId: siteTypeId) {}
+            }
+            
+            // Submit Site Ready Entry Button
+            Button(action: {
+                isSiteReadySurveyViewPresented = true
+            }) {
+                Text("Submit Site Ready Entry")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+            }
+            .padding(.bottom, 20)
+            .fullScreenCover(isPresented: $isSiteReadySurveyViewPresented) {
+                NavigationView {
+                    SiteReadySurveyView()
                 }
-                
-                //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
-                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
-                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
             }
         }
     }

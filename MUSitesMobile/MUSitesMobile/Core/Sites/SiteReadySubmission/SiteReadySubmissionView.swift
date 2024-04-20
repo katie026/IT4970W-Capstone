@@ -5,29 +5,50 @@
 //  Created by Tristan Winship on 4/11/24.
 //
 
-
 import SwiftUI
 
 struct SiteReadySurveyView: View {
+    @Environment(\.presentationMode) var presentationMode
+    
     @StateObject var viewModel = ViewModel()
     
     var body: some View {
         NavigationView {
-            Form {
-                ComputersSection(viewModel: viewModel)
-                PrintersSection(viewModel: viewModel)
-                PostersSection(viewModel: viewModel)
-                RoomSection(viewModel: viewModel)
-                AdditionalCommentsSection(viewModel: viewModel)
+            VStack {
+                Form {
+                    ComputersSection(viewModel: viewModel)
+                    PrintersSection(viewModel: viewModel)
+                    PostersSection(viewModel: viewModel)
+                    RoomSection(viewModel: viewModel)
+                    AdditionalCommentsSection(viewModel: viewModel)
+                }
+                Spacer()
+                Button(action: {
+                    // Add your submit logic here
+                    // For example, you can print the form data
+                    print("Form submitted!")
+                }) {
+                    Text("Submit")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                }
+                .padding(.vertical)
             }
             .navigationTitle("Site Ready Survey")
-            .background(
-                LinearGradient(gradient: Gradient(colors: [Color.green.opacity(0.8), Color.green.opacity(0.6)]), startPoint: .leading, endPoint: .trailing)
-                    .edgesIgnoringSafeArea(.all)
-            )
+            .navigationBarItems(leading: Button(action: {
+                self.presentationMode.wrappedValue.dismiss()
+            }) {
+                Text("Back")
+            })
         }
     }
 }
+
+
 
 struct ComputersSection: View {
     @ObservedObject var viewModel: SiteReadySurveyView.ViewModel
@@ -35,7 +56,7 @@ struct ComputersSection: View {
     var body: some View {
         Section(header: Text("Computers")) {
             // Text prompt section for entering counts
-            Text("Please enter the following counts:")
+            Text("Enter PC count:")
             
             // PC Count TextField
             TextField("Enter PC count", value: $viewModel.pcCount, formatter: NumberFormatter())
@@ -70,9 +91,6 @@ struct ComputersSection: View {
                 }
             }
             
-            // Text prompt section for computer label replacement
-            Text("Please provide details for computers that failed to login:")
-            
             // Number of computers that failed to login
             Stepper(value: $viewModel.failedToLoginCount, in: 0...100, step: 1) {
                 Text("How many computers failed to login? \(viewModel.failedToLoginCount)")
@@ -81,7 +99,13 @@ struct ComputersSection: View {
             // Details for each computer that failed to login
             if viewModel.failedToLoginCount > 0 {
                 ForEach(0..<viewModel.failedToLoginCount, id: \.self) { index in
-                    ComputerFailureView(computerFailure: $viewModel.computerFailures[index])
+                    VStack {
+                        TextField("Enter computer failure description", text: $viewModel.computerFailures[index])
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        TextField("Enter ticket number", text: $viewModel.failedLoginTicketNumbers[index])
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
                 }
             }
             
@@ -108,6 +132,7 @@ struct ComputersSection: View {
         }
     }
 }
+
 struct PrintersSection: View {
     @ObservedObject var viewModel: SiteReadySurveyView.ViewModel
     
@@ -296,7 +321,7 @@ struct RoomSection: View {
     @ObservedObject var viewModel: SiteReadySurveyView.ViewModel
     
     var body: some View {
-        Section(header: Text("Room Section")) {
+        Section(header: Text("Room")) {
             // Projector and remote working properly?
             Picker("Projector and remote working properly?", selection: $viewModel.projectorWorkingProperly) {
                 ForEach(["Yes", "No", "No projector in the room"], id: \.self) { option in
@@ -315,30 +340,30 @@ struct RoomSection: View {
             
             // Cleaned whiteboard?
             Toggle(isOn: $viewModel.cleanedWhiteboard) {
-                Text(viewModel.cleanedWhiteboard ? "Yes" : "No")
+                Text("Cleaned whiteboard?")
             }
-            
-            // Updated Inventory
+
             Toggle(isOn: $viewModel.updatedInventory) {
-                Text(viewModel.updatedInventory ? "Yes" : "No")
+                Text("Updated Inventory")
             }
-            
-            // Took out recycling?
+
             Toggle(isOn: $viewModel.tookOutRecycling) {
-                Text(viewModel.tookOutRecycling ? "Yes" : "No")
+                Text("Took out recycling?")
             }
             
             // Any other issues?
-            Text("Any other issues?")
-            TextField("Enter number", text: $viewModel.otherIssuesCount)
-                .keyboardType(.numberPad)
+            Stepper(value: $viewModel.otherIssuesCount, in: 0...100, step: 1) {
+                Text("How many other issues? \(viewModel.otherIssuesCount)")
+            }
             
             // Issues dropdown
-            if let count = Int(viewModel.otherIssuesCount), count > 0 {
-                ForEach(0..<count, id: \.self) { index in
+            if viewModel.otherIssuesCount > 0 {
+                ForEach(0..<viewModel.otherIssuesCount, id: \.self) { index in
                     HStack {
                         TextField("Enter issue", text: $viewModel.otherIssues[index])
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                         TextField("Enter ticket number", text: $viewModel.otherIssueTicketNumbers[index])
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                 }
             }
@@ -404,8 +429,13 @@ extension SiteReadySurveyView {
                 while computerFailures.count < failedToLoginCount {
                     computerFailures.append("")
                 }
+                // Ensure that the failedLoginTicketNumbers array matches the count
+                while failedLoginTicketNumbers.count < failedToLoginCount {
+                    failedLoginTicketNumbers.append("")
+                }
             }
         }
+        @Published var failedLoginTicketNumbers: [String] = []
         @Published var computerFailures: [String] = []
         @Published var cleanedAllComputers: Bool = false
         @Published var cleanedAllStations: Bool = false
@@ -473,11 +503,18 @@ extension SiteReadySurveyView {
         @Published var cleanedWhiteboard: Bool = false
         @Published var updatedInventory: Bool = false
         @Published var tookOutRecycling: Bool = false
-        @Published var otherIssuesCount: String = "0"
-        @Published var otherIssues: [String] = Array(repeating: "", count: 5)
-        @Published var otherIssueTicketNumbers: [String] = Array(repeating: "", count: 5)
+        @Published var otherIssuesCount: Int = 0 {
+            didSet {
+                // Ensure that the otherIssues and otherIssueTicketNumbers arrays match the count
+                while otherIssues.count < otherIssuesCount {
+                    otherIssues.append("")
+                    otherIssueTicketNumbers.append("")
+                }
+            }
+        }
+        @Published var otherIssues: [String] = []
+        @Published var otherIssueTicketNumbers: [String] = []
 
-        
         @Published var additionalComments: String = ""
 
         // Scanner computers
@@ -489,6 +526,7 @@ extension SiteReadySurveyView {
         }
     }
 }
+
 struct SiteReadySurveyView_Previews: PreviewProvider {
     static var previews: some View {
         SiteReadySurveyView()
