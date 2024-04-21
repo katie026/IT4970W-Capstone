@@ -27,6 +27,11 @@ class SiteCaptainViewModel: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     private let siteCaptainManager = SiteCaptainManager()
     
+    func getSupplyTypes() {
+        SupplyTypeManager.shared.fetchSupplyTypes()
+        print("Got \(SupplyTypeManager.shared.supplyTypes) supply types.")
+    }
+    
     // Method to add a supply with its count to the suppliesNeeded array
     func addSupply(supply: SupplyType, count: Int) {
         let newSupplyNeeded = SupplyNeeded(count: count, supply: supply.id)
