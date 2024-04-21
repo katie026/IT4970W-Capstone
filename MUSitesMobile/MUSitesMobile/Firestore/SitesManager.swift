@@ -192,7 +192,7 @@ final class SitesManager {
             query = getAllSitesSortedByNameQuery(descending: descending)
         }
         
-        print("Trying to query sites collection, query: \(query)")
+        print("Trying to query sites collection.")
         return try await query
             .getDocuments(as: Site.self) // query Sites collection
     }

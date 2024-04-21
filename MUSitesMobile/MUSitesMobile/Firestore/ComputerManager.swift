@@ -14,7 +14,7 @@ struct Computer: Identifiable, Codable, Equatable {
     let name: String?
     let os: String?
     let siteId: String?
-    let lastCleaned: Date?
+    var lastCleaned: Date?
     let section: String?
     
     // create Site manually
@@ -160,4 +160,33 @@ final class ComputerManager {
     func allComputersCount() async throws -> Int {
         try await computersCollection.aggregateCount()
     }
+    
+    func updateComputers(_ computers: [Computer]) async throws {
+        // Create a new batched write operation
+        let batch = Firestore.firestore().batch()
+        
+        // Iterate over the computers array and update each document in the batch
+        for computer in computers {
+            // Get the reference to the document
+            let documentRef = computerDocument(computerId: computer.id)
+            
+            // Encode the updated supplyCount object
+            guard let data = try? encoder.encode(computer) else {
+                // Handle encoding error
+                throw ComputerManagerError.encodingError
+            }
+            
+            // Set the data for the document in the batch
+            batch.setData(data, forDocument: documentRef)
+        }
+        
+        // Commit the batched write operation
+        try await batch.commit()
+    }
+}
+
+// Errors
+enum ComputerManagerError: Error {
+    case noComputerId
+    case encodingError
 }

@@ -10,7 +10,7 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Combine
 
-struct ComputingSite: Codable {
+struct SiteCaptain: Codable {
     let id: String
     let siteId:String
     let siteName: String
@@ -89,6 +89,7 @@ struct Issue: Codable {
     let issue: String
     let ticket: String
 }
+
 struct SupplyNeeded: Codable {
     let count: Int
     let supply: String
@@ -100,7 +101,7 @@ class SiteCaptainManager {
     private let siteCaptainEntry = "site_captain_entries"
     private let supplyRequestCollection = "supply_requests"
     
-    func submitSiteCaptainEntry(_ computingSite: ComputingSite, completion: @escaping (Error?) -> Void) {
+    func submitSiteCaptainEntry(_ computingSite: SiteCaptain, completion: @escaping (Error?) -> Void) {
         do {
             try db.collection(siteCaptainEntry).document(computingSite.id).setData(from: computingSite) { [weak self] error in
                 if let error = error {
@@ -117,7 +118,7 @@ class SiteCaptainManager {
         }
     }
     
-    private func createSupplyRequests(for computingSite: ComputingSite, completion: @escaping (Error?) -> Void) {
+    private func createSupplyRequests(for computingSite: SiteCaptain, completion: @escaping (Error?) -> Void) {
         let supplyRequests = computingSite.suppliesNeeded.map { supplyNeeded -> SupplyRequest in
             return SupplyRequest(
                 id: UUID().uuidString,
