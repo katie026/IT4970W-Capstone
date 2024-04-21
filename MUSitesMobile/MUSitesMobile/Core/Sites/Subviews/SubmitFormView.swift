@@ -7,22 +7,63 @@
 
 import SwiftUI
 
-struct SubmitView: View {
-    let site: Site
+struct SubmitFormView: View {
+    let computingSite: Site
     
     var body: some View {
-        NavigationLink(destination: SiteCaptainSubmissionView(siteId: site.id, siteName: site.name ?? "")) {
+        VStack {
+            // Subtitle
             HStack {
-                Spacer(minLength: 4)
-                Text("Submit a Form")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.blue)
+                Text("\(computingSite.name ?? "N/A")")
+                    .font(.title2)
+                    .fontWeight(.medium)
                 Spacer()
             }
-            .padding(.horizontal)
-            .padding(.vertical)
-        }
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
+            
+            // Link List
+            List {
+                // Hourly Cleaning Link
+                NavigationLink(destination: HourlyCleaningSubmissionView(computingSite: computingSite)) {
+                    HStack {
+                        Text("Hourly Cleaning")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }.padding(.vertical, 10)
+                }
+                
+                // Site Captain Link
+                NavigationLink(destination: SiteCaptainSubmissionView(siteId: computingSite.id, siteName: computingSite.name ?? "")) {
+                    HStack {
+                        Text("Site Captain")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }.padding(.vertical, 10)
+                }
+            }
+        }.navigationTitle("SUBMIT")
     }
 }
 
+#Preview {
+    NavigationView {
+        SubmitFormView(computingSite: Site(
+            id: "BezlCe1ospf57zMdop2z",
+            name: "Bluford",
+            buildingId: "SvK0cIKPNTGCReVCw7Ln",
+            nearestInventoryId: "345",
+            chairCounts: [ChairCount(count: 3, type: "physics_black")],
+            siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
+            hasClock: true,
+            hasInventory: true,
+            hasWhiteboard: false,
+            namePatternMac: "CLARK-MAC-##",
+            namePatternPc: "CLARK-PC-##",
+            namePatternPrinter: "Clark Printer ##",
+            calendarName: "cornell-hall-5-lab"
+        ))
+    }
+}
