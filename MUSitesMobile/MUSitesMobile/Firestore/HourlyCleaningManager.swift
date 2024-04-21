@@ -104,6 +104,14 @@ final class HourlyCleaningManager {
         hourlyCleaningsCollection
     }
     
+    // create new hourlyCleaning document in Firestore, return id
+    func getNewHourlyCleaningId() async throws -> String {
+        // create auto-generated document in collection
+        let document = hourlyCleaningsCollection.document()
+        // get document id
+        return document.documentID
+    }
+    
     // get hourlyCleanings filtered by date range
     private func getHourlyCleaningsBySiteQuery(startDate: Date, endDate: Date) -> Query {
         hourlyCleaningsCollection

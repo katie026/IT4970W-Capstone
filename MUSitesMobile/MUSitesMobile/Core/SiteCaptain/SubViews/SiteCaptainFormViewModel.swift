@@ -61,7 +61,7 @@ class SiteCaptainViewModel: ObservableObject {
         let issues = needsRepair ? [Issue(issue: issueDescription, ticket: ticketNumber)] : []
         let labelsForReplacement = needsLabelReplacement ? labelsToReplace.components(separatedBy: ",") : []
         
-        let computingSite = ComputingSite(
+        let siteCaptain = SiteCaptain (
             id: UUID().uuidString,
             siteId: siteId,
             siteName: siteName,
@@ -73,7 +73,7 @@ class SiteCaptainViewModel: ObservableObject {
             user: userId
         )
         
-        siteCaptainManager.submitSiteCaptainEntry(computingSite) { [weak self] error in
+        siteCaptainManager.submitSiteCaptainEntry(siteCaptain) { [weak self] error in
             DispatchQueue.main.async {
                 if let error = error {
                     self?.submissionError = error
