@@ -84,7 +84,6 @@ struct DetailedSiteView: View {
                 }
             }
             
-            // Submit Site Ready Entry Button
             Button(action: {
                 isSiteReadySurveyViewPresented = true
             }) {
@@ -100,7 +99,7 @@ struct DetailedSiteView: View {
             .padding(.bottom, 20)
             .fullScreenCover(isPresented: $isSiteReadySurveyViewPresented) {
                 NavigationView {
-                    SiteReadySurveyView()
+                    SiteReadySurveyView(siteId: site.id)
                 }
             }
         }
