@@ -14,7 +14,7 @@ struct SiteCaptain: Codable {
     let id: String
     let siteId:String
     let siteName: String
-    let issues: [Issue]
+    let issues: [SiteCaptainIssue]
     let labelsForReplacement: [String]
     let suppliesNeeded: [SupplyNeeded]
     let timestamp: Date
@@ -25,7 +25,7 @@ struct SiteCaptain: Codable {
         id: String,
         siteId:String,
         siteName:String,
-        issues: [Issue]?,
+        issues: [SiteCaptainIssue]?,
         labelsForReplacement:[String]?,
         suppliesNeeded:[SupplyNeeded]?,
         timestampValue : Date?,
@@ -62,7 +62,7 @@ struct SiteCaptain: Codable {
         self.id = try container.decode(String.self, forKey: .id)
         self.siteId = try container.decode(String.self, forKey: .siteId)
         self.siteName = try container.decode(String.self, forKey: .siteName)
-        self.issues = try container.decode([Issue].self, forKey: .issues)
+        self.issues = try container.decode([SiteCaptainIssue].self, forKey: .issues)
         self.labelsForReplacement = try container.decode([String].self, forKey: .labelsForReplacement)
         self.suppliesNeeded = try container.decode([SupplyNeeded].self, forKey: .suppliesNeeded)
         self.timestamp = try container.decode(Date.self, forKey: .timestamp)
@@ -85,7 +85,7 @@ struct SiteCaptain: Codable {
 
 }
 
-struct Issue: Codable {
+struct SiteCaptainIssue: Codable {
     let issue: String
     let ticket: String
 }
