@@ -24,13 +24,26 @@ class SiteCaptainViewModel: ObservableObject {
     @Published var suppliesNeeded: [SupplyNeeded] = []
     @Published var showSubmissionConfirmation: Bool = false
     @Published var submissionError: Error?
+    var user: AuthDataResultModel? = nil
     
     private var cancellables: Set<AnyCancellable> = []
     private let siteCaptainManager = SiteCaptainManager()
     
+    func getUser() {
+        Task {
+            // get current user
+            self.user = try AuthenticationManager.shared.getAuthenticatedUser()
+        }
+    }
+    
     func getSupplyTypes() {
         SupplyTypeManager.shared.fetchSupplyTypes()
-        print("Got \(SupplyTypeManager.shared.supplyTypes) supply types.")
+        print("Queried supply types.")
+    }
+    
+    func getIssueTypes() {
+        IssueTypeManager.shared.fetchIssueTypes()
+        print("Queried issue types.")
     }
     
     // Method to add a supply with its count to the suppliesNeeded array

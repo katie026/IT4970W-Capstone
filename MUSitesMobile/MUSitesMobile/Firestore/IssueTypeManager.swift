@@ -25,7 +25,7 @@ class IssueTypeManager {
     static let shared = IssueTypeManager()
     private init() { }
 
-    private var issueTypes: [IssueType] = []
+    @Published var issueTypes: [IssueType] = []
 
     // get the collection as CollectionReference
     private let issueTypesCollection: CollectionReference = Firestore.firestore().collection("issue_types")
@@ -87,5 +87,15 @@ class IssueTypeManager {
     // we can use this to determine if we need to use pagination
     func allIssueTypesCount() async throws -> Int {
         try await issueTypesCollection.aggregateCount()
+    }
+    
+    func fetchIssueTypes() {
+        Task {
+            do {
+                issueTypes = try await getAllIssueTypes(descending: false)
+            } catch {
+                print("Error fetching issue types: \(error)")
+            }
+        }
     }
 }

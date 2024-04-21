@@ -74,7 +74,7 @@ struct IssuesView: View {
     // Date Formatter
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "M/d/yy HH:mm"
+        formatter.dateFormat = "M/d/yy"
         return formatter
     }()
     
@@ -204,6 +204,8 @@ struct IssuesView: View {
                 // DATE
                 Image(systemName: "calendar")
                 Text("\(issue.timestamp != nil ? dateFormatter.string(from: issue.timestamp!) : "N/A")")
+                // RESOLUTION STATUS
+                issueResolvedSection(issue: issue)
                 // SITE
                 Image(systemName: "mappin.and.ellipse")
                     .padding(.leading,20)
@@ -211,11 +213,11 @@ struct IssuesView: View {
                 Text("\(siteName)")
             }
             HStack {
+                // TYPE
+                issueTypeSection(issue: issue)
                 // USER
                 Image(systemName: "person.fill")
                 Text("\(userFullName)")
-                // TYPE
-                issueTypeSection(issue: issue)
             }
             // DESCRIPTION
             //TODO: consider shortening description if it's a certain amount of characters and redirect to a detailed view (or trigger pop up/long hold etc.)
@@ -267,12 +269,47 @@ struct IssuesView: View {
         return HStack {
             Image(systemName: issueTypeImageName)
                 .foregroundColor(issueTypeAccentColor)
-                .padding(.leading, 15)
             Text("\(typeName)")
                 .padding(.vertical, 3)
                 .padding(.horizontal, 5)
                 .foregroundColor(issueTypeAccentColor)
                 .cornerRadius(8)
+        }
+    }
+    
+    private func issueResolvedSection(issue: Issue) -> some View {
+        // default accent color
+        var resolvedAccentColor = Color.gray
+        // default image
+        var resolvedImageName = "square.dotted"
+        
+        // customize color and image based on Type
+        if let resolved = issue.resolved {
+            // if resolved
+            if resolved == true {
+                resolvedAccentColor = Color.green
+                resolvedImageName = "checkmark.circle"
+            // if not resolved
+            } else {
+                resolvedAccentColor = Color.red
+                resolvedImageName = "xmark.app"
+            }
+        }
+        
+        // return section
+        return HStack {
+            Image(systemName: resolvedImageName)
+                .foregroundColor(resolvedAccentColor)
+                .padding(.leading, 15)
+            if let resolved = issue.resolved {
+                Text(resolved ? "Resolved" : "Unresolved")
+                    .padding(.vertical, 3)
+                    .padding(.horizontal, 5)
+            } else {
+                Text("N/A")
+                    .padding(.vertical, 3)
+                    .padding(.horizontal, 5)
+            }
         }
     }
 }

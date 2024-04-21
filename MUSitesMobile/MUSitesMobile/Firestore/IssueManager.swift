@@ -10,12 +10,12 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 
 struct Issue: Identifiable, Codable, Equatable {
-    let id: String
-    let description: String?
+    var id: String
+    var description: String?
     let timestamp: Date?
-    let issueType: String?
-    let resolved: Bool?
-    let ticket: Int?
+    var issueType: String?
+    var resolved: Bool?
+    var ticket: Int?
     let reportId: String?
     var reportType: String?
     let siteId: String?

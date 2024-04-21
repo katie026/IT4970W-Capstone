@@ -16,6 +16,7 @@ struct SiteCaptainSubmissionView: View {
     @State private var selectedSupplyType: SupplyType?
     @State private var needsSupplies: Bool = false
     @State private var suppliesNeededCount: Int = 1 // Initialize with default value
+    @State var issueCount = ""
     
     let thingsToClean = [
         "Wipe down the keyboards, mice, all desks, and monitors for each workstation",
@@ -72,6 +73,8 @@ struct SiteCaptainSubmissionView: View {
         }
         .onAppear {
             viewModel.getSupplyTypes()
+            viewModel.getIssueTypes()
+            viewModel.getUser()
         }
     }
 
@@ -173,21 +176,7 @@ struct SiteCaptainSubmissionView: View {
             }
             
             if viewModel.needsRepair {
-                VStack(alignment: .leading) {
-                    Text("What issues are there in your site?")
-                    
-                    TextField("Enter the issue description", text: $viewModel.issueDescription)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-                    
-                    Text("Enter the ticket number(s) below for the problems you encountered.")
-                    Text("If no tickets were needed, leave it blank.")
-                    
-                    TextField("Enter the 7-digit ticket number", text: $viewModel.ticketNumber)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-                        .keyboardType(.numberPad)
-                }
+                issuesSection()
                 // add a button to dismiss keypad when needed
                 .toolbar {
                     ToolbarItem(placement: .keyboard) {
@@ -197,6 +186,107 @@ struct SiteCaptainSubmissionView: View {
                     }
                 }
             }
+            
+            ForEach(viewModel.issues.indices, id: \.self) { index in
+                let issue = viewModel.issues[index]
+                Text("\(issue.id)")
+            }
+        }
+    }
+    
+    func issuesSection() -> some View {
+        let view = Section() {
+            VStack(alignment: .leading) {
+                Text("How many issues are there in your site?")
+                TextField("#", text: Binding(
+                    get: { String(issueCount) },
+                    set: { newValue in
+                        issueCount = newValue
+                        viewModel.issues = Array(repeating: Issue(
+                            id: "",
+                            description: nil,
+                            timestamp: Date(),
+                            issueType: nil,
+                            resolved: false,
+                            ticket: nil,
+                            reportId: nil,
+                            reportType: "site_captain",
+                            siteId: siteId,
+                            userSubmitted: viewModel.user?.uid,
+                            userAssigned: nil
+                        ), count: Int(issueCount) ?? 0)
+                        viewModel.issues.enumerated().forEach { index, _ in
+                            viewModel.issues[index].id = "\(index)"
+                        }
+                    }
+                ))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                    .keyboardType(.numberPad)
+                
+                ForEach(0..<(viewModel.issues.count), id: \.self) { index in
+                    issueRow(index: index)
+                }
+            }
+        }
+        
+        return AnyView(view)
+    }
+    
+    func issueRow(index: Int) -> some View {
+        var view = Section() {
+            VStack(alignment: .leading) {
+                HStack {
+                    Picker("Issue Type", selection: $viewModel.issues[index].issueType) {
+                        Text("Issue Type").tag(nil as IssueType?)
+                        ForEach(IssueTypeManager.shared.issueTypes, id: \.self) { issueType in
+                            Text(issueType.name).tag(issueType as IssueType?)
+                        }
+                    }.labelsHidden()
+                    TextField("7-digit ticket # if needed", value: $viewModel.issues[index].ticket, formatter: NumberFormatter())
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                        .keyboardType(.numberPad)
+                    
+                }
+                
+                TextField("Description", text: Binding(
+                    get: { viewModel.issues[index].description ?? "" }, // if description is nil
+                    set: { newValue in viewModel.issues[index].description = newValue }
+                ))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+            }
+        }
+        
+//        let issue = Issue(
+//            id: String(index),
+//            description: description == "" ? nil : description,
+//            timestamp: Date(),
+//            issueType: issueType == "" ? nil : issueType,
+//            resolved: false,
+//            ticket: ticket == "" ? nil : Int(ticket),
+//            reportId: nil,
+//            reportType: "site_captain",
+//            siteId: siteId,
+//            userSubmitted: viewModel.user?.uid,
+//            userAssigned: nil
+//        )
+        
+        return AnyView(view)
+    }
+    
+    func updateIssue(_ issue: Issue) {
+        if (issue.description != nil), (issue.issueType != nil), (issue.ticket != nil) {
+            // Append or update issue in viewModel.issues
+            if let index = viewModel.issues.firstIndex(where: { $0.id == issue.id }) {
+                viewModel.issues[index] = issue
+            } else {
+                viewModel.issues.append(issue)
+            }
+        } else {
+            // Remove issue from viewModel.issues
+            viewModel.issues.removeAll { $0.id == issue.id }
         }
     }
     
