@@ -631,21 +631,21 @@
 			path = Users;
 			sourceTree = "<group>";
 		};
-		F6AB56132BCB0CC1005727D2 /* CleaningSubmission */ = {
+		F6AB56132BCB0CC1005727D2 /* HourlyCleaning */ = {
 			isa = PBXGroup;
 			children = (
+				F6B887232BD19D3100E4A7C8 /* HourlyCleaningSubmissionView.swift */,
+				F6B887252BD19F7600E4A7C8 /* HourlyCleaningsView.swift */,
+				F6B887292BD1B04500E4A7C8 /* HourlyCleaningCellView.swift */,
 			);
-			path = CleaningSubmission;
+			path = HourlyCleaning;
 			sourceTree = "<group>";
 		};
 		F6AB56162BCB0FA2005727D2 /* Computers */ = {
 			isa = PBXGroup;
 			children = (
-				F6AB56132BCB0CC1005727D2 /* CleaningSubmission */,
+				F6AB56132BCB0CC1005727D2 /* HourlyCleaning */,
 				F6AB56172BCB0FBF005727D2 /* ComputersView.swift */,
-				F6B887232BD19D3100E4A7C8 /* HourlyCleaningSubmissionView.swift */,
-				F6B887252BD19F7600E4A7C8 /* HourlyCleaningsView.swift */,
-				F6B887292BD1B04500E4A7C8 /* HourlyCleaningCellView.swift */,
 			);
 			path = Computers;
 			sourceTree = "<group>";

@@ -20,13 +20,18 @@ struct SiteCaptainSubmissionView: View {
     var body: some View {
         ScrollView {
             VStack {
-                Text("Site Captain Form")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding()
+                // Subtitle
+                HStack {
+                    Text("\(siteName)")
+                        .font(.title2)
+                        .fontWeight(.medium)
+                    Spacer()
+                }
+                .padding(.top, 10)
+                .padding(.horizontal, 20)
 
                 SiteCaptainFormView(
-                    siteCleanedToggle: $viewModel.siteCleanedToggle,
+                    submitButtonActive: $viewModel.submitButtonActive,
                     selectedThingsToClean: $viewModel.selectedThingsToClean,
                     selectedThingsToDo: $viewModel.selectedThingsToDo,
                     needsRepair: $viewModel.needsRepair,
@@ -41,17 +46,28 @@ struct SiteCaptainSubmissionView: View {
                     selectedSupplyType: $selectedSupplyType,
                     needsSupplies: $needsSupplies
                 )
-
-                Button(action: submitSiteCaptain) {
-                    Text("Submit Site Captain Entry")
+                
+                if viewModel.submitButtonActive {
+                    Button(action: submitSiteCaptain) {
+                        Text("SUBMIT")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+                    .padding()
+                } else {
+                    Text("SUBMIT")
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue)
+                        .background(Color(UIColor.systemGray4))
                         .cornerRadius(10)
+                        .padding()
                 }
-                .padding()
 
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
@@ -59,8 +75,7 @@ struct SiteCaptainSubmissionView: View {
                         .padding()
                 }
             }
-            .navigationTitle("Site Captain Form for \(siteName)")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Site Captain")
             .alert(isPresented: $viewModel.showSubmissionConfirmation) {
                 Alert(title: Text("Submission Successful"),
                       message: Text("Your site captain entry has been submitted."),
@@ -95,6 +110,15 @@ struct SiteCaptainSubmissionView: View {
             for: siteId,
             siteName: siteName,
             userId: currentUser.uid
+        )
+    }
+}
+
+#Preview {
+    NavigationView {
+        SiteCaptainSubmissionView(
+            siteId: "BezlCe1ospf57zMdop2z",
+            siteName: "Bluford"
         )
     }
 }

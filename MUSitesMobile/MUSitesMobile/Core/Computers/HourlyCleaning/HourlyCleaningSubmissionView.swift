@@ -8,7 +8,7 @@
 import SwiftUI
 
 @MainActor
-final class HourlyCleaningViewModel: ObservableObject {
+final class HourlyCleaningSubmissionViewModel: ObservableObject {
     // Inventory Entry Default Values
     @Published var computingSite: Site? = nil // will be passed in from the View
     @Published var computers: [Computer] = []
@@ -97,10 +97,11 @@ final class HourlyCleaningViewModel: ObservableObject {
     }
 }
 
-struct HourlyCleaningView: View {
+struct HourlyCleaningSubmissionView: View {
     // View Model
-    @StateObject private var viewModel = HourlyCleaningViewModel()
+    @StateObject private var viewModel = HourlyCleaningSubmissionViewModel()
     // View Control
+    @Environment(\.presentationMode) var presentationMode
     @State private var showCleanedComputers = false
     // Alerts (only one alert per view) https://www.hackingwithswift.com/quick-start/swiftui/how-to-show-multiple-alerts-in-a-single-view
     @State private var showConfirmAlert = false
@@ -137,7 +138,8 @@ struct HourlyCleaningView: View {
                 message: Text(viewModel.resultMessage),
                 dismissButton: .default(Text("OK")) {
                     //TODO: navigation logic
-                    // return to SubmitFormView
+                    // dismiss the current view and navigate back one view (SubmitFormView)
+                    presentationMode.wrappedValue.dismiss()
                 }
             )
         }
@@ -145,8 +147,8 @@ struct HourlyCleaningView: View {
     
     private var content: some View {
         VStack {
+            // Subtitle
             HStack {
-                // Subtitle
                 Text("\(computingSite.name ?? "N/A")")
                     .font(.title2)
                     .fontWeight(.medium)
@@ -155,15 +157,26 @@ struct HourlyCleaningView: View {
             .padding(.top, 10)
             .padding(.horizontal, 20)
             
+            // Summary
             Form {
+                // Submit Button
+                submitButton()
+                    .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                // Cleaned Computers
                 cleanedComputersSection
+                    .listRowBackground(Color(UIColor.systemGray6))
+                    .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             }
-            .frame(height: showCleanedComputers ? 90 + (CGFloat(viewModel.cleanedComputers.count) * 50.0) : 90)
+            .frame(height: showCleanedComputers ? 180 + (CGFloat(viewModel.cleanedComputers.count) * 50.0) : 180)
+            .scrollContentBackground(.hidden)
             
+            // Computers
             Form {
                 computerListSection
-                submitButton()
+                    .listRowBackground(Color(UIColor.systemGray6))
+                    .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             }
+            .scrollContentBackground(.hidden)
         }
     }
     
@@ -324,7 +337,7 @@ struct HourlyCleaningView: View {
 
 #Preview {
     NavigationView {
-        HourlyCleaningView(computingSite: Site(
+        HourlyCleaningSubmissionView(computingSite: Site(
             id: "BezlCe1ospf57zMdop2z",
             name: "Bluford",
             buildingId: "SvK0cIKPNTGCReVCw7Ln",

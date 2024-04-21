@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 
 class SiteCaptainViewModel: ObservableObject {
-    @Published var siteCleanedToggle: Bool = false
+    @Published var submitButtonActive: Bool = false
     @Published var selectedThingsToClean: [Bool] = Array(repeating: false, count: 7)
     @Published var selectedThingsToDo: [Bool] = Array(repeating: false, count: 4)
     @Published var needsRepair: Bool = false
@@ -40,7 +40,7 @@ class SiteCaptainViewModel: ObservableObject {
     
     // Method to reset the form and clear all fields
     func resetForm() {
-        siteCleanedToggle = false
+        submitButtonActive = false
         selectedThingsToClean = Array(repeating: false, count: 7)
         selectedThingsToDo = Array(repeating: false, count: 4)
         needsRepair = false
