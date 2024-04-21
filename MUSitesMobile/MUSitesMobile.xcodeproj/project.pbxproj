@@ -75,6 +75,8 @@
 		E553CD822BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E553CD812BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift */; };
 		E553CD842BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E553CD832BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift */; };
 		E565A5772BD415E700B7EEB7 /* SupplyRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E565A5762BD415E700B7EEB7 /* SupplyRequestManager.swift */; };
+		E565A57B2BD5C35400B7EEB7 /* IssueManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E565A57A2BD5C35400B7EEB7 /* IssueManager.swift */; };
+		E565A57D2BD5C38300B7EEB7 /* IssueTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E565A57C2BD5C38300B7EEB7 /* IssueTypeManager.swift */; };
 		F1A0BA402BBF09C400BBC9CB /* BuildingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0BA3F2BBF09C400BBC9CB /* BuildingDetailView.swift */; };
 		F6246A7C2BA12FD400828DAE /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6246A7B2BA12FD400828DAE /* KeyManager.swift */; };
 		F6246A7F2BA3BC6A00828DAE /* SimpleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6246A7E2BA3BC6900828DAE /* SimpleMapView.swift */; };
@@ -173,6 +175,8 @@
 		E553CD812BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainFormViewModel.swift; sourceTree = "<group>"; };
 		E553CD832BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainSubmissionFormView.swift; sourceTree = "<group>"; };
 		E565A5762BD415E700B7EEB7 /* SupplyRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyRequestManager.swift; sourceTree = "<group>"; };
+		E565A57A2BD5C35400B7EEB7 /* IssueManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueManager.swift; sourceTree = "<group>"; };
+		E565A57C2BD5C38300B7EEB7 /* IssueTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueTypeManager.swift; sourceTree = "<group>"; };
 		F1A0BA3F2BBF09C400BBC9CB /* BuildingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingDetailView.swift; sourceTree = "<group>"; };
 		F6246A7B2BA12FD400828DAE /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
 		F6246A7E2BA3BC6900828DAE /* SimpleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleMapView.swift; sourceTree = "<group>"; };
@@ -323,6 +327,8 @@
 				E565A5762BD415E700B7EEB7 /* SupplyRequestManager.swift */,
 				F63F46BF2BBAA55F00ADEB9D /* SupplyTypeManager.swift */,
 				6E3329802B7F699F009FCD14 /* UserManager.swift */,
+				E565A57A2BD5C35400B7EEB7 /* IssueManager.swift */,
+				E565A57C2BD5C38300B7EEB7 /* IssueTypeManager.swift */,
 			);
 			path = Firestore;
 			sourceTree = "<group>";
@@ -751,6 +757,7 @@
 				6E3329812B7F699F009FCD14 /* UserManager.swift in Sources */,
 				6E8C572A2B7CC35100B5BF59 /* RootView.swift in Sources */,
 				6EA65F492B8476E9000766C7 /* BuildingCellView.swift in Sources */,
+				E565A57D2BD5C38300B7EEB7 /* IssueTypeManager.swift in Sources */,
 				F63F46C42BBB01DB00ADEB9D /* InventorySubmissionViewModel.swift in Sources */,
 				F68E1B072BBC2CE600EBE6AC /* SheetManager.swift in Sources */,
 				6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */,
@@ -787,6 +794,7 @@
 				D5B5E0712BB32C7E00AFCE3C /* ContentModerationView.swift in Sources */,
 				F63F46B72BBAA28600ADEB9D /* InventorySubmissionView.swift in Sources */,
 				E565A5772BD415E700B7EEB7 /* SupplyRequestManager.swift in Sources */,
+				E565A57B2BD5C35400B7EEB7 /* IssueManager.swift in Sources */,
 				6E6858362B8446C300896B16 /* BuildingsView.swift in Sources */,
 				6EA65F552B872D6A000766C7 /* BuildingCellViewBuilder.swift in Sources */,
 				6EA65F682B96EF0B000766C7 /* DetailedSiteView.swift in Sources */,
