@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		261E6B6F2BD60C05000021CA /* SiteReadySubmissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 261E6B6E2BD60C05000021CA /* SiteReadySubmissionView.swift */; };
+		261E6B712BD60C19000021CA /* SiteReadyEntriesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 261E6B702BD60C19000021CA /* SiteReadyEntriesModel.swift */; };
+		261E6B742BD60D21000021CA /* SitesReadyEntriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 261E6B732BD60D21000021CA /* SitesReadyEntriesView.swift */; };
 		26EC33B92B966BC8001F0AEE /* SitesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EC33B82B966BC8001F0AEE /* SitesMapView.swift */; };
 		6E33296E2B7F61CD009FCD14 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6E33296D2B7F61CD009FCD14 /* FirebaseFirestore */; };
 		6E3329702B7F61CD009FCD14 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6E33296F2B7F61CD009FCD14 /* FirebaseFirestoreSwift */; };
@@ -110,6 +113,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		261E6B6E2BD60C05000021CA /* SiteReadySubmissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteReadySubmissionView.swift; sourceTree = "<group>"; };
+		261E6B702BD60C19000021CA /* SiteReadyEntriesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteReadyEntriesModel.swift; sourceTree = "<group>"; };
+		261E6B732BD60D21000021CA /* SitesReadyEntriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitesReadyEntriesView.swift; sourceTree = "<group>"; };
 		26EC33B82B966BC8001F0AEE /* SitesMapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SitesMapView.swift; sourceTree = "<group>"; };
 		6E3329732B7F62D9009FCD14 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		6E3329762B7F6389009FCD14 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
@@ -228,6 +234,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		261E6B6D2BD60BE5000021CA /* SiteReadySubmission */ = {
+			isa = PBXGroup;
+			children = (
+				261E6B6E2BD60C05000021CA /* SiteReadySubmissionView.swift */,
+			);
+			path = SiteReadySubmission;
+			sourceTree = "<group>";
+		};
+		261E6B722BD60D05000021CA /* SitesEntries */ = {
+			isa = PBXGroup;
+			children = (
+				261E6B732BD60D21000021CA /* SitesReadyEntriesView.swift */,
+				261E6B702BD60C19000021CA /* SiteReadyEntriesModel.swift */,
+			);
+			path = SitesEntries;
+			sourceTree = "<group>";
+		};
 		26EC33B52B966B33001F0AEE /* Apple Maps */ = {
 			isa = PBXGroup;
 			children = (
@@ -422,6 +445,8 @@
 		6EA65F5D2B911B0C000766C7 /* Sites */ = {
 			isa = PBXGroup;
 			children = (
+				261E6B722BD60D05000021CA /* SitesEntries */,
+				261E6B6D2BD60BE5000021CA /* SiteReadySubmission */,
 				6EA65F672B96EF0B000766C7 /* DetailedSiteView.swift */,
 				6EA65F692B96F028000766C7 /* DetailedSiteViewModel.swift */,
 				6EA65F602B91204D000766C7 /* SitesView.swift */,
@@ -756,10 +781,12 @@
 				F63F46C22BBAFEB000ADEB9D /* InventoryChangeView.swift in Sources */,
 				6E68583C2B84498A00896B16 /* BuildingsManager.swift in Sources */,
 				6E3329772B7F6389009FCD14 /* AuthenticationViewModel.swift in Sources */,
+				261E6B742BD60D21000021CA /* SitesReadyEntriesView.swift in Sources */,
 				6EA65F5F2B911B34000766C7 /* SitesManager.swift in Sources */,
 				F68E1B052BBBE4B300EBE6AC /* TempChangeView.swift in Sources */,
 				F6AB56102BC4D9EE005727D2 /* SiteGroupsManager.swift in Sources */,
 				D5225A672BB73D76007F14E2 /* DetailedSitePosterBoardView.swift in Sources */,
+				261E6B712BD60C19000021CA /* SiteReadyEntriesModel.swift in Sources */,
 				D5225A6B2BC8758C007F14E2 /* AdminUserProfileView.swift in Sources */,
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				F6B8872F2BD540ED00E4A7C8 /* IssuesView.swift in Sources */,
@@ -839,6 +866,7 @@
 				F68E1B0C2BBD2C6B00EBE6AC /* InventoryEntriesView.swift in Sources */,
 				D5B5E0752BB336C300AFCE3C /* ImagePickerView.swift in Sources */,
 				6EA65F6D2B98EF70000766C7 /* InventorySitesManager.swift in Sources */,
+				261E6B6F2BD60C05000021CA /* SiteReadySubmissionView.swift in Sources */,
 				6E8C57262B7CADBE00B5BF59 /* SignInEmailView.swift in Sources */,
 				F6B8872C2BD53C4E00E4A7C8 /* IssueManager.swift in Sources */,
 			);
