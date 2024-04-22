@@ -73,7 +73,6 @@
 		E553CD7C2BCD937E00B9D63B /* SiteCaptainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E553CD7B2BCD937E00B9D63B /* SiteCaptainManager.swift */; };
 		E553CD7F2BCD947000B9D63B /* SiteCaptainSubmissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E553CD7E2BCD947000B9D63B /* SiteCaptainSubmissionView.swift */; };
 		E553CD822BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E553CD812BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift */; };
-		E553CD842BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E553CD832BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift */; };
 		E565A5772BD415E700B7EEB7 /* SupplyRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E565A5762BD415E700B7EEB7 /* SupplyRequestManager.swift */; };
 		E565A57B2BD5C35400B7EEB7 /* IssueManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E565A57A2BD5C35400B7EEB7 /* IssueManager.swift */; };
 		E565A57D2BD5C38300B7EEB7 /* IssueTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E565A57C2BD5C38300B7EEB7 /* IssueTypeManager.swift */; };
@@ -173,7 +172,6 @@
 		E553CD7B2BCD937E00B9D63B /* SiteCaptainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainManager.swift; sourceTree = "<group>"; };
 		E553CD7E2BCD947000B9D63B /* SiteCaptainSubmissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainSubmissionView.swift; sourceTree = "<group>"; };
 		E553CD812BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainFormViewModel.swift; sourceTree = "<group>"; };
-		E553CD832BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainSubmissionFormView.swift; sourceTree = "<group>"; };
 		E565A5762BD415E700B7EEB7 /* SupplyRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyRequestManager.swift; sourceTree = "<group>"; };
 		E565A57A2BD5C35400B7EEB7 /* IssueManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueManager.swift; sourceTree = "<group>"; };
 		E565A57C2BD5C38300B7EEB7 /* IssueTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueTypeManager.swift; sourceTree = "<group>"; };
@@ -548,7 +546,6 @@
 			isa = PBXGroup;
 			children = (
 				E553CD812BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift */,
-				E553CD832BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift */,
 			);
 			path = SubViews;
 			sourceTree = "<group>";
@@ -799,7 +796,6 @@
 				6EA65F552B872D6A000766C7 /* BuildingCellViewBuilder.swift in Sources */,
 				6EA65F682B96EF0B000766C7 /* DetailedSiteView.swift in Sources */,
 				F63F46BE2BBAA50200ADEB9D /* SupplyCountManager.swift in Sources */,
-				E553CD842BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift in Sources */,
 				6E8C57372B7CF32100B5BF59 /* Utilities.swift in Sources */,
 				26EC33B92B966BC8001F0AEE /* SitesMapView.swift in Sources */,
 				F69D742D2BA0EAA50095A817 /* NonAuthUserCellView.swift in Sources */,

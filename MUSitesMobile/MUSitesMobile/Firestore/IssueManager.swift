@@ -11,17 +11,18 @@ import FirebaseFirestoreSwift
 
 struct Issue: Identifiable, Codable, Equatable {
     let id: String
-    let description: String?
+    var description: String?  // Change this from 'let' to 'var' to make it mutable
     let timestamp: Date?
-    let issueType: String?
+    var issueType: String?
     let resolved: Bool?
-    let ticket: Int?
+    var ticket: Int?
     let reportId: String?
     var reportType: String?
     let siteId: String?
     let userSubmitted: String?
     var userAssigned: String?
-    
+
+
     // create Site manually
     init(
         id: String,
@@ -100,130 +101,93 @@ struct Issue: Identifiable, Codable, Equatable {
 }
 
 final class IssueManager {
-    // create singleton of manager
+    // Singleton instance
     static let shared = IssueManager()
-    private init() { }
-    
-    // get the collection as CollectionReference
+    private init() {}
+
+    // Reference to the Firestore collection
     private let issuesCollection: CollectionReference = Firestore.firestore().collection("reported_issues")
-    
-    // get Firestore document as DocumentReference
-    private func issueDocument(issueId: String) -> DocumentReference {
-        issuesCollection.document(issueId)
+
+    // Method to get a Firestore document reference safely
+    private func issueDocument(issueId: String) -> DocumentReference? {
+        guard !issueId.isEmpty else {
+            print("Error: Document path cannot be empty.")
+            return nil
+        }
+        return issuesCollection.document(issueId)
     }
-    
-    // create Firestore encoder
-    private let encoder: Firestore.Encoder = {
-        let encoder = Firestore.Encoder()
-        return encoder
-    }()
-    
-    // create Firestore decoder
-    private let decoder: Firestore.Decoder = {
-        let decoder = Firestore.Decoder()
-        return decoder
-    }()
-    
-    // get a issue from Firestore as Issue struct
+
+    // Method to retrieve an issue from Firestore
     func getIssue(issueId: String) async throws -> Issue {
-        try await issueDocument(issueId: issueId).getDocument(as: Issue.self)
+        guard let document = issueDocument(issueId: issueId) else {
+            throw IssueManagerError.invalidDocumentPath
+        }
+        return try await document.getDocument(as: Issue.self)
     }
-    
-    // create a new issue in Firestore from struct
+
+    // Method to create a new issue in Firestore
     func createIssue(issue: Issue) async throws {
-        // connect to Firestore and create a new document from codable struct
-        try issueDocument(issueId: issue.id).setData(from: issue, merge: false)
+        guard let document = issueDocument(issueId: issue.id) else {
+            throw IssueManagerError.invalidDocumentPath
+        }
+        try await document.setData(from: issue, merge: false)
     }
-    
-    // fetch issue collection onto local device
+
+    // Query method for retrieving all issues
     private func getAllIssuesQuery() -> Query {
         issuesCollection
     }
-    
-    // get hourlyCleanings sorted by Date
-    private func getIssuesSortedByDateQuery(descending: Bool) -> Query {
-        issuesCollection
-            .order(by: Issue.CodingKeys.timestamp.rawValue, descending: descending)
-    }
-    
-    // get issues filtered by date range
-    private func getIssuesByDateQuery(startDate: Date, endDate: Date) -> Query {
-        issuesCollection
-            .whereField(Issue.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
-            .whereField(Issue.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
-    }
-    
-    // get issues filtered by date & sorted by date
+
+    // Method to sort and filter issues by date
     private func getIssuesSortedFilteredByDateQuery(descending: Bool, startDate: Date, endDate: Date) -> Query {
         issuesCollection
-            // filter by date
             .whereField(Issue.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
             .whereField(Issue.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
-            // sort by date
             .order(by: Issue.CodingKeys.timestamp.rawValue, descending: descending)
     }
-    
-    // get issues sorted by date
-    private func getAllIssuesSortedByNameQuery(descending: Bool) -> Query {
-        issuesCollection
-            .order(by: Issue.CodingKeys.timestamp.rawValue, descending: descending)
-    }
-    
-    // get issues by name
+
+    // Method to retrieve all issues based on sorting and filtering criteria
     func getAllIssues(descending: Bool?, startDate: Date?, endDate: Date?) async throws -> [Issue] {
         var query: Query = getAllIssuesQuery()
-        
-        // if given a Site and nameSort
-        if let descending, let startDate, let endDate {
-            // filter and sort collection
+        if let descending = descending, let startDate = startDate, let endDate = endDate {
             query = getIssuesSortedFilteredByDateQuery(descending: descending, startDate: startDate, endDate: endDate)
-        // if just given sort
-        } else if let descending {
-            // sort whole collection
-            query = getIssuesSortedByDateQuery(descending: descending)
-        // if just given filter
-        } else if let startDate, let endDate {
-            // filter whole collection
-            query = getIssuesByDateQuery(startDate: startDate, endDate: endDate)
+        } else if let startDate = startDate, let endDate = endDate {
+            query = issuesCollection
+                .whereField(Issue.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
+                .whereField(Issue.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
+        } else if let descending = descending {
+            query = issuesCollection
+                .order(by: Issue.CodingKeys.timestamp.rawValue, descending: descending)
         }
-        
-        print("Trying to query issues collection.")
-        return try await query
-            .getDocuments(as: Issue.self) // query Issues collection
+        print("Querying issues collection.")
+        return try await query.getDocuments(as: Issue.self)
     }
-    
-    // get count of all issues
-    // we can use this to determine if we need to use pagination
-    func allIssuesCount() async throws -> Int {
-        try await issuesCollection.aggregateCount()
-    }
-    
+
+    // Batch update method for issues
     func updateIssues(_ issues: [Issue]) async throws {
-        // Create a new batched write operation
         let batch = Firestore.firestore().batch()
-        
-        // Iterate over the issues array and update each document in the batch
         for issue in issues {
-            // Get the reference to the document
-            let documentRef = issueDocument(issueId: issue.id)
-            
-            // Encode the updated supplyCount object
-            guard let data = try? encoder.encode(issue) else {
-                // Handle encoding error
-                throw IssueManagerError.encodingError
+            guard let document = issueDocument(issueId: issue.id), !issue.id.isEmpty else {
+                throw IssueManagerError.invalidDocumentPath
             }
-            
-            // Set the data for the document in the batch
-            batch.setData(data, forDocument: documentRef)
+            let data = try Firestore.Encoder().encode(issue)
+            batch.setData(data, forDocument: document)
         }
-        
-        // Commit the batched write operation
         try await batch.commit()
+    }
+
+    // Error enum for IssueManager-specific errors
+    enum IssueManagerError: Error {
+        case noIssueId
+        case encodingError
+        case invalidDocumentPath
     }
 }
 
-// Errors
+
 enum IssueManagerError: Error {
     case noIssueId
     case encodingError
+    case invalidDocumentPath
 }
+

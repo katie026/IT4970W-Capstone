@@ -1,3 +1,4 @@
+
 //
 //  SiteCaptainFormViewModel.swift
 //  MUSitesMobile
@@ -9,10 +10,11 @@ import SwiftUI
 import Combine
 
 class SiteCaptainViewModel: ObservableObject {
-    @Published var siteCleanedToggle: Bool = false
+    @Published var submitButtonActive: Bool = false
     @Published var selectedThingsToClean: [Bool] = Array(repeating: false, count: 7)
     @Published var selectedThingsToDo: [Bool] = Array(repeating: false, count: 4)
     @Published var needsRepair: Bool = false
+    @Published var issues: [Issue] = []
     @Published var issueDescription: String = ""
     @Published var ticketNumber: String = ""
     @Published var needsLabelReplacement: Bool = false
@@ -23,9 +25,27 @@ class SiteCaptainViewModel: ObservableObject {
     @Published var suppliesNeeded: [SupplyNeeded] = []
     @Published var showSubmissionConfirmation: Bool = false
     @Published var submissionError: Error?
+    var user: AuthDataResultModel? = nil
     
     private var cancellables: Set<AnyCancellable> = []
     private let siteCaptainManager = SiteCaptainManager()
+    
+    func getUser() {
+        Task {
+            // get current user
+            self.user = try AuthenticationManager.shared.getAuthenticatedUser()
+        }
+    }
+    
+    func getSupplyTypes() {
+        SupplyTypeManager.shared.fetchSupplyTypes()
+        print("Queried supply types.")
+    }
+    
+    func getIssueTypes() {
+        IssueTypeManager.shared.fetchIssueTypes()
+        print("Queried issue types.")
+    }
     
     // Method to add a supply with its count to the suppliesNeeded array
     func addSupply(supply: SupplyType, count: Int) {
@@ -38,12 +58,45 @@ class SiteCaptainViewModel: ObservableObject {
         suppliesNeeded.remove(at: index)
     }
     
+    // Method to add an issue with its issue type to the issues array
+    func addIssue(issue: Issue, issueType: IssueType?) {
+        guard let issueType = issueType else {
+            // Handle the case where issueType is nil
+            return
+        }
+
+        let updatedIssue = Issue(
+            id: issue.id,
+            description: issue.description,
+            timestamp: issue.timestamp,
+            issueType: issueType.name, // Safe to access issueType.name now
+            resolved: issue.resolved,
+            ticket: issue.ticket,
+            reportId: issue.reportId,
+            reportType: issue.reportType,
+            siteId: issue.siteId,
+            userSubmitted: issue.userSubmitted,
+            userAssigned: issue.userAssigned
+        )
+
+        Task {
+            do {
+                try await IssueManager.shared.createIssue(issue: updatedIssue)
+            } catch {
+                // Handle the error
+                print("Error adding issue: \(error)")
+            }
+        }
+    }
+
+    
     // Method to reset the form and clear all fields
     func resetForm() {
-        siteCleanedToggle = false
+        submitButtonActive = false
         selectedThingsToClean = Array(repeating: false, count: 7)
         selectedThingsToDo = Array(repeating: false, count: 4)
         needsRepair = false
+        issues = []
         issueDescription = ""
         ticketNumber = ""
         needsLabelReplacement = false
@@ -57,30 +110,27 @@ class SiteCaptainViewModel: ObservableObject {
     }
     
     // Method to submit the site captain entry
-    func submitSiteCaptainEntry(for siteId: String, siteName: String, userId: String) {
-        let issues = needsRepair ? [Issue(issue: issueDescription, ticket: ticketNumber)] : []
-        let labelsForReplacement = needsLabelReplacement ? labelsToReplace.components(separatedBy: ",") : []
-        
-        let computingSite = ComputingSite(
-            id: UUID().uuidString,
-            siteId: siteId,
-            siteName: siteName,
-            issues: issues,
-            labelsForReplacement: labelsForReplacement,
-            suppliesNeeded: suppliesNeeded,
-            timestampValue: Date(),
-            updatedInventory: inventoryChecked,
-            user: userId
-        )
-        
-        siteCaptainManager.submitSiteCaptainEntry(computingSite) { [weak self] error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self?.submissionError = error
-                } else {
-                    self?.showSubmissionConfirmation = true
-                }
-            }
-        }
-    }
+     func submitSiteCaptainEntry(for siteId: String, siteName: String, userId: String) {
+         let siteCaptain = SiteCaptain (
+             id: UUID().uuidString,
+             siteId: siteId,
+             siteName: siteName,
+             issues: issues,
+             labelsForReplacement: needsLabelReplacement ? labelsToReplace.components(separatedBy: ",") : [],
+             suppliesNeeded: suppliesNeeded,
+             timestampValue: Date(),
+             updatedInventory: inventoryChecked,
+             user: userId
+         )
+         
+         siteCaptainManager.submitSiteCaptainEntry(siteCaptain) { [weak self] error in
+             DispatchQueue.main.async {
+                 if let error = error {
+                     self?.submissionError = error
+                 } else {
+                     self?.showSubmissionConfirmation = true
+                 }
+             }
+         }
+     }
 }

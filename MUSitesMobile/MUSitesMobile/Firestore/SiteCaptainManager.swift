@@ -10,9 +10,9 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Combine
 
-struct ComputingSite: Codable {
+struct SiteCaptain: Codable {
     let id: String
-    let siteId:String
+    let siteId: String
     let siteName: String
     let issues: [Issue]
     let labelsForReplacement: [String]
@@ -23,17 +23,15 @@ struct ComputingSite: Codable {
     
     init(
         id: String,
-        siteId:String,
-        siteName:String,
+        siteId: String,
+        siteName: String,
         issues: [Issue]?,
-        labelsForReplacement:[String]?,
-        suppliesNeeded:[SupplyNeeded]?,
-        timestampValue : Date?,
+        labelsForReplacement: [String]?,
+        suppliesNeeded: [SupplyNeeded]?,
+        timestampValue: Date?,
         updatedInventory: Bool?,
-        user : String
-        
+        user: String
     ) {
-        
         self.id = id
         self.siteId = siteId
         self.siteName = siteName
@@ -44,6 +42,7 @@ struct ComputingSite: Codable {
         self.updatedInventory = updatedInventory ?? false
         self.user = user
     }
+
     
     enum CodingKeys: String, CodingKey {
         case id = "id"
@@ -85,10 +84,11 @@ struct ComputingSite: Codable {
 
 }
 
-struct Issue: Codable {
+struct SiteCaptainIssue: Codable {
     let issue: String
     let ticket: String
 }
+
 struct SupplyNeeded: Codable {
     let count: Int
     let supply: String
@@ -100,7 +100,7 @@ class SiteCaptainManager {
     private let siteCaptainEntry = "site_captain_entries"
     private let supplyRequestCollection = "supply_requests"
     
-    func submitSiteCaptainEntry(_ computingSite: ComputingSite, completion: @escaping (Error?) -> Void) {
+    func submitSiteCaptainEntry(_ computingSite: SiteCaptain, completion: @escaping (Error?) -> Void) {
         do {
             try db.collection(siteCaptainEntry).document(computingSite.id).setData(from: computingSite) { [weak self] error in
                 if let error = error {
@@ -117,7 +117,7 @@ class SiteCaptainManager {
         }
     }
     
-    private func createSupplyRequests(for computingSite: ComputingSite, completion: @escaping (Error?) -> Void) {
+    private func createSupplyRequests(for computingSite: SiteCaptain, completion: @escaping (Error?) -> Void) {
         let supplyRequests = computingSite.suppliesNeeded.map { supplyNeeded -> SupplyRequest in
             return SupplyRequest(
                 id: UUID().uuidString,
@@ -147,4 +147,3 @@ class SiteCaptainManager {
         }
     }
 }
-
