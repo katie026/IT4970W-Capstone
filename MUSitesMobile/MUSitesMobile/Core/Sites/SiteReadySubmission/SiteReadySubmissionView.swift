@@ -12,7 +12,7 @@ struct SiteReadySurveyView: View {
     let siteId: String
     let userId: String
     @StateObject var viewModel = ViewModel()
-    @State private var showAlert = false 
+    @State private var showAlert = false
 
     var body: some View {
         NavigationView {
@@ -23,42 +23,38 @@ struct SiteReadySurveyView: View {
                     PostersSection(viewModel: viewModel)
                     RoomSection(viewModel: viewModel)
                     AdditionalCommentsSection(viewModel: viewModel)
+                    
+                    // Section for reporting issues
+                    Section(header: Text("Report Issues")) {
+                        Stepper(value: $viewModel.failedToLoginCount, in: 0...100, step: 1) {
+                            Text("How many computers failed to login? \(viewModel.failedToLoginCount)")
+                        }
+                        
+                        if viewModel.failedToLoginCount > 0 {
+                            ForEach(0..<viewModel.failedToLoginCount, id: \.self) { index in
+                                VStack {
+                                    TextField("Enter computer failure description", text: $viewModel.computerFailures[index])
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    
+                                    TextField("Enter ticket number", text: $viewModel.failedLoginTicketNumbers[index])
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                }
+                            }
+                        }
+                    }
                 }
                 Spacer()
                 Button(action: {
                     let db = Firestore.firestore()
 
-                    
-                    let documentId = UUID().uuidString
-
-                    
-                    let docRef = db.collection("site_ready_entries").document(documentId)
-
-                    let timestamp = Timestamp(date: Date())
-
-                    let data: [String: Any] = [
-                        "bw_printer_count": viewModel.bwPrinterCount,
-                        "chair_count": viewModel.chairCount,
-                        "color_printer_count": viewModel.colorPrinterCount,
-                        "comments": viewModel.additionalComments,
-                        "computing_site": siteId,
-                        "id": documentId,
-                        "mac_count": viewModel.macCount,
-                        "missing_chairs": viewModel.missingChairs,
-                        "pc_count": viewModel.pcCount,
-                        "user": userId,
-                        "timestamp": timestamp
-                    ]
-
-                    // Write data to Firestore
-                    docRef.setData(data) { error in
-                        if let error = error {
-                            print("Error writing document: \(error)")
-                        } else {
-                            // Show alert after successful submission
-                            showAlert = true
-                            print("Document successfully written!")
-                        }
+                    // Submitting reported issues
+                    submitReportedIssues(db: db) { reportedIssuesUUIDs in
+                        // Submitting site ready survey data with reported issues' UUIDs
+                        submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs)
+                    }
+                    // Submitting label issues
+                    Task {
+                        await submitLabelIssues(db: db)
                     }
                 }) {
                     Text("Submit")
@@ -79,6 +75,103 @@ struct SiteReadySurveyView: View {
             })
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("Submission Successful"), message: Text("Your survey has been successfully submitted."), dismissButton: .default(Text("OK")))
+            }
+        }
+    }
+
+    private func submitSiteReadySurvey(db: Firestore, reportedIssuesUUIDs: [String]) {
+        let documentId = UUID().uuidString
+        let docRef = db.collection("site_ready_entries").document(documentId)
+        let timestamp = Timestamp(date: Date())
+
+        var data: [String: Any] = [
+            "bw_printer_count": viewModel.bwPrinterCount,
+            "chair_count": viewModel.chairCount,
+            // Include reported issues' UUIDs in the "issues" array
+            "issues": reportedIssuesUUIDs,
+            // Other fields...
+            // "computing_site": siteId,
+            "comments": viewModel.additionalComments,
+            // "id": documentId,
+            // "mac_count": viewModel.macCount,
+            // "missing_chairs": viewModel.missingChairs,
+            // "pc_count": viewModel.pcCount,
+            // "user": userId,
+            // "timestamp": timestamp
+        ]
+
+        // Add other data to the dictionary if needed
+
+        data["computing_site"] = siteId
+        data["id"] = documentId
+        data["mac_count"] = viewModel.macCount
+        data["missing_chairs"] = viewModel.missingChairs
+        data["pc_count"] = viewModel.pcCount
+        data["user"] = userId
+        data["timestamp"] = timestamp
+
+        // Write data to Firestore
+        docRef.setData(data) { error in
+            if let error = error {
+                print("Error writing document: \(error)")
+            } else {
+                print("Site ready survey data successfully written!")
+                // Show the alert
+                showAlert = true
+            }
+        }
+    }
+
+    private func submitReportedIssues(db: Firestore, completion: @escaping ([String]) -> Void) {
+        var reportedIssuesUUIDs: [String] = []
+
+        let group = DispatchGroup()
+
+        for index in 0..<viewModel.failedToLoginCount {
+            group.enter()
+            let documentId = UUID().uuidString
+            let docRef = db.collection("reported_issues").document(documentId)
+            let timestamp = Timestamp(date: Date())
+
+            let data: [String: Any] = [
+                "description": viewModel.computerFailures[index],
+                "id": documentId,
+                "issue_type": "GxFGSkbDySZmdkCFExt9", // Assuming a constant issue type for all reported issues
+                "report_id": viewModel.reportId, // You need to define reportId in your view model or provide it from somewhere
+                "report_type": "site_ready",
+                "resolved": false,
+                "site": siteId,
+                "ticket": viewModel.failedLoginTicketNumbers[index],
+                "timestamp": timestamp,
+                "user_assigned": "",
+                "user_submitted": userId
+            ]
+
+            // Write data to Firestore
+            docRef.setData(data) { error in
+                if let error = error {
+                    print("Error writing document: \(error)")
+                } else {
+                    print("Reported issue \(index + 1) successfully written!")
+                    reportedIssuesUUIDs.append(documentId)
+                }
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            completion(reportedIssuesUUIDs)
+        }
+    }
+
+    private func submitLabelIssues(db: Firestore) async {
+        // Assuming you have access to viewModel.labelIssues array
+        for labelIssue in viewModel.labelIssues {
+            do {
+                // Submit each label issue to Firestore
+                try await IssueManager.shared.createIssue(issue: labelIssue)
+            } catch {
+                print("Error creating label issue: \(error)")
             }
         }
     }
@@ -548,6 +641,9 @@ extension SiteReadySurveyView {
         }
         @Published var otherIssues: [String] = []
         @Published var otherIssueTicketNumbers: [String] = []
+        @Published var labelIssues: [Issue] = []
+        @Published var reportId: String = ""
+
 
         @Published var additionalComments: String = ""
 
