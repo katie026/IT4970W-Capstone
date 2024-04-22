@@ -89,10 +89,11 @@ struct SiteCaptainSubmissionView: View {
         }
 
         viewModel.issues.enumerated().forEach { index, issue in
-            if let selectedIssueType = viewModel.issues[index].issueType {
-                let issueType = IssueTypeManager.shared.issueTypes.first { $0.name == selectedIssueType }
-                viewModel.addIssue(issue: viewModel.issues[index], issueType: issueType)
+            guard let selectedIssueType = viewModel.issues[index].issueType else {
+                return
             }
+            let issueType = IssueTypeManager.shared.issueTypes.first { $0.name == selectedIssueType }
+            viewModel.addIssue(issue: viewModel.issues[index], issueType: issueType)
         }
 
         viewModel.submitSiteCaptainEntry(
@@ -101,6 +102,7 @@ struct SiteCaptainSubmissionView: View {
             userId: currentUser.uid
         )
     }
+    
     func checkIfCanSubmit() {
         if (
             viewModel.selectedThingsToClean.allSatisfy({ $0 == true }) &&
@@ -207,53 +209,50 @@ struct SiteCaptainSubmissionView: View {
                 TextField("#", text: Binding(
                     get: { String(issueCount) },
                     set: { newValue in
-                        issueCount = newValue
-                        viewModel.issues = Array(repeating: Issue(
-                            id: "",
-                            description: nil,
-                            timestamp: Date(),
-                            issueType: nil,
-                            resolved: false,
-                            ticket: nil,
-                            reportId: nil,
-                            reportType: "site_captain",
-                            siteId: siteId,
-                            userSubmitted: viewModel.user?.uid,
-                            userAssigned: nil
-                        ), count: Int(issueCount) ?? 0)
+                        if let count = Int(newValue), count >= 0 && count <= 100 {
+                            issueCount = newValue
+                            let userId = viewModel.user?.uid ?? ""  // Handle nil case for viewModel.user
+                            viewModel.issues = Array(repeating: Issue(
+                                id: "",
+                                description: nil,
+                                timestamp: Date(),
+                                issueType: nil,
+                                resolved: false,
+                                ticket: nil,
+                                reportId: nil,
+                                reportType: "site_captain",
+                                siteId: siteId,
+                                userSubmitted: userId,
+                                userAssigned: nil
+                            ), count: count)
+                        }
                     }
                 ))
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .keyboardType(.numberPad)
-                
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .keyboardType(.numberPad)
+
                 ForEach(0..<(viewModel.issues.count), id: \.self) { index in
                     issueRow(index: index)
                 }
             }
         }
-        
+
         return AnyView(view)
     }
     
     func issueRow(index: Int) -> some View {
-        // First, check if the index is valid for the issues array
         guard viewModel.issues.indices.contains(index) else {
-            // If the index is invalid, return an appropriate view that handles this case
-            return AnyView(Text("No data available for this issue.").foregroundColor(.gray))
+            return AnyView(Text("Invalid index"))
         }
 
-
-        // If the index is valid, create the view normally
         return AnyView(Section {
             VStack(alignment: .leading) {
                 HStack {
                     Picker("Issue Type", selection: Binding(
                         get: { viewModel.issues[index].issueType },
                         set: { newValue in
-                            if viewModel.issues.indices.contains(index) {
-                                viewModel.issues[index].issueType = newValue
-                            }
+                            viewModel.issues[index].issueType = newValue
                         }
                     )) {
                         Text("Select Issue Type").tag(nil as String?)
@@ -262,12 +261,14 @@ struct SiteCaptainSubmissionView: View {
                         }
                     }
                     .labelsHidden()
-                    
+
                     TextField("7-digit ticket # if needed", value: Binding(
-                        get: { viewModel.issues[index].ticket ?? 0 },
+                        get: { viewModel.issues[index].ticket?.description ?? "" },
                         set: { newValue in
-                            if viewModel.issues.indices.contains(index) {
-                                viewModel.issues[index].ticket = newValue
+                            if let value = Int(newValue) {
+                                viewModel.issues[index].ticket = value
+                            } else {
+                                viewModel.issues[index].ticket = nil
                             }
                         }
                     ), formatter: NumberFormatter())
@@ -275,13 +276,11 @@ struct SiteCaptainSubmissionView: View {
                     .padding()
                     .keyboardType(.numberPad)
                 }
-                
+
                 TextField("Description", text: Binding(
                     get: { viewModel.issues[index].description ?? "" },
                     set: { newValue in
-                        if viewModel.issues.indices.contains(index) {
-                            viewModel.issues[index].description = newValue
-                        }
+                        viewModel.issues[index].description = newValue
                     }
                 ))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -289,7 +288,6 @@ struct SiteCaptainSubmissionView: View {
             }
         })
     }
-
 
 
     
