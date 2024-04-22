@@ -17,10 +17,6 @@ struct AdminView: View {
                     NavigationLink(destination: ViewUsersView()) {
                         Text("View Users")
                     }
-                    //not set up yet
-                    NavigationLink(destination: CreateUserView()) {
-                        Text("Create User")
-                    }
                 }
                 
                 // INVENTORY SECTION
@@ -45,10 +41,7 @@ struct AdminView: View {
     }
 }
 
-// Placeholder views for navigation destinations
-struct CreateUserView: View {
-    var body: some View { Text("Create User Content") }
-}
+
 
 #Preview {
     AdminView()

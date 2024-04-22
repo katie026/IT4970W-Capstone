@@ -134,7 +134,11 @@ struct SiteCaptainSubmissionView: View {
     }
     
     var thingsToCleanSection: some View {
+<<<<<<< HEAD
 //        VStack(alignment: .leading)
+=======
+//        VStack(alignment: .leading) 
+>>>>>>> hourly-cleaning
         Section("Things to Clean") {
             ForEach(thingsToClean.indices, id: \.self) { index in
                 HStack {
@@ -209,6 +213,7 @@ struct SiteCaptainSubmissionView: View {
                 TextField("#", text: Binding(
                     get: { String(issueCount) },
                     set: { newValue in
+<<<<<<< HEAD
                         if let count = Int(newValue), count >= 0 && count <= 100 {
                             issueCount = newValue
                             let userId = viewModel.user?.uid ?? ""  // Handle nil case for viewModel.user
@@ -232,16 +237,46 @@ struct SiteCaptainSubmissionView: View {
                 .padding()
                 .keyboardType(.numberPad)
 
+=======
+                        issueCount = newValue
+                        viewModel.issues = Array(repeating: Issue(
+                            id: "",
+                            description: nil,
+                            timestamp: Date(),
+                            issueType: nil,
+                            resolved: false,
+                            ticket: nil,
+                            reportId: nil,
+                            reportType: "site_captain",
+                            siteId: siteId,
+                            userSubmitted: viewModel.user?.uid,
+                            userAssigned: nil
+                        ), count: Int(issueCount) ?? 0)
+                        viewModel.issues.enumerated().forEach { index, _ in
+                            viewModel.issues[index].id = "\(index)"
+                        }
+                    }
+                ))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                    .keyboardType(.numberPad)
+                
+>>>>>>> hourly-cleaning
                 ForEach(0..<(viewModel.issues.count), id: \.self) { index in
                     issueRow(index: index)
                 }
             }
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> hourly-cleaning
         return AnyView(view)
     }
     
     func issueRow(index: Int) -> some View {
+<<<<<<< HEAD
         guard viewModel.issues.indices.contains(index) else {
             return AnyView(Text("Invalid index"))
         }
@@ -290,6 +325,49 @@ struct SiteCaptainSubmissionView: View {
     }
 
 
+=======
+        var view = Section() {
+            VStack(alignment: .leading) {
+                HStack {
+                    Picker("Issue Type", selection: $viewModel.issues[index].issueType) {
+                        Text("Issue Type").tag(nil as IssueType?)
+                        ForEach(IssueTypeManager.shared.issueTypes, id: \.self) { issueType in
+                            Text(issueType.name).tag(issueType as IssueType?)
+                        }
+                    }.labelsHidden()
+                    TextField("7-digit ticket # if needed", value: $viewModel.issues[index].ticket, formatter: NumberFormatter())
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                        .keyboardType(.numberPad)
+                    
+                }
+                
+                TextField("Description", text: Binding(
+                    get: { viewModel.issues[index].description ?? "" }, // if description is nil
+                    set: { newValue in viewModel.issues[index].description = newValue }
+                ))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+            }
+        }
+        
+//        let issue = Issue(
+//            id: String(index),
+//            description: description == "" ? nil : description,
+//            timestamp: Date(),
+//            issueType: issueType == "" ? nil : issueType,
+//            resolved: false,
+//            ticket: ticket == "" ? nil : Int(ticket),
+//            reportId: nil,
+//            reportType: "site_captain",
+//            siteId: siteId,
+//            userSubmitted: viewModel.user?.uid,
+//            userAssigned: nil
+//        )
+        
+        return AnyView(view)
+    }
+>>>>>>> hourly-cleaning
     
     func updateIssue(_ issue: Issue) {
         if (issue.description != nil), (issue.issueType != nil), (issue.ticket != nil) {
@@ -306,7 +384,11 @@ struct SiteCaptainSubmissionView: View {
     }
     
     var labelsSection: some View {
+<<<<<<< HEAD
 //        VStack(alignment: .leading)
+=======
+//        VStack(alignment: .leading) 
+>>>>>>> hourly-cleaning
         Section("Labels") {
             Text("Are there any table or printer labels that need to be replaced?")
             
@@ -330,7 +412,11 @@ struct SiteCaptainSubmissionView: View {
     }
     
     var inventorySection: some View {
+<<<<<<< HEAD
 //        VStack(alignment: .leading)
+=======
+//        VStack(alignment: .leading) 
+>>>>>>> hourly-cleaning
         Section("Inventory") {
             Text("Does your site building have a cabinet/inventory location?")
             

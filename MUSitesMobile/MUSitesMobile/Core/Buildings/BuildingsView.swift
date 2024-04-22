@@ -10,60 +10,61 @@ import SwiftUI
 struct BuildingsView: View {
     
     @StateObject private var viewModel = BuildingsViewModel()
+    @State private var searchText = ""
+    
+    var filteredBuildings: [Building] {
+            if searchText.isEmpty {
+                return viewModel.buildings
+            } else {
+                return viewModel.buildings.filter { building in
+                    building.name?.localizedCaseInsensitiveContains(searchText) ?? false
+                }
+            }
+        }
     
     var body: some View {
-        //testing button for the buildingId query
-        Button("Fetch Building") {
-            viewModel.fetchBuilding(withID: "4NqNXGqU9iItZaVg3V2h")
-        }
-        if let building = viewModel.building {
-            Text("Building Name: \(building.name ?? "Unknown")")
-        }
-        //end of test
-        List {
-            ForEach(viewModel.buildings) { building in
-                BuildingCellView(building: building)
-                    .contextMenu {
-                        Button("Add to Tasks") {
-                            viewModel.addUserBuilding(buildingId: building.id)
-                        }
+            NavigationView {
+                VStack {
+                    TextField("Search", text: $searchText)
+                        .padding(.horizontal)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.top)
+                    
+                    List(filteredBuildings) { building in
+                        BuildingCellView(building: building)
+                            .contextMenu {
+                                Button("Add to Tasks") {
+                                    viewModel.addUserBuilding(buildingId: building.id)
+                                }
+                            }
                     }
-            }
-        }
-        .navigationTitle("Buildings")
-        .toolbar(content: {
-            // Sorting
-            ToolbarItem(placement: .navigationBarLeading) {
-                Menu("Sort by: \(viewModel.selectedSort?.rawValue ?? "NONE")") {
-                    ForEach(BuildingsViewModel.SortOption.allCases, id: \.self) { option in
-                        Button(option.rawValue) {
-                            Task {
-                                try? await viewModel.sortSelected(option: option)
+                }
+                .navigationTitle("Buildings")
+                .toolbar(content: {
+                    // Sorting
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Menu("Sort by: \(viewModel.selectedSort?.rawValue ?? "NONE")") {
+                            ForEach(BuildingsViewModel.SortOption.allCases, id: \.self) { option in
+                                Button(option.rawValue) {
+                                    Task {
+                                        try? await viewModel.sortSelected(option: option)
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
-            
-            // Filtering
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu("Filter: \(viewModel.selectedFilter?.rawValue ?? "NONE")") {
-                    ForEach(BuildingsViewModel.FilterOption.allCases, id: \.self) { option in
-                        Button(option.rawValue) {
-                            Task {
-                                try? await viewModel.filterSelected(option: option)
-                            }
-                        }
+                    
+                    // Filtering - Removed for Search
+                    
+                    // You can keep other toolbar items here if needed
+                })
+                .onAppear {
+                    Task {
+                        viewModel.getBuildings()
                     }
                 }
             }
-        })
-        .onAppear {
-            Task {
-                viewModel.getBuildings()
-            }
         }
-    }
 }
 
 #Preview {

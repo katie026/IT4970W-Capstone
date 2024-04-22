@@ -108,6 +108,7 @@ struct InventoryEntriesView: View {
     @StateObject private var viewModel = InventoryEntriesViewModel()
     // View Control
     @State private var path: [Route] = []
+    @State private var hasLoadedOnce = false
     // Track loading status
     @State private var isLoading = true
     
@@ -193,6 +194,16 @@ struct InventoryEntriesView: View {
     private var entryList: some View {
         List {
             ScrollView(.horizontal) {
+                // if user hasn't loaded entries yet
+                if !hasLoadedOnce {
+                    Text("Choose a date range and reload.")
+                        .foregroundColor(.gray)
+                // else, if they have, but there are still no entries
+                } else if (hasLoadedOnce && viewModel.inventoryEntries.count == 0) {
+                    Text("There are no entries for this date range.")
+                        .foregroundColor(.gray)
+                }
+                
                 ForEach(viewModel.inventoryEntries, id: \.id) { inventoryEntry in
                     HStack(alignment: .top) {
                         InventoryEntryCellView(supplyTypes: viewModel.supplyTypes, inventoryEntry: inventoryEntry, inventorySites: viewModel.inventorySites, users: viewModel.users)
@@ -213,6 +224,7 @@ struct InventoryEntriesView: View {
         Button(action: {
             isLoading = true
             fetchEntries()
+            hasLoadedOnce = true
         }) {
             Image(systemName: "arrow.clockwise")
                 .font(.system(size: 20))

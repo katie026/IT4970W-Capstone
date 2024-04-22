@@ -113,7 +113,10 @@ struct PostersView: View {
     }
 
     private func safeAreaInsets() -> UIEdgeInsets {
-        guard let window = UIApplication.shared.windows.first else {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return .zero
+        }
+        guard let window = windowScene.windows.first else {
             return .zero
         }
         return window.safeAreaInsets
@@ -225,7 +228,10 @@ struct BoardView: View {
     }
 
     private func safeAreaInsets() -> UIEdgeInsets {
-        guard let window = UIApplication.shared.windows.first else {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return .zero
+        }
+        guard let window = windowScene.windows.first else {
             return .zero
         }
         return window.safeAreaInsets
@@ -337,7 +343,10 @@ public struct InventoryView: View {
     }
 
     private func safeAreaInsets() -> UIEdgeInsets {
-        guard let window = UIApplication.shared.windows.first else {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return .zero
+        }
+        guard let window = windowScene.windows.first else {
             return .zero
         }
         return window.safeAreaInsets

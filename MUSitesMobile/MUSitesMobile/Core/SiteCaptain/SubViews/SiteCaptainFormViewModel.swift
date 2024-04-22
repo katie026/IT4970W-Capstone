@@ -110,6 +110,7 @@ class SiteCaptainViewModel: ObservableObject {
     }
     
     // Method to submit the site captain entry
+<<<<<<< HEAD
      func submitSiteCaptainEntry(for siteId: String, siteName: String, userId: String) {
          let siteCaptain = SiteCaptain (
              id: UUID().uuidString,
@@ -133,4 +134,32 @@ class SiteCaptainViewModel: ObservableObject {
              }
          }
      }
+=======
+    func submitSiteCaptainEntry(for siteId: String, siteName: String, userId: String) {
+        let issues = needsRepair ? [SiteCaptainIssue(issue: issueDescription, ticket: ticketNumber)] : []
+        let labelsForReplacement = needsLabelReplacement ? labelsToReplace.components(separatedBy: ",") : []
+        
+        let siteCaptain = SiteCaptain (
+            id: UUID().uuidString,
+            siteId: siteId,
+            siteName: siteName,
+            issues: issues,
+            labelsForReplacement: labelsForReplacement,
+            suppliesNeeded: suppliesNeeded,
+            timestampValue: Date(),
+            updatedInventory: inventoryChecked,
+            user: userId
+        )
+        
+        siteCaptainManager.submitSiteCaptainEntry(siteCaptain) { [weak self] error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.submissionError = error
+                } else {
+                    self?.showSubmissionConfirmation = true
+                }
+            }
+        }
+    }
+>>>>>>> hourly-cleaning
 }
