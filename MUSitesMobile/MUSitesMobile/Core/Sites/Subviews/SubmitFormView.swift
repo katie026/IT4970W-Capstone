@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
+import FirebaseFirestoreSwift
 
 struct SubmitFormView: View {
     let computingSite: Site
-    
+
     var body: some View {
         VStack {
             // Subtitle
@@ -21,7 +23,7 @@ struct SubmitFormView: View {
             }
             .padding(.top, 10)
             .padding(.horizontal, 20)
-            
+
             // Link List
             List {
                 // Hourly Cleaning Link
@@ -33,11 +35,21 @@ struct SubmitFormView: View {
                         Spacer()
                     }.padding(.vertical, 10)
                 }
-                
+
                 // Site Captain Link
                 NavigationLink(destination: SiteCaptainSubmissionView(siteId: computingSite.id, siteName: computingSite.name ?? "")) {
                     HStack {
                         Text("Site Captain")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }.padding(.vertical, 10)
+                }
+
+                // Site Captain Submission Admin View Link
+                NavigationLink(destination: SiteCaptainSubmissionAdminView()) {
+                    HStack {
+                        Text("Site Captain Submissions")
                             .font(.headline)
                             .fontWeight(.semibold)
                         Spacer()

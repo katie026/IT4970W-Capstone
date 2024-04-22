@@ -10,9 +10,9 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Combine
 
-struct SiteCaptain: Codable {
+struct SiteCaptain: Codable, Identifiable {
     let id: String
-    let siteId:String
+    let siteId: String
     let siteName: String
     let issues: [SiteCaptainIssue]
     let labelsForReplacement: [String]
@@ -20,6 +20,11 @@ struct SiteCaptain: Codable {
     let timestamp: Date
     let updatedInventory: Bool
     let user: String
+
+    // Add this computed property to conform to Identifiable
+    var computedId: String {
+        id
+    }
     
     init(
         id: String,
@@ -148,4 +153,3 @@ class SiteCaptainManager {
         }
     }
 }
-
