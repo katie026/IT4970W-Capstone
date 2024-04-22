@@ -18,11 +18,11 @@ struct BuildingDetailView: View {
             VStack {
                 
                 TextField("Search", text: $searchText)
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(10)
                     .padding(.horizontal)
-
                 // Combined Sites Section
                 List {
                     Section(header: Text("Sites")) {
@@ -31,8 +31,8 @@ struct BuildingDetailView: View {
                         }
                     }
                     Section(header: Text("Inventory Sites")) {
-                        ForEach(filteredSites.filter { $0 is InventorySite }) { site in
-                            InventorySiteCellView(inventorySite: site as! InventorySite)
+                        ForEach(filteredSites.compactMap { $0 as? InventorySite }) { site in
+                            InventorySiteCellView(inventorySite: site)
                         }
                     }
                 }
@@ -48,9 +48,13 @@ struct BuildingDetailView: View {
                 do {
                     // Fetch sites for the selected building using SitesManager
                     let sites = try await SitesManager.shared.getAllSites(descending: nil)
+                    print("All sites fetched:", sites)
+                    
+                    // Filter sites based on the building ID
                     filteredSites = sites.filter { $0.buildingId == building.id }
+                    print("Filtered sites:", filteredSites)
                 } catch {
-                    print("Error fetching sites: \(error.localizedDescription)")
+                    print("Error fetching or filtering sites:", error.localizedDescription)
                     // Handle error if needed
                 }
             }

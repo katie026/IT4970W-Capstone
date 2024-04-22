@@ -28,7 +28,7 @@ struct BuildingsView: View {
                     TextField("Search", text: $searchText)
                         .padding(.horizontal)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.top)
+                        
                     
                     List(filteredBuildings) { building in
                         BuildingCellView(building: building)

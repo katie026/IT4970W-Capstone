@@ -43,28 +43,17 @@ final class InventorySitesViewModel: ObservableObject {
         }
     }
     
-//    func getInventorySite(id: String) async throws {
-//        // Clark ID: 6tYFeMv41IXzfXkwbbh6
-//        // use authData to get user data from Firestore as struct
-//        self.siteTest = try await SitesManager.shared.getSite(siteId: id)
-//    }
-//    
-//    func sortSelected(option: SortOption) async throws {
-//        // set sort option
-//        self.selectedSort = option
-//        // get sites again
-//        self.getSites()
-//    }
-//    
     func getInventorySites() {
         Task {
             self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: selectedSort?.sortDescending)
         }
     }
     
-    func getInventoryTypes() {
-        Task {
-            self.inventoryTypes = try await InventoryTypeManager.shared.getAllInventoryTypes(descending: nil)
+    func filteredInventorySites(searchText: String) -> [InventorySite] {
+        if searchText.isEmpty {
+            return inventorySites
+        } else {
+            return inventorySites.filter { $0.name?.localizedCaseInsensitiveContains(searchText) ?? false }
         }
     }
 }
@@ -72,40 +61,32 @@ final class InventorySitesViewModel: ObservableObject {
 struct InventorySitesView: View {
     // View Model
     @StateObject private var viewModel = InventorySitesViewModel()
-    
-    // View Control
     @State private var path: [Route] = []
     
+    // Search Text
+    @State private var searchText: String = ""
+    
     var body: some View {
-        //TODO: move the navigation stack to the root view
-        NavigationStack (path: $path) { // will trigger nav destination if $path changes
-            List {
-//                ForEach(viewModel.inventorySites) { inventorySite in
-//                    InventorySiteCellView(inventorySite: inventorySite)
-//                }
-                ForEach(viewModel.inventorySites) { inventorySite in
-                    NavigationLink(value: Route.detailedInventorySite(inventorySite)) {
-                        InventorySiteCellView(inventorySite: inventorySite)
+        NavigationView {
+            VStack {
+                Spacer()
+                TextField("Search", text: $searchText)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                
+                List {
+                    ForEach(viewModel.filteredInventorySites(searchText: searchText)) { inventorySite in
+                        NavigationLink(destination: DetailedInventorySiteView(path: $path, inventorySite: inventorySite)) {
+                            InventorySiteCellView(inventorySite: inventorySite)
+                        }
                     }
                 }
-            }
-            .navigationTitle("Inventory Sites")
-            .onAppear {
-                Task {
+                .navigationTitle("Inventory Sites")
+                .onAppear {
                     viewModel.getInventorySites()
-                    //viewModel.getInventoryTypes()
-                }
-            }
-            .navigationDestination(for: Route.self) { view in
-                switch view {
-                case .inventorySitesList:
-                    InventorySitesView()
-                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-                case .inventorySubmission(let inventorySite):
-                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
-                        .environmentObject(SheetManager())
-                case .inventoryChange(let inventorySite):
-                    InventoryChangeView(path: $path, inventorySite: inventorySite)
                 }
             }
         }
