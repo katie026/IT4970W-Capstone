@@ -24,24 +24,6 @@ struct SiteReadySurveyView: View {
                     RoomSection(viewModel: viewModel)
                     AdditionalCommentsSection(viewModel: viewModel)
                     
-                    // Section for reporting issues
-                    Section(header: Text("Report Issues")) {
-                        Stepper(value: $viewModel.failedToLoginCount, in: 0...100, step: 1) {
-                            Text("How many computers failed to login? \(viewModel.failedToLoginCount)")
-                        }
-                        
-                        if viewModel.failedToLoginCount > 0 {
-                            ForEach(0..<viewModel.failedToLoginCount, id: \.self) { index in
-                                VStack {
-                                    TextField("Enter computer failure description", text: $viewModel.computerFailures[index])
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    
-                                    TextField("Enter ticket number", text: $viewModel.failedLoginTicketNumbers[index])
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                }
-                            }
-                        }
-                    }
                 }
                 Spacer()
                 Button(action: {
@@ -49,13 +31,18 @@ struct SiteReadySurveyView: View {
 
                     // Submitting reported issues
                     submitReportedIssues(db: db) { reportedIssuesUUIDs in
-                        // Submitting site ready survey data with reported issues' UUIDs
-                        submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs)
+                        // Submitting printer label issues
+                        Task {
+                            let printerLabelIssuesUUIDs = await submitPrinterLabelIssues(db: db)
+                            // Submitting site ready survey data with reported and printer label issues' UUIDs
+                            submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs)
+                        }
                     }
                     // Submitting label issues
                     Task {
                         await submitLabelIssues(db: db)
                     }
+
                 }) {
                     Text("Submit")
                         .padding()
@@ -79,7 +66,7 @@ struct SiteReadySurveyView: View {
         }
     }
 
-    private func submitSiteReadySurvey(db: Firestore, reportedIssuesUUIDs: [String]) {
+    private func submitSiteReadySurvey(db: Firestore, reportedIssuesUUIDs: [String], printerLabelIssuesUUIDs: [String]) {
         let documentId = UUID().uuidString
         let docRef = db.collection("site_ready_entries").document(documentId)
         let timestamp = Timestamp(date: Date())
@@ -87,8 +74,8 @@ struct SiteReadySurveyView: View {
         var data: [String: Any] = [
             "bw_printer_count": viewModel.bwPrinterCount,
             "chair_count": viewModel.chairCount,
-            // Include reported issues' UUIDs in the "issues" array
-            "issues": reportedIssuesUUIDs,
+            // Include reported and printer label issues' UUIDs in the "issues" array
+            "issues": reportedIssuesUUIDs + printerLabelIssuesUUIDs,
             // Other fields...
             // "computing_site": siteId,
             "comments": viewModel.additionalComments,
@@ -136,7 +123,7 @@ struct SiteReadySurveyView: View {
             let data: [String: Any] = [
                 "description": viewModel.computerFailures[index],
                 "id": documentId,
-                "issue_type": "GxFGSkbDySZmdkCFExt9", // Assuming a constant issue type for all reported issues
+                "issue_type": "GxFGSkbDySZmdkCFExt9",
                 "report_id": viewModel.reportId, // You need to define reportId in your view model or provide it from somewhere
                 "report_type": "site_ready",
                 "resolved": false,
@@ -162,6 +149,46 @@ struct SiteReadySurveyView: View {
         group.notify(queue: .main) {
             completion(reportedIssuesUUIDs)
         }
+    }
+    private func submitPrinterLabelIssues(db: Firestore) async -> [String] {
+        var reportedIssuesUUIDs: [String] = []
+
+        let group = DispatchGroup()
+
+        for index in 0..<viewModel.printerLabelsToReplace {
+            group.enter()
+            let documentId = UUID().uuidString
+            let docRef = db.collection("reported_issues").document(documentId)
+            let timestamp = Timestamp(date: Date())
+
+            let data: [String: Any] = [
+                "description": viewModel.printerLabels[index],
+                "id": documentId,
+                "issue_type": "PrinterLabelIssue", // Assuming a constant issue type for printer label issues
+                "report_id": viewModel.reportId ?? "", // Ensure reportId is available in the ViewModel
+                "report_type": "site_ready",
+                "resolved": false,
+                "site": siteId,
+                "timestamp": timestamp,
+                "user_submitted": userId
+            ]
+
+            // Write data to Firestore
+            docRef.setData(data) { error in
+                if let error = error {
+                    print("Error writing document: \(error)")
+                } else {
+                    print("Reported printer label issue \(index + 1) successfully written!")
+                    reportedIssuesUUIDs.append(documentId)
+                }
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            // No completion handler needed for async function, just return the UUIDs
+        }
+        return reportedIssuesUUIDs
     }
 
     private func submitLabelIssues(db: Firestore) async {
@@ -548,6 +575,7 @@ extension SiteReadySurveyView {
         @Published var pcCount: Int = 0
         @Published var macCount: Int = 0
         @Published var scannerCount: Int = 0
+        
         @Published var chairCount: Int = 0
         @Published var loggedIntoAllComputers: Bool = false
         @Published var failedToLoginCount: Int = 0 {
@@ -643,6 +671,7 @@ extension SiteReadySurveyView {
         @Published var otherIssueTicketNumbers: [String] = []
         @Published var labelIssues: [Issue] = []
         @Published var reportId: String = ""
+        
 
 
         @Published var additionalComments: String = ""
