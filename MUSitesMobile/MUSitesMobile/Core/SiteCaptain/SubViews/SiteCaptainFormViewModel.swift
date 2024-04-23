@@ -48,10 +48,9 @@ class SiteCaptainViewModel: ObservableObject {
     
     // Method to add a supply with its count to the suppliesNeeded array
     func addSupply(supply: SupplyType, count: Int) {
-        let newSupplyNeeded = SupplyNeeded(count: count, supply: supply.id)
+        let newSupplyNeeded = SupplyNeeded(count: count, supplyId: supply.id, supplyName: supply.name)
         suppliesNeeded.append(newSupplyNeeded)
     }
-    
     // Method to remove a supply from the suppliesNeeded array
     func removeSupply(at index: Int) {
         suppliesNeeded.remove(at: index)

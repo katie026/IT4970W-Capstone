@@ -16,23 +16,26 @@ struct SupplyRequest: Codable {
     let reportType: String
     let resolved: Bool
     let supplyType: String
-    
+    let supplyName: String
+
     init(
         id: String,
         countNeeded: Int,
         reportID: String,
         reportType: String,
         resolved: Bool,
-        supplyType: String)
-    {
+        supplyType: String,
+        supplyName: String // New parameter for supply name
+    ) {
         self.id = id
         self.countNeeded = countNeeded
         self.reportID = reportID
         self.reportType = reportType
         self.resolved = resolved
         self.supplyType = supplyType
+        self.supplyName = supplyName // Assign the supply name
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case countNeeded = "count_needed"
@@ -40,7 +43,9 @@ struct SupplyRequest: Codable {
         case reportType = "report_type"
         case resolved = "resolved"
         case supplyType = "supply_type"
+        case supplyName = "supply_name"
     }
+
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -50,6 +55,7 @@ struct SupplyRequest: Codable {
         self.reportType = try container.decode(String.self, forKey: .reportType)
         self.resolved = try container.decode(Bool.self, forKey: .resolved)
         self.supplyType = try container.decode(String.self, forKey: .supplyType)
+        self.supplyName = try container.decode(String.self, forKey: .supplyName)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -60,6 +66,7 @@ struct SupplyRequest: Codable {
         try container.encode(self.reportType, forKey: .reportType)
         try container.encode(self.resolved, forKey: .resolved)
         try container.encode(self.supplyType, forKey: .supplyType)
+        try container.encode(self.supplyName, forKey: .supplyName)
     }
     
     

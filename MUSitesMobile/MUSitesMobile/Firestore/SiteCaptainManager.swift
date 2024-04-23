@@ -21,7 +21,6 @@ struct SiteCaptain: Codable, Identifiable {
     let updatedInventory: Bool
     let user: String
 
-    // Add this computed property to conform to Identifiable
     var computedId: String {
         id
     }
@@ -97,7 +96,8 @@ struct SiteCaptainIssue: Codable {
 
 struct SupplyNeeded: Codable {
     let count: Int
-    let supply: String
+    let supplyId: String
+    let supplyName: String
 }
 
 
@@ -131,7 +131,8 @@ class SiteCaptainManager {
                 reportID: computingSite.id,
                 reportType: "site_captain",
                 resolved: false,
-                supplyType: supplyNeeded.supply
+                supplyType: supplyNeeded.supplyId,
+                supplyName: supplyNeeded.supplyName
             )
         }
         
