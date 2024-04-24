@@ -34,6 +34,11 @@ struct AdminView: View {
                         Text("Upload Images")
                     }
                 }
+                
+                NavigationLink(destination: SiteCaptainSubmissionAdminView()) {
+                    Text("View Site Captain Submissions")
+                }
+                
             }
             .listStyle(InsetGroupedListStyle())
             .navigationTitle("Admin")

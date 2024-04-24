@@ -45,16 +45,6 @@ struct SubmitFormView: View {
                         Spacer()
                     }.padding(.vertical, 10)
                 }
-
-                // Site Captain Submission Admin View Link
-                NavigationLink(destination: SiteCaptainSubmissionAdminView()) {
-                    HStack {
-                        Text("Site Captain Submissions")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                        Spacer()
-                    }.padding(.vertical, 10)
-                }
             }
         }.navigationTitle("SUBMIT")
     }
