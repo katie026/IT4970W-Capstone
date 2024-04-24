@@ -27,23 +27,28 @@ struct SiteReadySurveyView: View {
                 }
                 Spacer()
                 Button(action: {
-                    let db = Firestore.firestore()
+                    // Attempt to get the authenticated user and submit the site ready survey data
+                    do {
+                        let db = Firestore.firestore()
 
-                    // Submitting reported issues
-                    submitReportedIssues(db: db) { reportedIssuesUUIDs in
-                        // Submitting printer label issues
-                        Task {
-                            let printerLabelIssuesUUIDs = await submitPrinterLabelIssues(db: db)
-                            // Submitting site ready survey data with reported and printer label issues' UUIDs
-                            submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs)
+                        // Submitting reported issues
+                        submitReportedIssues(db: db) { reportedIssuesUUIDs in
+                            // Submitting printer label issues
+                            Task {
+                                let printerLabelIssuesUUIDs = await submitPrinterLabelIssues(db: db)
+                                // Submitting site ready survey data with reported and printer label issues' UUIDs
+                                submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs)
+                            }
                         }
+                        // Submitting label issues
+                        Task {
+                            await submitLabelIssues(db: db)
+                        }
+                    } catch {
+                        print("Error submitting site ready survey data: \(error)")
                     }
-                    // Submitting label issues
-                    Task {
-                        await submitLabelIssues(db: db)
-                    }
-
                 }) {
+                    // Button content
                     Text("Submit")
                         .padding()
                         .frame(maxWidth: .infinity)
@@ -65,12 +70,13 @@ struct SiteReadySurveyView: View {
             }
         }
     }
+    
 
     private func submitSiteReadySurvey(db: Firestore, reportedIssuesUUIDs: [String], printerLabelIssuesUUIDs: [String]) {
         let documentId = UUID().uuidString
         let docRef = db.collection("site_ready_entries").document(documentId)
         let timestamp = Timestamp(date: Date())
-
+        
         var data: [String: Any] = [
             "bw_printer_count": viewModel.bwPrinterCount,
             "chair_count": viewModel.chairCount,
@@ -124,7 +130,7 @@ struct SiteReadySurveyView: View {
                 "description": viewModel.computerFailures[index],
                 "id": documentId,
                 "issue_type": "GxFGSkbDySZmdkCFExt9",
-                "report_id": viewModel.reportId, // You need to define reportId in your view model or provide it from somewhere
+                "report_id": viewModel.reportId,
                 "report_type": "site_ready",
                 "resolved": false,
                 "site": siteId,
@@ -257,8 +263,15 @@ struct ComputersSection: View {
                         TextField("Enter computer failure description", text: $viewModel.computerFailures[index])
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         
-                        TextField("Enter ticket number", text: $viewModel.failedLoginTicketNumbers[index])
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        TextField("Enter ticket number", text: Binding(
+                            get: {
+                                return viewModel.failedLoginTicketNumbers[index] == 0 ? "" : "\(viewModel.failedLoginTicketNumbers[index])"
+                            },
+                            set: { newValue in
+                                viewModel.failedLoginTicketNumbers[index] = Int(newValue) ?? 0
+                            }
+                        ))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                 }
             }
@@ -586,11 +599,11 @@ extension SiteReadySurveyView {
                 }
                 // Ensure that the failedLoginTicketNumbers array matches the count
                 while failedLoginTicketNumbers.count < failedToLoginCount {
-                    failedLoginTicketNumbers.append("")
+                    failedLoginTicketNumbers.append(0)
                 }
             }
         }
-        @Published var failedLoginTicketNumbers: [String] = []
+        @Published var failedLoginTicketNumbers: [Int] = []
         @Published var computerFailures: [String] = []
         @Published var cleanedAllComputers: Bool = false
         @Published var cleanedAllStations: Bool = false

@@ -85,7 +85,13 @@ struct DetailedSiteView: View {
             }
             
             Button(action: {
-                isSiteReadySurveyViewPresented = true
+                // Attempt to get the authenticated user
+                if let user = try? AuthenticationManager.shared.getAuthenticatedUser() {
+                    isSiteReadySurveyViewPresented = true
+                } else {
+                    // Handle the case where the user is not authenticated
+                    print("User not authenticated")
+                }
             }) {
                 Text("Submit Site Ready Entry")
                     .font(.headline)
@@ -99,7 +105,12 @@ struct DetailedSiteView: View {
             .padding(.bottom, 20)
             .fullScreenCover(isPresented: $isSiteReadySurveyViewPresented) {
                 NavigationView {
-                    SiteReadySurveyView(siteId: site.id, userId: "123")
+                    if let user = try? AuthenticationManager.shared.getAuthenticatedUser() {
+                        SiteReadySurveyView(siteId: site.id, userId: user.uid)
+                    } else {
+                        // Handle the case where the user is not authenticated
+                        Text("User not authenticated")
+                    }
                 }
             }
         }
