@@ -241,9 +241,5 @@ struct SiteCaptainFormView: View {
 
 #Preview {
     NavigationView {
-        SiteCaptainSubmissionView(
-            siteId: "BezlCe1ospf57zMdop2z",
-            siteName: "Bluford"
-        )
     }
 }

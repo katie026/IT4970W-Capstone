@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct Computer: Identifiable, Codable, Equatable {
+struct Computer: Identifiable, Codable, Equatable, Hashable {
     let id: String
     let name: String?
     let os: String?

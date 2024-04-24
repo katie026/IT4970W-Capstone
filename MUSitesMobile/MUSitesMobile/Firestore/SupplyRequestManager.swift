@@ -11,19 +11,19 @@ import FirebaseFirestoreSwift
 
 struct SupplyRequest: Codable {
     let id: String
-    let countNeeded: Int
-    let reportID: String
-    let reportType: String
-    let resolved: Bool
-    let supplyType: String
+    let countNeeded: Int?
+    let reportID: String?
+    let reportType: String?
+    let resolved: Bool?
+    let supplyType: String?
     
     init(
         id: String,
-        countNeeded: Int,
-        reportID: String,
-        reportType: String,
-        resolved: Bool,
-        supplyType: String)
+        countNeeded: Int? = nil,
+        reportID: String? = nil,
+        reportType: String? = nil,
+        resolved: Bool? = nil,
+        supplyType: String? = nil)
     {
         self.id = id
         self.countNeeded = countNeeded
@@ -45,22 +45,20 @@ struct SupplyRequest: Codable {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(String.self, forKey: .id)
-        self.countNeeded = try container.decode(Int.self, forKey: .countNeeded)
-        self.reportID = try container.decode(String.self, forKey: .reportID)
-        self.reportType = try container.decode(String.self, forKey: .reportType)
-        self.resolved = try container.decode(Bool.self, forKey: .resolved)
-        self.supplyType = try container.decode(String.self, forKey: .supplyType)
+        self.countNeeded = try container.decodeIfPresent(Int.self, forKey: .countNeeded)
+        self.reportID = try container.decodeIfPresent(String.self, forKey: .reportID)
+        self.reportType = try container.decodeIfPresent(String.self, forKey: .reportType)
+        self.resolved = try container.decodeIfPresent(Bool.self, forKey: .resolved)
+        self.supplyType = try container.decodeIfPresent(String.self, forKey: .supplyType)
     }
     
-    func encode(to encoder: Encoder) throws {
+    func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.id, forKey: .id)
-        try container.encode(self.countNeeded, forKey: .countNeeded)
-        try container.encode(self.reportID, forKey: .reportID)
-        try container.encode(self.reportType, forKey: .reportType)
-        try container.encode(self.resolved, forKey: .resolved)
-        try container.encode(self.supplyType, forKey: .supplyType)
+        try container.encodeIfPresent(self.countNeeded, forKey: .countNeeded)
+        try container.encodeIfPresent(self.reportID, forKey: .reportID)
+        try container.encodeIfPresent(self.reportType, forKey: .reportType)
+        try container.encodeIfPresent(self.resolved, forKey: .resolved)
+        try container.encodeIfPresent(self.supplyType, forKey: .supplyType)
     }
-    
-    
 }

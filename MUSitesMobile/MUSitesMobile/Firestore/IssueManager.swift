@@ -9,11 +9,11 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct Issue: Identifiable, Codable, Equatable {
+struct Issue: Identifiable, Codable, Equatable  {
     var id: String
     var description: String?
     let timestamp: Date?
-    var issueType: String?
+    var issueTypeId: String?
     var resolved: Bool?
     var ticket: Int?
     let reportId: String?
@@ -27,7 +27,7 @@ struct Issue: Identifiable, Codable, Equatable {
         id: String,
         description: String? = nil,
         timestamp: Date? = nil,
-        issueType: String? = nil,
+        issueTypeId: String? = nil,
         resolved: Bool? = nil,
         ticket: Int? = nil,
         reportId: String? = nil,
@@ -39,7 +39,7 @@ struct Issue: Identifiable, Codable, Equatable {
         self.id = id
         self.description = description
         self.timestamp = timestamp
-        self.issueType = issueType
+        self.issueTypeId = issueTypeId
         self.resolved = resolved
         self.ticket = ticket
         self.reportId = reportId
@@ -53,7 +53,7 @@ struct Issue: Identifiable, Codable, Equatable {
         case id = "id"
         case timestamp = "timestamp"
         case description = "description"
-        case issueType = "issue_type"
+        case issueTypeId = "issue_type"
         case resolved = "resolved"
         case ticket = "ticket"
         case reportId = "report_id"
@@ -68,7 +68,7 @@ struct Issue: Identifiable, Codable, Equatable {
         self.id = try container.decode(String.self, forKey: .id)
         self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp)
         self.description = try container.decodeIfPresent(String.self, forKey: .description)
-        self.issueType = try container.decodeIfPresent(String.self, forKey: .issueType)
+        self.issueTypeId = try container.decodeIfPresent(String.self, forKey: .issueTypeId)
         self.resolved = try container.decodeIfPresent(Bool.self, forKey: .resolved)
         self.ticket = try container.decodeIfPresent(Int.self, forKey: .ticket)
         self.reportId = try container.decodeIfPresent(String.self, forKey: .reportId)
@@ -83,7 +83,7 @@ struct Issue: Identifiable, Codable, Equatable {
         try container.encode(self.id, forKey: .id)
         try container.encodeIfPresent(self.timestamp, forKey: .timestamp)
         try container.encodeIfPresent(self.description, forKey: .description)
-        try container.encodeIfPresent(self.issueType, forKey: .issueType)
+        try container.encodeIfPresent(self.issueTypeId, forKey: .issueTypeId)
         try container.encodeIfPresent(self.resolved, forKey: .resolved)
         try container.encodeIfPresent(self.ticket, forKey: .ticket)
         try container.encodeIfPresent(self.reportId, forKey: .reportId)

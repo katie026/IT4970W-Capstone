@@ -366,7 +366,7 @@ struct DetailedSiteView: View {
 
 private func submitForm(site: Site) -> some View {
     //Submit a Form section
-    NavigationLink(destination: SiteCaptainSubmissionView(siteId: site.id, siteName: site.name ?? ""))
+    NavigationLink(destination: SubmitFormView(computingSite: site))
     {        HStack {
             Spacer(minLength: 4)
             Text("Submit a Form")

@@ -20,10 +20,14 @@ final class IssuesViewModel: ObservableObject {
     var users: [DBUser] = []
     var issueTypes: [IssueType] = []
     
-    func getIssues(completion: @escaping () async -> Void) {
+    func getIssues(completion: @escaping () -> Void) {
         Task {
-            self.issues = try await IssueManager.shared.getAllIssues(descending: selectedSort.sortDescending, startDate: startDate, endDate: endDate)
-            await completion()
+            do {
+                self.issues = try await IssueManager.shared.getAllIssues(descending: selectedSort.sortDescending, startDate: startDate, endDate: endDate)
+            } catch {
+                print("Error getting issues: \(error)")
+            }
+            completion()
         }
     }
     
@@ -238,7 +242,7 @@ struct IssuesView: View {
     }
     
     private func issueTypeSection(issue: Issue) -> some View {
-        let typeName = viewModel.issueTypes.first { $0.id == issue.issueType }?.name ?? "N/A"
+        let typeName = viewModel.issueTypes.first { $0.id == issue.issueTypeId }?.name ?? "N/A"
         
         // default accent color
         var issueTypeAccentColor = Color.gray
@@ -246,7 +250,7 @@ struct IssuesView: View {
         var issueTypeImageName = "square.dotted"
         
         // customize color and image based on Type
-        if let issueType = issue.issueType {
+        if let issueType = issue.issueTypeId {
             if issueType == "FldaGVfpPdQ57H7XsGOO" { // Chair
                 issueTypeAccentColor = Color.green
                 issueTypeImageName = "chair"

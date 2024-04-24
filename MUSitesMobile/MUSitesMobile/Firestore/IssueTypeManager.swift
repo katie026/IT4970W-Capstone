@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct IssueType: Codable, Hashable {
+struct IssueType: Identifiable, Codable, Hashable {
     let id: String
     let name: String
     let notes: String?
