@@ -16,7 +16,7 @@ struct Issue: Identifiable, Codable, Equatable  {
     var issueTypeId: String?
     var resolved: Bool?
     var ticket: Int?
-    let reportId: String?
+    var reportId: String?
     var reportType: String?
     let siteId: String?
     let userSubmitted: String?
@@ -138,6 +138,14 @@ final class IssueManager {
     // fetch issue collection onto local device
     private func getAllIssuesQuery() -> Query {
         issuesCollection
+    }
+    
+    // create new issue document in Firestore, return id
+    func getNewIssueId() async throws -> String {
+        // create auto-generated document in collection
+        let document = issuesCollection.document()
+        // get document id
+        return document.documentID
     }
     
     // get hourlyCleanings sorted by Date

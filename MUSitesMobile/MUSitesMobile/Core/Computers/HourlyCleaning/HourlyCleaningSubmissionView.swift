@@ -137,7 +137,6 @@ struct HourlyCleaningSubmissionView: View {
                 title: Text("Status"),
                 message: Text(viewModel.resultMessage),
                 dismissButton: .default(Text("OK")) {
-                    //TODO: navigation logic
                     // dismiss the current view and navigate back one view (SubmitFormView)
                     presentationMode.wrappedValue.dismiss()
                 }
