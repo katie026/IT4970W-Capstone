@@ -415,6 +415,22 @@ struct DetailedSiteView: View {
     }()
 }
 
+private func submitForm(site: Site) -> some View {
+    //Submit a Form section
+    NavigationLink(destination: SubmitFormView(computingSite: site))
+    {        HStack {
+            Spacer(minLength: 4)
+            Text("Submit a Form")
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(.blue)
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical)
+    }
+}
+
 #Preview {
     NavigationStack {
         DetailedSiteView(

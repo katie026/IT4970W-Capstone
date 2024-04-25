@@ -35,7 +35,7 @@ struct SubmitFormView: View {
                 }
                 
                 // Site Captain Link
-                NavigationLink(destination: SiteCaptainSubmissionView(siteId: computingSite.id, siteName: computingSite.name ?? "")) {
+                NavigationLink(destination: SiteCaptainSubmissionView(site: computingSite)) {
                     HStack {
                         Text("Site Captain")
                             .font(.headline)
@@ -59,7 +59,7 @@ struct SubmitFormView: View {
             siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
             hasClock: true,
             hasInventory: true,
-            hasWhiteboard: false,
+            hasWhiteboard: true,
             namePatternMac: "CLARK-MAC-##",
             namePatternPc: "CLARK-PC-##",
             namePatternPrinter: "Clark Printer ##",

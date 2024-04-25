@@ -94,6 +94,7 @@
 		F68E1B072BBC2CE600EBE6AC /* SheetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B062BBC2CE500EBE6AC /* SheetManager.swift */; };
 		F68E1B0C2BBD2C6B00EBE6AC /* InventoryEntriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B0B2BBD2C6B00EBE6AC /* InventoryEntriesView.swift */; };
 		F69670602BBF041F00A56AA5 /* SupplyEntriesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F696705F2BBF041F00A56AA5 /* SupplyEntriesManager.swift */; };
+		F69A9C362BD98914006EAE22 /* PrinterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69A9C352BD98912006EAE22 /* PrinterManager.swift */; };
 		F6AB560A2BC472CD005727D2 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB56092BC472CD005727D2 /* WebView.swift */; };
 		F6AB560C2BC4C092005727D2 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB560B2BC4C092005727D2 /* Route.swift */; };
 		F6AB560E2BC4D5FD005727D2 /* SiteTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */; };
@@ -197,6 +198,7 @@
 		F68E1B062BBC2CE500EBE6AC /* SheetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetManager.swift; sourceTree = "<group>"; };
 		F68E1B0B2BBD2C6B00EBE6AC /* InventoryEntriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryEntriesView.swift; sourceTree = "<group>"; };
 		F696705F2BBF041F00A56AA5 /* SupplyEntriesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyEntriesManager.swift; sourceTree = "<group>"; };
+		F69A9C352BD98912006EAE22 /* PrinterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrinterManager.swift; sourceTree = "<group>"; };
 		F6AB56092BC472CD005727D2 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		F6AB560B2BC4C092005727D2 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
 		F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteTypeManager.swift; sourceTree = "<group>"; };
@@ -344,6 +346,7 @@
 				F6246A7B2BA12FD400828DAE /* KeyManager.swift */,
 				F668B1E22B9AB392000B2886 /* KeySetManager.swift */,
 				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
+				F69A9C352BD98912006EAE22 /* PrinterManager.swift */,
 				E553CD7B2BCD937E00B9D63B /* SiteCaptainManager.swift */,
 				F6AB560F2BC4D9EE005727D2 /* SiteGroupsManager.swift */,
 				F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */,
@@ -809,6 +812,7 @@
 				F6246A7F2BA3BC6A00828DAE /* SimpleMapView.swift in Sources */,
 				D5B5E06D2BB32C0000AFCE3C /* AdminView.swift in Sources */,
 				6EA65F5C2B8E75E5000766C7 /* OnFirstAppearViewModifier.swift in Sources */,
+				F69A9C362BD98914006EAE22 /* PrinterManager.swift in Sources */,
 				6E33297A2B7F640D009FCD14 /* SignInEmailViewModel.swift in Sources */,
 				6E8C57392B7ED9DF00B5BF59 /* SignInGoogleHelper.swift in Sources */,
 				6E68583A2B84479100896B16 /* BuildingsViewModel.swift in Sources */,
