@@ -34,6 +34,11 @@ struct AdminView: View {
                         Text("Upload Images")
                     }
                 }
+                Section(header: Text("Sites")) {
+                                    NavigationLink(destination: SiteReadyEntriesView()) {
+                                        Text("View Site Ready Entries")
+                                    }
+                                }
             }
             .listStyle(InsetGroupedListStyle())
             .navigationTitle("Admin")

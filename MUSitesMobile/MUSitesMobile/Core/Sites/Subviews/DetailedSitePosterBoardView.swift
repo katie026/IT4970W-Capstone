@@ -15,40 +15,43 @@ struct PostersView: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(imageURLs, id: \.self) { imageUrl in
-                        AsyncImage(url: imageUrl) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .matchedGeometryEffect(id: imageUrl, in: animationNamespace)
-                                    .frame(width: 100, height: 100)
-                                    .cornerRadius(10)
-                                    .onTapGesture {
-                                        withAnimation(.spring()) {
-                                            selectedImageURL = imageUrl
+            // ScrollView is now conditional
+            if selectedImageURL == nil {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(imageURLs, id: \.self) { imageUrl in
+                            AsyncImage(url: imageUrl) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 100, height: 100)
+                                        .cornerRadius(10)
+                                        .onTapGesture {
+                                            withAnimation(.spring()) {
+                                                selectedImageURL = imageUrl
+                                            }
                                         }
-                                    }
-                            case .failure(_):
-                                Image(systemName: "photo")
-                                    .resizable()
-                                    .scaledToFit()
-                            case .empty:
-                                ProgressView()
-                            @unknown default:
-                                EmptyView()
+                                case .failure(_):
+                                    Image(systemName: "photo")
+                                        .resizable()
+                                        .scaledToFit()
+                                case .empty:
+                                    ProgressView()
+                                @unknown default:
+                                    EmptyView()
+                                }
                             }
+                            .matchedGeometryEffect(id: imageUrl, in: animationNamespace)
+                            .frame(width: 100, height: 100)
+                            .cornerRadius(10)
                         }
-                        .frame(width: 100, height: 100)
-                        .cornerRadius(10)
                     }
+                    .frame(height: 100)
+                    .padding(.horizontal)
                 }
             }
-            .frame(height: 100)
-            .padding(.horizontal)
 
             // Overlay view for expanded image
             if let selectedImageURL = selectedImageURL {
@@ -59,7 +62,7 @@ struct PostersView: View {
                             self.selectedImageURL = nil
                         }
                     }
-                
+
                 AsyncImage(url: selectedImageURL) { phase in
                     switch phase {
                     case .success(let image):
@@ -84,42 +87,8 @@ struct PostersView: View {
                 .padding(20)
                 .transition(.scale.combined(with: .opacity))
                 .zIndex(1)
-
-                // Close button with better styling
-                CloseButton {
-                    withAnimation(.easeInOut) {
-                        self.selectedImageURL = nil
-                    }
-                }
-                .padding(.top, safeAreaInsets().top)
-                .padding(.trailing, 20)
-                .transition(.opacity)
-                .zIndex(2)
             }
         }
-    }
-
-    @ViewBuilder
-    private func CloseButton(action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 10))
-                .foregroundColor(.white)
-                
-                .padding(.trailing, -500)
-                .padding(.top, -50)
-                .background(Color.black.opacity(0.6).cornerRadius(20))
-        }
-    }
-
-    private func safeAreaInsets() -> UIEdgeInsets {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
-            return .zero
-        }
-        guard let window = windowScene.windows.first else {
-            return .zero
-        }
-        return window.safeAreaInsets
     }
 }
 
@@ -130,40 +99,43 @@ struct BoardView: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(imageURLs, id: \.self) { imageUrl in
-                        AsyncImage(url: imageUrl) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .matchedGeometryEffect(id: imageUrl, in: animationNamespace)
-                                    .frame(width: 100, height: 100)
-                                    .cornerRadius(10)
-                                    .onTapGesture {
-                                        withAnimation(.spring()) {
-                                            selectedImageURL = imageUrl
+            // ScrollView is now conditional
+            if selectedImageURL == nil {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(imageURLs, id: \.self) { imageUrl in
+                            AsyncImage(url: imageUrl) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 100, height: 100)
+                                        .cornerRadius(10)
+                                        .onTapGesture {
+                                            withAnimation(.spring()) {
+                                                selectedImageURL = imageUrl
+                                            }
                                         }
-                                    }
-                            case .failure(_):
-                                Image(systemName: "photo")
-                                    .resizable()
-                                    .scaledToFit()
-                            case .empty:
-                                ProgressView()
-                            @unknown default:
-                                EmptyView()
+                                case .failure(_):
+                                    Image(systemName: "photo")
+                                        .resizable()
+                                        .scaledToFit()
+                                case .empty:
+                                    ProgressView()
+                                @unknown default:
+                                    EmptyView()
+                                }
                             }
+                            .matchedGeometryEffect(id: imageUrl, in: animationNamespace)
+                            .frame(width: 100, height: 100)
+                            .cornerRadius(10)
                         }
-                        .frame(width: 100, height: 100)
-                        .cornerRadius(10)
                     }
+                    .frame(height: 100)
+                    .padding(.horizontal)
                 }
             }
-            .frame(height: 100)
-            .padding(.horizontal)
 
             // Overlay view for expanded image
             if let selectedImageURL = selectedImageURL {
@@ -174,7 +146,7 @@ struct BoardView: View {
                             self.selectedImageURL = nil
                         }
                     }
-                
+
                 AsyncImage(url: selectedImageURL) { phase in
                     switch phase {
                     case .success(let image):
@@ -199,86 +171,55 @@ struct BoardView: View {
                 .padding(20)
                 .transition(.scale.combined(with: .opacity))
                 .zIndex(1)
-
-                // Close button with better styling
-                CloseButton {
-                    withAnimation(.easeInOut) {
-                        self.selectedImageURL = nil
-                    }
-                }
-                .padding(.top, safeAreaInsets().top)
-                .padding(.trailing, 20)
-                .transition(.opacity)
-                .zIndex(2)
             }
         }
     }
-
-    @ViewBuilder
-    private func CloseButton(action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 10))
-                .foregroundColor(.white)
-                
-                .padding(.trailing, -500)
-                .padding(.top, -50)
-                .background(Color.black.opacity(0.6).cornerRadius(20))
-        }
-    }
-
-    private func safeAreaInsets() -> UIEdgeInsets {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
-            return .zero
-        }
-        guard let window = windowScene.windows.first else {
-            return .zero
-        }
-        return window.safeAreaInsets
-    }
 }
 
-public struct InventoryView: View {
+struct InventoryView: View {
     var imageURLs: [URL]
     @State private var selectedImageURL: URL?
     @Namespace private var animationNamespace
 
-    public var body: some View {
+    var body: some View {
         ZStack(alignment: .topTrailing) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(imageURLs, id: \.self) { imageUrl in
-                        AsyncImage(url: imageUrl) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .matchedGeometryEffect(id: imageUrl, in: animationNamespace)
-                                    .frame(width: 100, height: 100)
-                                    .cornerRadius(10)
-                                    .onTapGesture {
-                                        withAnimation(.spring()) {
-                                            selectedImageURL = imageUrl
+            // ScrollView is now conditional
+            if selectedImageURL == nil {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(imageURLs, id: \.self) { imageUrl in
+                            AsyncImage(url: imageUrl) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 100, height: 100)
+                                        .cornerRadius(10)
+                                        .onTapGesture {
+                                            withAnimation(.spring()) {
+                                                selectedImageURL = imageUrl
+                                            }
                                         }
-                                    }
-                            case .failure(_):
-                                Image(systemName: "photo")
-                                    .resizable()
-                                    .scaledToFit()
-                            case .empty:
-                                ProgressView()
-                            @unknown default:
-                                EmptyView()
+                                case .failure(_):
+                                    Image(systemName: "photo")
+                                        .resizable()
+                                        .scaledToFit()
+                                case .empty:
+                                    ProgressView()
+                                @unknown default:
+                                    EmptyView()
+                                }
                             }
+                            .matchedGeometryEffect(id: imageUrl, in: animationNamespace)
+                            .frame(width: 100, height: 100)
+                            .cornerRadius(10)
                         }
-                        .frame(width: 100, height: 100)
-                        .cornerRadius(10)
                     }
+                    .frame(height: 100)
+                    .padding(.horizontal)
                 }
             }
-            .frame(height: 100)
-            .padding(.horizontal)
 
             // Overlay view for expanded image
             if let selectedImageURL = selectedImageURL {
@@ -289,7 +230,7 @@ public struct InventoryView: View {
                             self.selectedImageURL = nil
                         }
                     }
-                
+
                 AsyncImage(url: selectedImageURL) { phase in
                     switch phase {
                     case .success(let image):
@@ -314,46 +255,10 @@ public struct InventoryView: View {
                 .padding(20)
                 .transition(.scale.combined(with: .opacity))
                 .zIndex(1)
-
-                // Close button with better styling
-                CloseButton {
-                    withAnimation(.easeInOut) {
-                        self.selectedImageURL = nil
-                    }
-                }
-                .padding(.top, safeAreaInsets().top)
-                .padding(.trailing, 20)
-                .transition(.opacity)
-                .zIndex(2)
             }
         }
     }
-
-    @ViewBuilder
-    private func CloseButton(action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 10))
-                .foregroundColor(.white)
-                
-                .padding(.trailing, -500)
-                .padding(.top, -50)
-                .background(Color.black.opacity(0.6).cornerRadius(20))
-        }
-    }
-
-    private func safeAreaInsets() -> UIEdgeInsets {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
-            return .zero
-        }
-        guard let window = windowScene.windows.first else {
-            return .zero
-        }
-        return window.safeAreaInsets
-    }
 }
-
-
 
 struct ProfileImageView: View {
     var imageURL: URL?

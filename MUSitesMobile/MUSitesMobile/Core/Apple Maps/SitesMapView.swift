@@ -78,7 +78,7 @@ struct SitesMapView: View {
                                 .foregroundColor(.black) // Set text color to black
                         }
 
-                        Text("Selected Option: \(selectedSiteGroup ?? "None")")
+                        Text("Selected Option: \(siteGroupChosen ?? "None")")
                             .padding(5) // Adjust the padding size here
                             .background(Color.black)
                             .cornerRadius(5) // Adjust the corner radius as needed
@@ -156,17 +156,17 @@ struct MapView: UIViewRepresentable {
     }
     
     private func fetchBuildingsFromFirestore(completion: @escaping ([Building]) -> Void) {
-            Task {
-                do {
-                    let fetchedBuildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: nil)
-                    DispatchQueue.main.async {
-                        completion(fetchedBuildings)
-                    }
-                } catch {
-                    print("Error fetching buildings: \(error)")
+        Task {
+            do {
+                let fetchedBuildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: selectedSiteGroup)
+                DispatchQueue.main.async {
+                    completion(fetchedBuildings)
                 }
+            } catch {
+                print("Error fetching buildings: \(error)")
             }
         }
+    }
     
     private func addAnnotations(to mapView: MKMapView) {
         mapView.removeAnnotations(mapView.annotations)
