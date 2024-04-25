@@ -13,6 +13,7 @@ struct SiteListView: View {
     @State private var sites: [Site] = []
     @State private var isLoading = true
     @State private var error: Error?
+    @State private var isDeleteMode = false
 
     var body: some View {
         Group {
@@ -40,6 +41,8 @@ struct SiteListView: View {
             }
         }
     }
+    
+    
 
     private func fetchSites() async {
         do {

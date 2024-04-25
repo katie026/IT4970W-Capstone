@@ -50,7 +50,7 @@ final class AuthenticationViewModel: ObservableObject {
                 // create a DBUser from AuthDataResultModel
                 let user = DBUser(auth: authDataResult)
                 // create their user profile in Firestore using DBUser
-                try await UserManager.shared.createNewUser(user: user)
+                try await UserManager.shared.createOrUpdateUser(user: user)
                 
                 if document.exists {
                     return true
