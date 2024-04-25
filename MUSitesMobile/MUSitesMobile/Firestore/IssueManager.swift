@@ -12,7 +12,8 @@ import FirebaseFirestoreSwift
 struct Issue: Identifiable, Codable, Equatable  {
     var id: String
     var description: String?
-    let timestamp: Date?
+    let dateCreated: Date?
+    var dateResolved: Date?
     var issueTypeId: String?
     var resolved: Bool?
     var ticket: Int?
@@ -26,7 +27,8 @@ struct Issue: Identifiable, Codable, Equatable  {
     init(
         id: String,
         description: String? = nil,
-        timestamp: Date? = nil,
+        dateCreated: Date? = nil,
+        dateResolved: Date? = nil,
         issueTypeId: String? = nil,
         resolved: Bool? = nil,
         ticket: Int? = nil,
@@ -38,7 +40,8 @@ struct Issue: Identifiable, Codable, Equatable  {
     ) {
         self.id = id
         self.description = description
-        self.timestamp = timestamp
+        self.dateCreated = dateCreated
+        self.dateResolved = dateCreated
         self.issueTypeId = issueTypeId
         self.resolved = resolved
         self.ticket = ticket
@@ -51,7 +54,8 @@ struct Issue: Identifiable, Codable, Equatable  {
     
     enum CodingKeys: String, CodingKey {
         case id = "id"
-        case timestamp = "timestamp"
+        case dateCreated = "date_created"
+        case dateResolved = "date_resolved"
         case description = "description"
         case issueTypeId = "issue_type"
         case resolved = "resolved"
@@ -66,7 +70,8 @@ struct Issue: Identifiable, Codable, Equatable  {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(String.self, forKey: .id)
-        self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp)
+        self.dateCreated = try container.decodeIfPresent(Date.self, forKey: .dateCreated)
+        self.dateResolved = try container.decodeIfPresent(Date.self, forKey: .dateResolved)
         self.description = try container.decodeIfPresent(String.self, forKey: .description)
         self.issueTypeId = try container.decodeIfPresent(String.self, forKey: .issueTypeId)
         self.resolved = try container.decodeIfPresent(Bool.self, forKey: .resolved)
@@ -81,7 +86,8 @@ struct Issue: Identifiable, Codable, Equatable  {
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.id, forKey: .id)
-        try container.encodeIfPresent(self.timestamp, forKey: .timestamp)
+        try container.encodeIfPresent(self.dateCreated, forKey: .dateCreated)
+        try container.encodeIfPresent(self.dateResolved, forKey: .dateResolved)
         try container.encodeIfPresent(self.description, forKey: .description)
         try container.encodeIfPresent(self.issueTypeId, forKey: .issueTypeId)
         try container.encodeIfPresent(self.resolved, forKey: .resolved)
@@ -151,30 +157,30 @@ final class IssueManager {
     // get hourlyCleanings sorted by Date
     private func getIssuesSortedByDateQuery(descending: Bool) -> Query {
         issuesCollection
-            .order(by: Issue.CodingKeys.timestamp.rawValue, descending: descending)
+            .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
     }
     
     // get issues filtered by date range
     private func getIssuesByDateQuery(startDate: Date, endDate: Date) -> Query {
         issuesCollection
-            .whereField(Issue.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
-            .whereField(Issue.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
+            .whereField(Issue.CodingKeys.dateCreated.rawValue, isGreaterThanOrEqualTo: startDate)
+            .whereField(Issue.CodingKeys.dateCreated.rawValue, isLessThanOrEqualTo: endDate)
     }
     
     // get issues filtered by date & sorted by date
     private func getIssuesSortedFilteredByDateQuery(descending: Bool, startDate: Date, endDate: Date) -> Query {
         issuesCollection
             // filter by date
-            .whereField(Issue.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
-            .whereField(Issue.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
+            .whereField(Issue.CodingKeys.dateCreated.rawValue, isGreaterThanOrEqualTo: startDate)
+            .whereField(Issue.CodingKeys.dateCreated.rawValue, isLessThanOrEqualTo: endDate)
             // sort by date
-            .order(by: Issue.CodingKeys.timestamp.rawValue, descending: descending)
+            .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
     }
     
     // get issues sorted by date
     private func getAllIssuesSortedByNameQuery(descending: Bool) -> Query {
         issuesCollection
-            .order(by: Issue.CodingKeys.timestamp.rawValue, descending: descending)
+            .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
     }
     
     // get issues by name

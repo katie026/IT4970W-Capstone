@@ -244,13 +244,13 @@
 			path = SiteReadySubmission;
 			sourceTree = "<group>";
 		};
-		261E6B722BD60D05000021CA /* SitesEntries */ = {
+		261E6B722BD60D05000021CA /* SitesReadyEntries */ = {
 			isa = PBXGroup;
 			children = (
 				261E6B732BD60D21000021CA /* SitesReadyEntriesView.swift */,
 				261E6B702BD60C19000021CA /* SiteReadyEntriesModel.swift */,
 			);
-			path = SitesEntries;
+			path = SitesReadyEntries;
 			sourceTree = "<group>";
 		};
 		26EC33B52B966B33001F0AEE /* Apple Maps */ = {
@@ -285,7 +285,6 @@
 				F668B1E42B9AB638000B2886 /* Keys */,
 				6E33297B2B7F6442009FCD14 /* Profile */,
 				6E3329722B7F62A7009FCD14 /* Settings */,
-				E553CD7D2BCD944C00B9D63B /* SiteCaptain */,
 				6EA65F5D2B911B0C000766C7 /* Sites */,
 				6EA65F4A2B8710DC000766C7 /* TabBarView */,
 				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
@@ -448,8 +447,8 @@
 		6EA65F5D2B911B0C000766C7 /* Sites */ = {
 			isa = PBXGroup;
 			children = (
-				261E6B722BD60D05000021CA /* SitesEntries */,
-				261E6B6D2BD60BE5000021CA /* SiteReadySubmission */,
+				F69A9C372BDA38F1006EAE22 /* SiteReady */,
+				E553CD7D2BCD944C00B9D63B /* SiteCaptain */,
 				6EA65F672B96EF0B000766C7 /* DetailedSiteView.swift */,
 				6EA65F692B96F028000766C7 /* DetailedSiteViewModel.swift */,
 				6EA65F602B91204D000766C7 /* SitesView.swift */,
@@ -582,8 +581,8 @@
 		E553CD7D2BCD944C00B9D63B /* SiteCaptain */ = {
 			isa = PBXGroup;
 			children = (
-				E553CD802BCD947B00B9D63B /* SubViews */,
 				E553CD7E2BCD947000B9D63B /* SiteCaptainSubmissionView.swift */,
+				E553CD802BCD947B00B9D63B /* SubViews */,
 			);
 			path = SiteCaptain;
 			sourceTree = "<group>";
@@ -659,6 +658,15 @@
 				F6B4E1C32BBF91DC009644DB /* SupplyEntriesView.swift */,
 			);
 			path = InventoryEntries;
+			sourceTree = "<group>";
+		};
+		F69A9C372BDA38F1006EAE22 /* SiteReady */ = {
+			isa = PBXGroup;
+			children = (
+				261E6B722BD60D05000021CA /* SitesReadyEntries */,
+				261E6B6D2BD60BE5000021CA /* SiteReadySubmission */,
+			);
+			path = SiteReady;
 			sourceTree = "<group>";
 		};
 		F69D74292BA0E9570095A817 /* Users */ = {

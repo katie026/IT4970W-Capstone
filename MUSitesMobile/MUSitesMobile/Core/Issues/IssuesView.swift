@@ -12,7 +12,7 @@ final class IssuesViewModel: ObservableObject {
     
     @Published private(set) var issues: [Issue] = []
     @Published var selectedSort = SortOption.descending
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -365, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -364, to: Date())!
     @Published var endDate = Date()
     
     // for labels
@@ -207,7 +207,7 @@ struct IssuesView: View {
             HStack {
                 // DATE
                 Image(systemName: "calendar")
-                Text("\(issue.timestamp != nil ? dateFormatter.string(from: issue.timestamp!) : "N/A")")
+                Text("\(issue.dateCreated != nil ? dateFormatter.string(from: issue.dateCreated!) : "N/A")")
                 // RESOLUTION STATUS
                 issueResolvedSection(issue: issue)
                 // SITE
