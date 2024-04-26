@@ -11,6 +11,8 @@ import Firebase
 final class ViewUsersViewModel: ObservableObject {
     @Published var users: [DBUser] = []
     @Published var isAuthenticated: [String: Bool] = [:]
+    @Published var unLinked: [String: Bool] = [:]
+
     
     func loadUsers(completion: @escaping () -> Void) {
         Task {
@@ -40,6 +42,24 @@ final class ViewUsersViewModel: ObservableObject {
             }
         }
     }
+    
+    func loadNonAuthenticatedUsers(completion: @escaping () -> Void) {
+        Task {
+            do {
+                let nonAuthenticatedUsers = try await UserManager.shared.getNonAuthenticatedUsers()
+                for user in nonAuthenticatedUsers {
+                    guard let email = user.email else { continue }
+                    self.unLinked[email] = true // Assume true for simplicity, adjust logic as needed
+                }
+                completion()
+            } catch {
+                print(error.localizedDescription)
+                completion()
+            }
+        }
+    }
+
+
 }
 
 struct ViewUsersView: View {
@@ -55,6 +75,7 @@ struct ViewUsersView: View {
         case all = "All"
         case authenticated = "Authenticated"
         case nonAuthenticated = "Non-Authenticated"
+        case unLinked = "unLinked"
     }
 
     var body: some View {
@@ -98,7 +119,11 @@ struct ViewUsersView: View {
             viewModel.loadUsers {
                 isLoading = false
             }
+            viewModel.loadNonAuthenticatedUsers {
+                isLoading = false
+            }
         }
+
         .overlay {
             if isLoading {
                 ProgressView("Loading users...")
@@ -106,15 +131,46 @@ struct ViewUsersView: View {
         }
     }
     
+//    private var filteredUsers: [DBUser] {
+//        var result = viewModel.users
+//        
+//        if filterMode != .all {
+//            result = result.filter {
+//                ($0.email != nil) && (viewModel.isAuthenticated[$0.email!] == (filterMode == .authenticated))
+//            }
+//        }
+//        
+//        if !searchText.isEmpty {
+//            result = result.filter {
+//                $0.fullName?.localizedCaseInsensitiveContains(searchText) ?? false
+//            }
+//        }
+//        
+//        return result.sorted { $0.fullName?.localizedCaseInsensitiveCompare($1.fullName ?? "") == .orderedAscending }
+//    }
+    
     private var filteredUsers: [DBUser] {
         var result = viewModel.users
         
-        if filterMode != .all {
-            result = result.filter {
-                ($0.email != nil) && (viewModel.isAuthenticated[$0.email!] == (filterMode == .authenticated))
+        switch filterMode {
+        case .all:
+            break
+        case .authenticated:
+            result = result.filter { user in
+                (user.email != nil) && (viewModel.isAuthenticated[user.email!] == true)
             }
+        case .nonAuthenticated:
+            result = result.filter { user in
+                (user.email != nil) && (viewModel.isAuthenticated[user.email!] == false)
+            }
+        case .unLinked:
+            result = result.filter { user in
+                guard let email = user.email else { return false }
+                return self.viewModel.unLinked[email, default: false] // Default to false if not set
+            }
+
         }
-        
+
         if !searchText.isEmpty {
             result = result.filter {
                 $0.fullName?.localizedCaseInsensitiveContains(searchText) ?? false

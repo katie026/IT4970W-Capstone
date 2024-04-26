@@ -65,6 +65,41 @@ final class StorageManager {
             }
         }
     }
+    
+    func deleteImage(siteName: String, category: String, imageName: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Reference to the specific image in the storage
+        let imageRef = Storage.storage().reference().child("Sites/\(siteName)/\(category)/\(imageName)")
+
+        // Perform the deletion
+        imageRef.delete { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+    
+    func listImages(siteName: String, category: String, completion: @escaping (Result<[String], Error>) -> Void) {
+        let ref = Storage.storage().reference().child("Sites/\(siteName)/\(category)")
+        ref.listAll { (result, error) in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            // Safely unwrap the result
+            guard let result = result else {
+                completion(.failure(URLError(.cannotParseResponse))) // Provide a more specific error as needed
+                return
+            }
+
+            let fileNames = result.items.map { $0.name }
+            completion(.success(fileNames))
+        }
+    }
+
+
     private func determineNextImageName(from existingNames: [String], siteName: String) -> String {
         let siteImageNumbers = existingNames.compactMap { name -> Int? in
             guard name.hasPrefix(siteName) else { return nil }

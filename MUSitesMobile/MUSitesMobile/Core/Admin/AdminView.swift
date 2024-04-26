@@ -31,7 +31,7 @@ struct AdminView: View {
                 
                 Section("Images") {
                     NavigationLink(destination: SiteListView()) { // we should rename this
-                        Text("Upload Images")
+                        Text("Images")
                     }
                 }
                 Section(header: Text("Sites")) {

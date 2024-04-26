@@ -170,6 +170,24 @@ final class UserManager {
         try userDocument(userId: user.userId).setData(from: user, merge: false)
     }
     
+    func createOrUpdateUser(user: DBUser) async throws {
+        let userRef = Firestore.firestore().collection("users").document(user.id)
+        
+        let document = try await userRef.getDocument()
+        if document.exists {
+            try await userRef.updateData([
+                "last_login": Timestamp(date: Date()),
+            ])
+        } else {
+            try await userRef.setData([
+                "user_id": user.id,
+                "email": user.email ?? "",
+                "date_created": Timestamp(date: Date()),
+                "last_login": Timestamp(date: Date())
+            ])
+        }
+    }
+    
     // delete a user in Firestore
     func deleteUser(userId: String) async throws {
         try await userDocument(userId: userId).delete()

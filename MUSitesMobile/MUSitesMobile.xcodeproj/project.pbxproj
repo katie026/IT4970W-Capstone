@@ -63,6 +63,7 @@
 		D5225A652BB733AF007F14E2 /* SiteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5225A642BB733AF007F14E2 /* SiteListView.swift */; };
 		D5225A672BB73D76007F14E2 /* DetailedSitePosterBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5225A662BB73D76007F14E2 /* DetailedSitePosterBoardView.swift */; };
 		D5225A6B2BC8758C007F14E2 /* AdminUserProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5225A6A2BC8758C007F14E2 /* AdminUserProfileView.swift */; };
+		D5225A802BDAF851007F14E2 /* ImageDeleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5225A7F2BDAF851007F14E2 /* ImageDeleteView.swift */; };
 		D5B5E06A2BAB405C00AFCE3C /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = D5B5E0692BAB405C00AFCE3C /* FirebaseStorage */; };
 		D5B5E06D2BB32C0000AFCE3C /* AdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B5E06C2BB32C0000AFCE3C /* AdminView.swift */; };
 		D5B5E0732BB32FA700AFCE3C /* AdminManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B5E0722BB32FA700AFCE3C /* AdminManager.swift */; };
@@ -168,6 +169,7 @@
 		D5225A642BB733AF007F14E2 /* SiteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteListView.swift; sourceTree = "<group>"; };
 		D5225A662BB73D76007F14E2 /* DetailedSitePosterBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedSitePosterBoardView.swift; sourceTree = "<group>"; };
 		D5225A6A2BC8758C007F14E2 /* AdminUserProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminUserProfileView.swift; sourceTree = "<group>"; };
+		D5225A7F2BDAF851007F14E2 /* ImageDeleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDeleteView.swift; sourceTree = "<group>"; };
 		D5B5E06C2BB32C0000AFCE3C /* AdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminView.swift; sourceTree = "<group>"; };
 		D5B5E0722BB32FA700AFCE3C /* AdminManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminManager.swift; sourceTree = "<group>"; };
 		D5B5E0742BB336C300AFCE3C /* ImagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerView.swift; sourceTree = "<group>"; };
@@ -553,6 +555,7 @@
 				D5B5E0742BB336C300AFCE3C /* ImagePickerView.swift */,
 				D5B5E07A2BB35DFB00AFCE3C /* ImageUploadView.swift */,
 				D5225A622BB72A07007F14E2 /* CategoryPickerView.swift */,
+				D5225A7F2BDAF851007F14E2 /* ImageDeleteView.swift */,
 			);
 			path = Photos;
 			sourceTree = "<group>";
@@ -849,6 +852,7 @@
 				F6B887262BD19F7600E4A7C8 /* HourlyCleaningsView.swift in Sources */,
 				26EC33B92B966BC8001F0AEE /* SitesMapView.swift in Sources */,
 				6E3329742B7F62D9009FCD14 /* SettingsViewModel.swift in Sources */,
+				D5225A802BDAF851007F14E2 /* ImageDeleteView.swift in Sources */,
 				F6AB56152BCB0D09005727D2 /* ComputerManager.swift in Sources */,
 				F6AB560E2BC4D5FD005727D2 /* SiteTypeManager.swift in Sources */,
 				F6B8872A2BD1B04500E4A7C8 /* HourlyCleaningCellView.swift in Sources */,
