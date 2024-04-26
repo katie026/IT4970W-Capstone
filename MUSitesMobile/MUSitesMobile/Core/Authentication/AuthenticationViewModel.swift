@@ -49,7 +49,7 @@ final class AuthenticationViewModel: ObservableObject {
                 let authDataResult = try await AuthenticationManager.shared.signInWithGoogle(googleSignInResult: googleSignInResult)
                 // create a DBUser from AuthDataResultModel
                 let user = DBUser(auth: authDataResult)
-                // create their user profile in Firestore using DBUser
+                // create or update their user profile in Firestore using DBUser
                 try await UserManager.shared.createOrUpdateUser(user: user)
                 
                 if document.exists {

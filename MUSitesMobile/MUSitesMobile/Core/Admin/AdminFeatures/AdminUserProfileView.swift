@@ -15,6 +15,7 @@ struct AdminUserProfileView: View {
     // Current Selections
     @State private var selectedPosition: String?
     // View Control
+    @State var currentUserId: String = ""
     @Environment(\.presentationMode) var presentationMode
     @State private var showingConfirmation = false
     @State private var showingDeleteConfirmation = false
@@ -53,23 +54,8 @@ struct AdminUserProfileView: View {
             getAllPositions()
             loadKeys() {}
             updateUserAdminStatus()
+            currentUserId = Auth.auth().currentUser?.uid ?? "" // tell the view the current user's id
         }
-//        .alert("Confirm Position", isPresented: $showingConfirmation) {
-//            Button("Cancel", role: .cancel) {}
-//            Button("Assign") {
-//                assignPosition(selectedPosition ?? "")
-//            }
-//        } message: {
-//            Text("Are you sure you want to assign the position \(selectedPosition ?? "N/A") to \(user.fullName ?? "this user")?")
-//        }
-//        .alert("Confirm Delete", isPresented: $showingDeleteConfirmation) {
-//            Button("Cancel", role: .cancel) {}
-//            Button("Delete", role: .destructive) {
-//                deleteUser()
-//            }
-//        } message: {
-//            Text("Are you sure you want to delete \(user.fullName ?? "this user")? This action cannot be undone.")
-//        }
         .alert(isPresented: $showAlert) {
             switch activateAlert {
             case .authentication:
@@ -118,9 +104,25 @@ struct AdminUserProfileView: View {
                 } else {
                     Text("User is not authorized.").foregroundColor(.red)
                 }
-                if !isAuthorized {
+                if isAuthorized {
+                    Button("Remove User Authorization") {
+                        AuthorizationManager.shared.removeUserToAuthorizedEmails(user: user) { error in
+                            if let error = error {
+                                alertMessage = "Failed to remove authorization: \(error.localizedDescription)"
+                            } else {
+                                alertMessage = "Removed user authorization successfully."
+                                // update local view
+                                isAuthorized = false
+                            }
+                            activateAlert = .authentication
+                            showAlert = true
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                } else {
                     Button("Authorize User") {
-                        Firestore.firestore().collection("authenticated_emails").document(user.email ?? "").setData(["email": user.email ?? ""]) { error in
+                        AuthorizationManager.shared.addUserToAuthorizedEmails(user: user) { error in
                             if let error = error {
                                 alertMessage = "Failed to authorize: \(error.localizedDescription)"
                             } else {
@@ -131,6 +133,18 @@ struct AdminUserProfileView: View {
                             activateAlert = .authentication
                             showAlert = true
                         }
+                        
+//                        Firestore.firestore().collection("authenticated_emails").document(user.email ?? "").setData(["email": user.email ?? ""]) { error in
+//                            if let error = error {
+//                                alertMessage = "Failed to authorize: \(error.localizedDescription)"
+//                            } else {
+//                                alertMessage = "User authorized successfully."
+//                                // update local view
+//                                isAuthorized = true
+//                            }
+//                            activateAlert = .authentication
+//                            showAlert = true
+//                        }
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.blue)
@@ -142,12 +156,29 @@ struct AdminUserProfileView: View {
                 } else {
                     Text("User is not an admin.").foregroundColor(.red)
                 }
-                if !isAdmin {
+                if isAdmin {
+                    Button("Remove Admin Access") {
+                        AdminManager.shared.removeUserFromAdminCollection(user: user) { error in
+                            if let error = error {
+                                alertMessage = "Failed to remove admin access: \(error.localizedDescription)"
+                            } else {
+                                alertMessage = "Access removed successfully."
+                                // update local view
+                                isAdmin = false
+                                // if user just removed their own access, dismiss view
+                                if currentUserId == user.id {
+                                    presentationMode.wrappedValue.dismiss()
+                                }
+                            }
+                            activateAlert = .authentication
+                            showAlert = true
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                } else {
                     Button("Grant Admin Access") {
-                        Firestore.firestore().collection("admin").document(user.id).setData([
-                            "name": user.fullName ?? "",
-                            "user_id": user.id
-                        ]) { error in
+                        AdminManager.shared.addUserToAdminCollection(user: user) { error in
                             if let error = error {
                                 alertMessage = "Failed to grant admin access: \(error.localizedDescription)"
                             } else {
@@ -165,9 +196,9 @@ struct AdminUserProfileView: View {
             }
             VStack(alignment: .leading) {
                 if isAuthenticated {
-                    Text("User has authentication profile.").foregroundColor(.green)
+                    Text("User has a linked authentication account.").foregroundColor(.green)
                 } else {
-                    Text("User is not linked to an authentication profile.").foregroundColor(.red)
+                    Text("User does not have a linked authentication account.").foregroundColor(.red)
                 }
             }
         }
@@ -269,8 +300,6 @@ struct AdminUserProfileView: View {
                     userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
                 }
             }
-//            // get updated user info from Firestore
-//            self.user = try await UserManager.shared.getUser(userId: self.user.id)
         }
     }
     
@@ -282,8 +311,6 @@ struct AdminUserProfileView: View {
             if let posIndex = userPositions.firstIndex(where: { $0.id == positionId }) {
                 userPositions.remove(at: posIndex)
             }
-            // get updated user info from Firestore
-//            self.user = try await UserManager.shared.getUser(userId: self.user.id)
         }
     }
 
@@ -412,8 +439,8 @@ struct PositionButtonStyle: ButtonStyle {
             dateCreated: Date(),
             lastLogin: Date(),
             isClockedIn: true,
-//            positionIds: ["1HujvaLNHtUEs59nTdci", "FYK5L6XdE4YE5kMpDOyr", "xArozhlNGujNsgczkKsr"],
-            positionIds: [],
+            positionIds: ["1HujvaLNHtUEs59nTdci", "FYK5L6XdE4YE5kMpDOyr", "xArozhlNGujNsgczkKsr"],
+//            positionIds: [],
             chairReport: nil
         ),
         isAuthorized: false,

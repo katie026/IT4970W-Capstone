@@ -12,7 +12,20 @@ final class ViewUsersViewModel: ObservableObject {
     @Published var users: [DBUser] = []
     @Published var isAuthorized: [String: Bool] = [:]
     @Published var nonAuthenticated: [String: Bool] = [:]
-
+    @Published var currentUserIsAdmin: Bool = false
+    
+    func checkCurrentUserAdminStatus(completion: @escaping () -> Void) {
+        Task {
+            AdminManager.shared.checkIfCurrentUserIsAdmin() { isAdminResult in
+                if isAdminResult {
+                    self.currentUserIsAdmin = true
+                } else {
+                    self.currentUserIsAdmin = false
+                }
+                completion()
+            }
+        }
+    }
     
     func loadUsers(completion: @escaping () -> Void) {
         Task {
@@ -32,9 +45,8 @@ final class ViewUsersViewModel: ObservableObject {
     private func checkAuthorization(for users: [DBUser]) {
         for user in users {
             guard let email = user.email else { continue }
-            let docRef = Firestore.firestore().collection("authenticated_emails").document(email)
-            docRef.getDocument { document, error in
-                if let document = document, document.exists {
+            AuthorizationManager.shared.checkIfUserIsInAuthorized(email: email) { result in
+                if result == true {
                     self.isAuthorized[email] = true
                 } else {
                     self.isAuthorized[email] = false
@@ -78,36 +90,44 @@ struct ViewUsersView: View {
 
     var body: some View {
         VStack {
-            filterBar
-            
-            searchBar
-            
-//            List(sortedUsers) { user in
-//                NavigationLink(destination: AdminUserProfileView(user: user)) {
-//                    VStack(alignment: .leading) {
-//                        Text(user.fullName ?? "No Name").font(.headline)
-//                        Text(user.email ?? "No Email").font(.subheadline)
-//                    }
-//                }
-//            }
-            usersList
+            if isLoading {
+                ProgressView("Checking permissions...")
+            } else {
+                if viewModel.currentUserIsAdmin {
+                    filterBar
+                    searchBar
+                    usersList
+                } else {
+                    List {
+                        Text("**Insufficient Permissions:** current user is not an admin")
+                    }
+                }
+            }
         }
         .navigationTitle("User Accounts")
         .onAppear {
             isLoading = true
-            viewModel.loadUsers {
-                isLoading = false
-            }
-            viewModel.loadNonAuthenticatedUsers {
-                isLoading = false
+            // check if current user is admin
+            viewModel.checkCurrentUserAdminStatus {
+                print(viewModel.currentUserIsAdmin)
+                if viewModel.currentUserIsAdmin == true {
+                    // if isAdmin, load the data
+                    viewModel.loadUsers {
+                        isLoading = false
+                    }
+                    viewModel.loadNonAuthenticatedUsers {
+                        isLoading = false
+                    }
+                } else {
+                    isLoading = false
+                }
             }
         }
-
-        .overlay {
-            if isLoading {
-                ProgressView("Loading users...")
-            }
-        }
+//        .overlay {
+//            if isLoading {
+//                ProgressView("Loading users...")
+//            }
+//        }
     }
     
     private var filterBar: some View {

@@ -81,18 +81,28 @@ class AdminManager {
         }
     }
     
-    func addUsertoAdminCollection(user: DBUser, completion: @escaping (Bool) -> Void) {
+    func addUserToAdminCollection(user: DBUser, completion: @escaping (Error?) -> Void) {
         adminCollection.document(user.id).setData([
             AdminDocumentModel.CodingKeys.userId.rawValue: user.id,
-            AdminDocumentModel.CodingKeys.name.rawValue: user.fullName
+            AdminDocumentModel.CodingKeys.name.rawValue: user.fullName as Any
         ]) { error in
             if let error = error {
                 print("Error adding user \(user.id) to admin collection: \(error.localizedDescription)")
-                completion(false)
-                return
+                completion(error)
             }
             print("Added user \(user.id) to admin collection.")
-            completion(true)
+            completion(nil)
+        }
+    }
+    
+    func removeUserFromAdminCollection(user: DBUser, completion: @escaping (Error?) -> Void) {
+        adminCollection.document(user.id).delete() { error in
+            if let error = error {
+                print("Error deleting user \(user.id) from admin collection: \(error.localizedDescription)")
+                completion(error)
+            }
+            print("Deleted user \(user.id) from admin collection.")
+            completion(nil)
         }
     }
 }
