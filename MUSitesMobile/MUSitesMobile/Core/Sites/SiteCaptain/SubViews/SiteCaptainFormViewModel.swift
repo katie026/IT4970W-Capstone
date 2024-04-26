@@ -32,13 +32,6 @@ class SiteCaptainViewModel: ObservableObject {
     @Published var supplyRequests: [SupplyRequest] = []
     // view control
     @Published var resultMessage = ""
-    @Published var showSubmissionConfirmation: Bool = false
-    @Published var submissionError: Error? // delete eventually?
-    @Published var suppliesNeeded: [SupplyNeeded] = [] // delete eventually
-    @Published var hasInventoryLocation: Bool = false // delete eventually
-    @Published var issueDescription: String = "" // delete eventually
-    @Published var ticketNumber: String = "" // delete eventually
-    @Published var labelsToReplace: String = ""  // delete eventually
     // To Do Lists (hardcoded)
     @Published var thingsToClean = [
         "Wipe down the keyboards, mice, all desks, and monitors for each workstation",
@@ -102,34 +95,16 @@ class SiteCaptainViewModel: ObservableObject {
         }
     }
     
-    // Method to add a supply with its count to the suppliesNeeded array
-    func addSupply(supply: SupplyType, count: Int) {
-        let newSupplyNeeded = SupplyNeeded(count: count, supply: supply.id)
-        suppliesNeeded.append(newSupplyNeeded)
-    }
-    
-    // Method to remove a supply from the suppliesNeeded array
-    func removeSupply(at index: Int) {
-        suppliesNeeded.remove(at: index)
-    }
-    
-    //TODO: delete eventually
-    // Method to reset the form and clear all fields
-    func resetForm() {
-        selectedThingsToClean = Array(repeating: false, count: 7)
-        selectedThingsToDo = Array(repeating: false, count: 4)
-        hasIssues = false
-        issues = []
-        issueDescription = ""
-        ticketNumber = ""
-        hasLabelIssues = false
-        labelsToReplace = ""
-        hasInventoryLocation = false
-        inventoryUpdated = false
-        needsSupplies = false
-        suppliesNeeded = []
-        showSubmissionConfirmation = false
-        submissionError = nil
+    func updateCleanedComputers() {
+        Task {
+            // for each computer in cleanedComputers
+            for index in self.computers.indices {
+                // update lastCleaned
+                computers[index].lastCleaned = Date()
+            }
+            try await ComputerManager.shared.updateComputers(computers)
+            print("Updated \(computers.count) computers lastCleaned.")
+        }
     }
     
     // Method to submit the site captain entry
@@ -138,6 +113,9 @@ class SiteCaptainViewModel: ObservableObject {
             do {
                 // if user is logged in (authorized)
                 if let user = user {
+                    // update all computers .lastCleaned
+                    updateCleanedComputers()
+                    
                     // create empty SiteCaptain document and get id
                     let siteCaptainId = try await SiteCaptainManager.shared.getNewSiteCaptainId()
                     
@@ -163,8 +141,8 @@ class SiteCaptainViewModel: ObservableObject {
                         // redefine the labelIssue.id and labelIssue.reportId
                         labelIssues[index].id = newIssueId
                         labelIssues[index].reportId = siteCaptainId
-                        // add to labelIssue.description
-                        labelIssues[index].description = labelIssues[index].description != nil ? labelIssues[index].description! + " label" : nil
+//                        // add to labelIssue.description
+//                        labelIssues[index].description = labelIssues[index].description != nil ? labelIssues[index].description! + " label" : nil
                     }
                     // combine issues and labelIssues
                     let allIssues = issues + labelIssues
@@ -210,31 +188,5 @@ class SiteCaptainViewModel: ObservableObject {
                 print("Error creating new site captain entry: \(error)")
             }
         }
-        
-//        let issues = hasIssues ? [SiteCaptainIssue(issue: issueDescription, ticket: ticketNumber)] : []
-//        let labelsForReplacement = hasLabelIssues ? labelsToReplace.components(separatedBy: ",") : []
-//        
-//        //TODO: make ticket # nil if chair, label, or poster issue
-//        
-//        let siteCaptain = SiteCaptain (
-//            id: UUID().uuidString,
-//            siteId: site.id,
-//            issues: issues,
-//            labelsForReplacement: labelsForReplacement,
-//            suppliesNeeded: suppliesNeeded,
-//            timestampValue: Date(),
-//            updatedInventory: inventorySubmitted,
-//            user: user.uid // current user
-//        )
-//        
-//        siteCaptainManager.submitSiteCaptainEntry(siteCaptain) { [weak self] error in
-//            DispatchQueue.main.async {
-//                if let error = error {
-//                    self?.submissionError = error
-//                } else {
-//                    self?.showSubmissionConfirmation = true
-//                }
-//            }
-//        }
     }
 }

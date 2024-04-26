@@ -16,7 +16,6 @@ struct SiteCaptainSubmissionView: View {
     // View Control
     @Environment(\.presentationMode) var presentationMode
     @State var isLoading: Bool = true
-    @State var submitButtonActive: Bool = false
     @State private var showIssuesSummary = false
     @State private var showLabelsSummary = false
     @State private var showSupplySummary = false
@@ -24,11 +23,7 @@ struct SiteCaptainSubmissionView: View {
     @State private var showInputErrorMessage = false
     @State private var showConfirmAlert = false
     @State private var showResultAlert = false
-    // Temporary variables
     @State private var inputErrorMessage = ""
-    @State private var errorMessage: String? // delete eventually?
-    @State private var selectedSupplyType: SupplyType? // delete eventually
-    @State private var suppliesNeededCount: Int = 1 // delete eventually
 
     var body: some View {
         if isLoading {
@@ -46,13 +41,6 @@ struct SiteCaptainSubmissionView: View {
             }
             // Title
             .navigationTitle("Site Captain")
-            .onReceive(viewModel.$submissionError) { error in
-                if let error = error {
-                    errorMessage = error.localizedDescription
-                } else {
-                    errorMessage = nil
-                }
-            }
         }
     }
     
@@ -82,12 +70,6 @@ struct SiteCaptainSubmissionView: View {
                         }
                     )
                 }
-            
-            if let errorMessage = errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
-            }
         }
     }
     
@@ -121,19 +103,6 @@ struct SiteCaptainSubmissionView: View {
                 completion()
             }
         }
-    }
-
-    private func submitSiteCaptain() {
-        guard let currentUser = Auth.auth().currentUser else {
-            errorMessage = "Unable to get current user information."
-            return
-        }
-
-        if let selectedSupplyType = selectedSupplyType {
-            viewModel.addSupply(supply: selectedSupplyType, count: suppliesNeededCount)
-        }
-
-        viewModel.submitSiteCaptainEntry(site: site) {}
     }
     
     private func checkIfCanSubmit() -> Bool {
@@ -352,7 +321,8 @@ struct SiteCaptainSubmissionView: View {
                             viewModel.issues = Array(repeating: Issue(
                                 id: "", // must edit before creating in Firebase
                                 description: nil, // should be editted by user using State var
-                                timestamp: Date(),
+                                dateCreated: Date(),
+                                dateResolved: nil, // keep nil
                                 issueTypeId: nil, // should be editted by user using State var
                                 resolved: false,
                                 ticket: nil, // should be editted by user using State var
@@ -485,7 +455,8 @@ struct SiteCaptainSubmissionView: View {
                             viewModel.labelIssues = Array(repeating: Issue(
                                 id: "", // must edit before creating in Firebase
                                 description: nil, // should be editted by user using State var
-                                timestamp: Date(),
+                                dateCreated: Date(),
+                                dateResolved: nil, // keep nil
                                 issueTypeId: "GxFGSkbDySZmdkCFExt9", // label issue
                                 resolved: false,
                                 ticket: nil, // labels don't need tickets
@@ -603,7 +574,6 @@ struct SiteCaptainSubmissionView: View {
                     
                     RadioButton(text: "No", isSelected: !viewModel.needsSupplies) {
                         viewModel.needsSupplies = false
-                        selectedSupplyType = nil
                     }
                     RadioButton(text: "Yes", isSelected: viewModel.needsSupplies) {
                         viewModel.needsSupplies = true
