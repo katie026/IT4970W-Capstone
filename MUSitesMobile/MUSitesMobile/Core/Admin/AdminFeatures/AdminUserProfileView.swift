@@ -3,15 +3,16 @@ import Firebase
 
 struct AdminUserProfileView: View {
     @State var user: DBUser
-    var isAuthenticated: Bool
+    var isAuthorized: Bool
+    @State var isAuthorizedTemp: Bool = false // redefined onAppear
     @State private var showingConfirmation = false
     @State private var selectedPosition: String?
     @State private var showingDeleteConfirmation = false
     @State private var showAlert = false
     @State private var alertMessage = ""
-    
+
     @Environment(\.presentationMode) var presentationMode
-    
+
     @State private var activateAlert: AlertType = .none
     enum AlertType {
         case authentication, positionConfirmation, deleteConfirmation, none
@@ -21,45 +22,8 @@ struct AdminUserProfileView: View {
         VStack {
             profileTitleSection
             Form {
-                Section(header: Text("Basic Information")) {
-                    Text("**ID:** \(user.studentId.map(String.init) ?? "N/A")")
-                    Text("**Email:** \(user.email ?? "N/A")")
-                    if isAuthenticated {
-                        Text("User is authenticated.").foregroundColor(.green)
-                    } else {
-                        Text("User is Not authenticated.").foregroundColor(.red)
-                    }
-                    Button("Authenticate User") {
-                        Firestore.firestore().collection("authenticated_emails").document(user.email ?? "").setData(["email": user.email ?? ""]) { error in
-                            if let error = error {
-                                alertMessage = "Failed to authenticate: \(error.localizedDescription)"
-                            } else {
-                                alertMessage = "User authenticated successfully."
-                            }
-                            activateAlert = .authentication
-                            showAlert = true
-                        }
-                    }
-                }
-                Section(header: Text("Assign Position")) {
-                    Button("CO") {
-                        selectedPosition = "CO"
-                        activateAlert = .positionConfirmation
-                        showAlert = true
-                    }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("CO") ?? false))
-                    
-                    Button("SS") {
-                        selectedPosition = "SS"
-                        activateAlert = .positionConfirmation
-                        showAlert = true
-                    }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("SS") ?? false))
-
-                    Button("CS") {
-                        selectedPosition = "CS"
-                        activateAlert = .positionConfirmation
-                        showAlert = true
-                    }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("CS") ?? false))
-                }
+                basicInfoSection
+                positionSection
                 Section {
                     Button("Delete User", role: .destructive) {
                         activateAlert = .deleteConfirmation
@@ -70,6 +34,9 @@ struct AdminUserProfileView: View {
         }
         .navigationTitle("User Details")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            isAuthorizedTemp = isAuthorized
+        }
 //        .alert("Confirm Position", isPresented: $showingConfirmation) {
 //            Button("Cancel", role: .cancel) {}
 //            Button("Assign") {
@@ -104,6 +71,83 @@ struct AdminUserProfileView: View {
         }
     }
 
+    private var basicInfoSection: some View {
+        Section(header: Text("Basic Information")) {
+            Text("**ID:** \(user.studentId.map(String.init) ?? "N/A")")
+            Text("**Email:** \(user.email ?? "N/A")")
+            if isAuthorizedTemp {
+                Text("User email is authorized.").foregroundColor(.green)
+            } else {
+                Text("User email is not authorized.").foregroundColor(.red)
+            }
+            if !isAuthorizedTemp {
+                Button("Authorize User") {
+                    Firestore.firestore().collection("authenticated_emails").document(user.email ?? "").setData(["email": user.email ?? ""]) { error in
+                        if let error = error {
+                            alertMessage = "Failed to authorize: \(error.localizedDescription)"
+                        } else {
+                            alertMessage = "User authorized successfully."
+                            // update local view
+                            isAuthorizedTemp = true
+                        }
+                        activateAlert = .authentication
+                        showAlert = true
+                    }
+                }
+            }
+        }
+    }
+
+    private var positionSection: some View {
+        Section(header: Text("Assign Position")) {
+            Button("CO") {
+                selectedPosition = "CO"
+                activateAlert = .positionConfirmation
+                showAlert = true
+            }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("CO") ?? false))
+
+            Button("SS") {
+                selectedPosition = "SS"
+                activateAlert = .positionConfirmation
+                showAlert = true
+            }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("SS") ?? false))
+
+            Button("CS") {
+                selectedPosition = "CS"
+                activateAlert = .positionConfirmation
+                showAlert = true
+            }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("CS") ?? false))
+        }
+    }
+    
+//    private func positionsSection(user: DBUser) -> some View {
+//        VStack {
+//            Text("**Positions**: \((user.positions ?? []).joined(separator: ", "))")
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//            HStack {
+//                // make a button for each position option above
+//                // positionOptions conforms to hashable (using id: \.self)
+//                ForEach(positionOptions, id: \.self) { string in
+//                    Button(string) {
+//                        // if user has the position
+//                        if userHasPosition(text: string) {
+//                            // delete the position
+//                            viewModel.removeUserPosition(text: string)
+//                        } else {
+//                            // otherwise add the position
+//                            viewModel.addUserPosition(text: string)
+//                        }
+//                    }
+//                    .buttonStyle(.borderedProminent)
+//                    // green if user already has position, red otherwise
+//                    .tint(userHasPosition(text: string) ? .green : .red)
+//                }
+//                
+//                Spacer()
+//            }
+//        }
+//    }
+
     private func assignPosition(_ position: String) {
         print("Assigning position: \(position)")
         UserManager.shared.updateUserPosition(userId: user.id, newPosition: position) { result in
@@ -136,11 +180,27 @@ struct AdminUserProfileView: View {
 
     private var profileTitleSection: some View {
         HStack {
-            Image(systemName: "person.crop.circle.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 60, height: 60)
-                .padding()
+            if let photoURL = user.photoURL {
+                AsyncImage(url: URL(string: photoURL)) { phase in
+                    switch phase {
+                    case .success(let image):
+                        // Loaded image
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 60, height: 60)
+                            .clipShape(Circle())
+                            .padding()
+                    default:
+                        // Placeholder content for loading state
+                        Image(systemName: "person.crop.circle.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 60, height: 60)
+                            .padding()
+                    }
+                }
+            }
             Text(user.fullName ?? "Unknown")
                 .font(.title)
                 .fontWeight(.semibold)
@@ -160,7 +220,25 @@ struct PositionButtonStyle: ButtonStyle {
             .background(isSelected ? Color.red : Color.blue)
             .foregroundColor(.white)
             .cornerRadius(5)
-            .scaleEffect(configuration.isPressed ? 1.1 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.9 : 1.0)
     }
 }
 
+#Preview {
+    AdminUserProfileView(
+        user: DBUser(
+            userId: "oeWvTMrqMza2nebC8mImsFOaNVL2",
+            studentId: 12572353,
+            isAnonymous: false,
+            hasAuthentication: true,
+            email: "kmjbcw@umsystem.edu",
+            fullName: "Katie Jackson",
+            photoURL: "https://lh3.googleusercontent.com/a/ACg8ocLKDtI4CrjvHhdly2ugqTq9y2NmF2WPWac-yEPLYH9u=s96-c",
+            dateCreated: Date(),
+            isClockedIn: true,
+            positions: [],
+            chairReport: nil
+        ),
+         isAuthorized: false
+    )
+}

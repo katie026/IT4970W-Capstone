@@ -12,7 +12,7 @@ final class IssuesViewModel: ObservableObject {
     
     @Published var issues: [Issue] = []
     @Published var selectedSort = SortOption.descending
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -364, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -366, to: Date())!
     @Published var endDate = Date()
     
     // for labels
