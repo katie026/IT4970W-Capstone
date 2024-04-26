@@ -10,6 +10,8 @@ struct AdminUserProfileView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showAlert = false
     @State private var alertMessage = ""
+    
+    @State private var positions: [Position] = []
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -17,13 +19,23 @@ struct AdminUserProfileView: View {
     enum AlertType {
         case authentication, positionConfirmation, deleteConfirmation, none
     }
+    
+    // Date Formatter
+    let dateFormatter: DateFormatter = {
+        let localTimezone =  TimeZone.current.abbreviation() ?? ""
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy hh:mm a '\(localTimezone)'"
+        return formatter
+    }()
 
     var body: some View {
         VStack {
             profileTitleSection
             Form {
                 basicInfoSection
-                positionSection
+                authorizationSection
+//                positionSection
+                positionsSection(user: user)
                 Section {
                     Button("Delete User", role: .destructive) {
                         activateAlert = .deleteConfirmation
@@ -36,6 +48,7 @@ struct AdminUserProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             isAuthorizedTemp = isAuthorized
+            getPositions()
         }
 //        .alert("Confirm Position", isPresented: $showingConfirmation) {
 //            Button("Cancel", role: .cancel) {}
@@ -73,26 +86,38 @@ struct AdminUserProfileView: View {
 
     private var basicInfoSection: some View {
         Section(header: Text("Basic Information")) {
-            Text("**ID:** \(user.studentId.map(String.init) ?? "N/A")")
+            Text("**Student ID:** \(user.studentId.map(String.init) ?? "N/A")")
             Text("**Email:** \(user.email ?? "N/A")")
-            if isAuthorizedTemp {
-                Text("User email is authorized.").foregroundColor(.green)
-            } else {
-                Text("User email is not authorized.").foregroundColor(.red)
-            }
-            if !isAuthorizedTemp {
-                Button("Authorize User") {
-                    Firestore.firestore().collection("authenticated_emails").document(user.email ?? "").setData(["email": user.email ?? ""]) { error in
-                        if let error = error {
-                            alertMessage = "Failed to authorize: \(error.localizedDescription)"
-                        } else {
-                            alertMessage = "User authorized successfully."
-                            // update local view
-                            isAuthorizedTemp = true
+            Text("**Status:** \(user.isClockedIn ?? false ? "Clocked In" : "Clocked Out")")
+            Text("Created: \(user.dateCreated != nil ? dateFormatter.string(from: user.dateCreated!) : "nil")") //TODO: update this value
+            Text("Last Login: \(user.lastLogin != nil ? dateFormatter.string(from: user.dateCreated!) : "nil")") //TODO: update this value
+        }
+    }
+    
+    private var authorizationSection: some View {
+        Section(header: Text("Authorization")) {
+            VStack(alignment: .leading) {
+                if isAuthorizedTemp {
+                    Text("User email is authorized.").foregroundColor(.green)
+                } else {
+                    Text("User email is not authorized.").foregroundColor(.red)
+                }
+                if !isAuthorizedTemp {
+                    Button("Authorize User") {
+                        Firestore.firestore().collection("authenticated_emails").document(user.email ?? "").setData(["email": user.email ?? ""]) { error in
+                            if let error = error {
+                                alertMessage = "Failed to authorize: \(error.localizedDescription)"
+                            } else {
+                                alertMessage = "User authorized successfully."
+                                // update local view
+                                isAuthorizedTemp = true
+                            }
+                            activateAlert = .authentication
+                            showAlert = true
                         }
-                        activateAlert = .authentication
-                        showAlert = true
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
                 }
             }
         }
@@ -104,49 +129,90 @@ struct AdminUserProfileView: View {
                 selectedPosition = "CO"
                 activateAlert = .positionConfirmation
                 showAlert = true
-            }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("CO") ?? false))
+            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("CO") ?? false))
 
             Button("SS") {
                 selectedPosition = "SS"
                 activateAlert = .positionConfirmation
                 showAlert = true
-            }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("SS") ?? false))
+            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("SS") ?? false))
 
             Button("CS") {
                 selectedPosition = "CS"
                 activateAlert = .positionConfirmation
                 showAlert = true
-            }.buttonStyle(PositionButtonStyle(isSelected: user.positions?.contains("CS") ?? false))
+            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("CS") ?? false))
         }
     }
     
-//    private func positionsSection(user: DBUser) -> some View {
-//        VStack {
-//            Text("**Positions**: \((user.positions ?? []).joined(separator: ", "))")
-//                .frame(maxWidth: .infinity, alignment: .leading)
-//            HStack {
-//                // make a button for each position option above
-//                // positionOptions conforms to hashable (using id: \.self)
-//                ForEach(positionOptions, id: \.self) { string in
-//                    Button(string) {
-//                        // if user has the position
-//                        if userHasPosition(text: string) {
-//                            // delete the position
-//                            viewModel.removeUserPosition(text: string)
-//                        } else {
-//                            // otherwise add the position
-//                            viewModel.addUserPosition(text: string)
-//                        }
-//                    }
-//                    .buttonStyle(.borderedProminent)
-//                    // green if user already has position, red otherwise
-//                    .tint(userHasPosition(text: string) ? .green : .red)
-//                }
-//                
-//                Spacer()
-//            }
-//        }
-//    }
+    private func userHasPosition(positionId: String) -> Bool {
+        user.positionIds?.contains(positionId) == true
+    }
+    
+    private func positionsSection(user: DBUser) -> some View {
+        var userPositions: [Position] = []
+        
+        // load the position names
+        if let positionIds = user.positionIds {
+            // for position in user's positionIds array
+            for positionId in positionIds {
+                // find position using positionId
+                guard let position = positions.first(where: { $0.id == positionId }) else { continue }
+                // add to position list
+                userPositions.append(position)
+                // sort position list
+                userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
+            }
+        }
+        
+        let view = Section ("Positions") {
+            VStack {
+            Text("**Positions**: \((userPositions.map{$0.nickname ?? ""}).joined(separator: ", "))")
+                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                // make a button for each position option above
+                // positionOptions conforms to hashable (using id: \.self)
+                ForEach(positions, id: \.self) { position in
+                    Button(position.nickname ?? "N/A") {
+                        // if user has the position
+                        if userHasPosition(positionId: position.id) {
+                            // delete the position
+                            removeUserPosition(positionId: position.id)
+                        } else {
+                            // otherwise add the position
+                            addUserPosition(positionId: position.id)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    // green if user already has position, red otherwise
+                    .tint(userHasPosition(positionId: position.id) ? .green : .red)
+                }
+                
+                Spacer()
+            }
+        }
+        }
+        
+        return AnyView(view)
+    }
+    
+    private func addUserPosition(positionId: String) {
+        Task {
+            // add position to user in Firestore
+            try await UserManager.shared.addUserPosition(userId: user.id, positionId: positionId)
+            // get updated user info from Firestore
+            self.user = try await UserManager.shared.getUser(userId: user.id)
+        }
+    }
+    
+    private func removeUserPosition(positionId: String) {
+        Task {
+            // remove position to user in Firestore
+            try await UserManager.shared.removeUserPosition(userId: user.id, positionId: positionId)
+            // get updated user info from Firestore
+            self.user = try await UserManager.shared.getUser(userId: user.id)
+        }
+    }
 
     private func assignPosition(_ position: String) {
         print("Assigning position: \(position)")
@@ -155,7 +221,7 @@ struct AdminUserProfileView: View {
             case .success(_):
                 print("Position \(position) assigned to user \(user.fullName ?? "Unknown") successfully.")
                 DispatchQueue.main.async {
-                    self.user.positions = [position]
+                    self.user.positionIds = [position]
                 }
             case .failure(let error):
                 print("Failed to assign position: \(error.localizedDescription)")
@@ -175,6 +241,17 @@ struct AdminUserProfileView: View {
                     presentationMode.wrappedValue.dismiss()
                 }
             }
+        }
+    }
+    
+    private func getPositions() {
+        Task {
+            do {
+                positions = try await PositionManager.shared.getAllPositions(descending: false)
+            } catch {
+                print("Error getting positions: \(error)")
+            }
+            print("Got \(positions.count) positions.")
         }
     }
 
@@ -235,8 +312,9 @@ struct PositionButtonStyle: ButtonStyle {
             fullName: "Katie Jackson",
             photoURL: "https://lh3.googleusercontent.com/a/ACg8ocLKDtI4CrjvHhdly2ugqTq9y2NmF2WPWac-yEPLYH9u=s96-c",
             dateCreated: Date(),
+            lastLogin: Date(),
             isClockedIn: true,
-            positions: [],
+            positionIds: ["1HujvaLNHtUEs59nTdci", "FYK5L6XdE4YE5kMpDOyr", "xArozhlNGujNsgczkKsr"],
             chairReport: nil
         ),
          isAuthorized: false
