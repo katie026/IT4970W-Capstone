@@ -288,7 +288,6 @@
 				6EA65F5D2B911B0C000766C7 /* Sites */,
 				6EA65F4A2B8710DC000766C7 /* TabBarView */,
 				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
-				F69D74292BA0E9570095A817 /* Users */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -667,13 +666,6 @@
 				261E6B6D2BD60BE5000021CA /* SiteReadySubmission */,
 			);
 			path = SiteReady;
-			sourceTree = "<group>";
-		};
-		F69D74292BA0E9570095A817 /* Users */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Users;
 			sourceTree = "<group>";
 		};
 		F6AB56132BCB0CC1005727D2 /* HourlyCleaning */ = {

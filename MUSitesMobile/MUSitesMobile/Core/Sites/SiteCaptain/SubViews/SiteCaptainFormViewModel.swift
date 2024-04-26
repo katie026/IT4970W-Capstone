@@ -95,12 +95,27 @@ class SiteCaptainViewModel: ObservableObject {
         }
     }
     
+    func updateCleanedComputers() {
+        Task {
+            // for each computer in cleanedComputers
+            for index in self.computers.indices {
+                // update lastCleaned
+                computers[index].lastCleaned = Date()
+            }
+            try await ComputerManager.shared.updateComputers(computers)
+            print("Updated \(computers.count) computers lastCleaned.")
+        }
+    }
+    
     // Method to submit the site captain entry
     func submitSiteCaptainEntry(site: Site, completion: @escaping () -> Void) {
         Task {
             do {
                 // if user is logged in (authorized)
                 if let user = user {
+                    // update all computers .lastCleaned
+                    updateCleanedComputers()
+                    
                     // create empty SiteCaptain document and get id
                     let siteCaptainId = try await SiteCaptainManager.shared.getNewSiteCaptainId()
                     
@@ -126,8 +141,8 @@ class SiteCaptainViewModel: ObservableObject {
                         // redefine the labelIssue.id and labelIssue.reportId
                         labelIssues[index].id = newIssueId
                         labelIssues[index].reportId = siteCaptainId
-                        // add to labelIssue.description
-                        labelIssues[index].description = labelIssues[index].description != nil ? labelIssues[index].description! + " label" : nil
+//                        // add to labelIssue.description
+//                        labelIssues[index].description = labelIssues[index].description != nil ? labelIssues[index].description! + " label" : nil
                     }
                     // combine issues and labelIssues
                     let allIssues = issues + labelIssues

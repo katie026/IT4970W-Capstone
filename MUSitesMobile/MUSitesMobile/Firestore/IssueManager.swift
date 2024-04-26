@@ -105,6 +105,26 @@ struct Issue: Identifiable, Codable, Equatable  {
     }
 }
 
+enum IssueSearchOption: String, CaseIterable, Hashable {
+    case description
+    case userSubmitted
+    case userAssigned
+    case siteName
+    case issueType
+    case resolutionStatus
+    
+    var optionLabel: String {
+        switch self {
+        case .description: return "Description"
+        case .userSubmitted: return "Submitted by"
+        case .userAssigned: return "Assigned to"
+        case .siteName: return "Site"
+        case .issueType: return "Type"
+        case .resolutionStatus: return "Resolved"
+        }
+    }
+}
+
 final class IssueManager {
     // create singleton of manager
     static let shared = IssueManager()
@@ -210,6 +230,41 @@ final class IssueManager {
     // we can use this to determine if we need to use pagination
     func allIssuesCount() async throws -> Int {
         try await issuesCollection.aggregateCount()
+    }
+    
+    func toggleIssueResolution(issue: Issue) async throws {
+        var issue = issue
+        
+        // if issue is resolved (if .resolved is nil, assume it's not resolved
+        if issue.resolved ?? false {
+            // mark issue as unresolved
+            issue.resolved = false
+            // erase dateResolved
+            issue.dateResolved = nil
+        // if issue is not resolved
+        } else {
+            // mark issue as resolved
+            issue.resolved = true
+            // update dateResolved
+            issue.dateResolved = Date()
+        }
+        
+        // update issue in Firestore
+        try await updateIssue(issue)
+    }
+    
+    func updateIssue(_ issue: Issue) async throws {
+        // Get the reference to the document
+        let documentRef = issueDocument(issueId: issue.id)
+        
+        // Encode the updated SiteCapatin object
+        guard let data = try? encoder.encode(issue) else {
+            // Handle encoding error
+            throw IssueManagerError.encodingError
+        }
+            
+        // Set the data for the document
+        try await documentRef.setData(data)
     }
     
     func updateIssues(_ issues: [Issue]) async throws {
