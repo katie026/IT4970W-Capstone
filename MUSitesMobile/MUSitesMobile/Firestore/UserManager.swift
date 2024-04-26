@@ -131,7 +131,7 @@ struct DBUser: Codable, Identifiable, Hashable { // allow encoding and decoding
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.userId, forKey: .userId)
-        try container.encodeIfPresent(self.studentId, forKey: .isAnonymous)
+        try container.encodeIfPresent(self.studentId, forKey: .studentId)
         try container.encodeIfPresent(self.isAnonymous, forKey: .isAnonymous)
         try container.encodeIfPresent(self.hasAuthentication, forKey: .hasAuthentication)
         try container.encodeIfPresent(self.email, forKey: .email)
@@ -216,6 +216,36 @@ final class UserManager {
     // delete a user in Firestore
     func deleteUser(userId: String) async throws {
         try await userDocument(userId: userId).delete()
+    }
+    
+    private func checkAuthorization(user: DBUser, completion: @escaping (Bool) -> Void) {
+        if let email = user.email {
+            let docRef = Firestore.firestore().collection("authenticated_emails").document(email)
+            docRef.getDocument { document, error in
+                if let document = document, document.exists {
+                    completion(true)
+                } else {
+                    completion(false)
+                }
+            }
+        } else {
+            completion(false)
+        }
+    }
+    
+    func checkAuthentication(user: DBUser) async throws -> Bool {
+        let docRef = userCollection.document(user.id)
+        do {
+            let documentSnapshot = try await docRef.getDocument()
+            if let data = documentSnapshot.data(), let isAuthenticated = data[DBUser.CodingKeys.hasAuthentication.rawValue] as? Bool {
+                return isAuthenticated
+            } else {
+                // document data or isAuthenticated value is nil
+                return false
+            }
+        } catch {
+            throw error
+        }
     }
     
     // get non-authenticated DBUsers

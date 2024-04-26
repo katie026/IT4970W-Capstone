@@ -58,8 +58,6 @@ final class ViewUsersViewModel: ObservableObject {
             }
         }
     }
-
-
 }
 
 struct ViewUsersView: View {
@@ -80,20 +78,9 @@ struct ViewUsersView: View {
 
     var body: some View {
         VStack {
-            Picker("Filter", selection: $filterMode) {
-                ForEach(FilterMode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue).tag(mode)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding()
+            filterBar
             
-            TextField("Search", text: $searchText)
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(10)
-                .padding(.horizontal)
+            searchBar
             
 //            List(sortedUsers) { user in
 //                NavigationLink(destination: AdminUserProfileView(user: user)) {
@@ -103,15 +90,7 @@ struct ViewUsersView: View {
 //                    }
 //                }
 //            }
-            List(filteredUsers) { user in
-                NavigationLink(destination: AdminUserProfileView(user: user, isAuthorized: viewModel.isAuthorized[user.email ?? ""] ?? false)) {
-                    VStack(alignment: .leading) {
-                        Text(user.fullName ?? "No Name").font(.headline)
-                        Text(user.email ?? "No Email").font(.subheadline)
-                    }
-                }
-            }
-
+            usersList
         }
         .navigationTitle("User Accounts")
         .onAppear {
@@ -127,6 +106,42 @@ struct ViewUsersView: View {
         .overlay {
             if isLoading {
                 ProgressView("Loading users...")
+            }
+        }
+    }
+    
+    private var filterBar: some View {
+        Picker("Filter", selection: $filterMode) {
+            ForEach(FilterMode.allCases, id: \.self) { mode in
+                Text(mode.rawValue).tag(mode)
+            }
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .padding()
+    }
+    
+    private var searchBar: some View {
+        TextField("Search", text: $searchText)
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(10)
+            .padding(.horizontal)
+    }
+    
+    private var usersList: some View {
+        List(filteredUsers) { user in
+            NavigationLink(destination: 
+                AdminUserProfileView(
+                    user: user,
+                    isAuthorized: viewModel.isAuthorized[user.email ?? ""] ?? false,
+                    isAuthenticated: viewModel.nonAuthenticated[user.email ?? ""] == true ? false : true
+                )
+            ) {
+                VStack(alignment: .leading) {
+                    Text(user.fullName ?? "No Name").font(.headline)
+                    Text(user.email ?? "No Email").font(.subheadline)
+                }
             }
         }
     }

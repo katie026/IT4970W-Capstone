@@ -32,13 +32,10 @@ struct ProfileView: View {
                     List {
                         // Profile title
                         profileTitleSection(user: user)
-                        
                         // Info Section
                         basicInfoSection
-                        
                         // Admin Section
                         adminSection
-                        
                         // Clock In/Out
                         clockInSection(user: user)
                     }
@@ -47,7 +44,7 @@ struct ProfileView: View {
         }
         .navigationTitle("Profile")
         .onAppear {
-            AdminManager.shared.checkIfUserIsAdmin { isAdminResult in
+            AdminManager.shared.checkIfCurrentUserIsAdmin { isAdminResult in
                 DispatchQueue.main.async {
                     self.isAdmin = isAdminResult
                 }
@@ -75,16 +72,13 @@ struct ProfileView: View {
         Section("Basic Information") {
             // STUDENT ID
             Text("**ID:** \(viewModel.user?.studentId.map(String.init) ?? "N/A")")
-            
             // EMAIL
             Text("**Email:** \(viewModel.user?.email ?? "N/A")")
-            
+            Text("**Date:** \(viewModel.user?.lastLogin?.formatted(.dateTime) ?? "N/A")")
             // KEYS
             keysGroup
-            
             // POSITIONS
             positionsSection()
-            
             // CHAIR COUNT (for testing)
 //            chairCountsSection(user: user)
         }

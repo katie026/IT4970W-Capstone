@@ -2,19 +2,28 @@ import SwiftUI
 import Firebase
 
 struct AdminUserProfileView: View {
+    // Init
     @State var user: DBUser
-    var isAuthorized: Bool
-    @State var isAuthorizedTemp: Bool = false // redefined onAppear
-    @State private var showingConfirmation = false
+    @State var isAuthorized: Bool
+    @State var isAuthenticated: Bool
+    // User Info
+    @State var isAdmin: Bool = false
+    @State var userPositions: [Position] = [] // initial values taken from given user
+    @State private(set) var keySet: KeySet? = nil
+    @State private(set) var keys: [Key]? = nil
+    @State private(set) var keyTypeCodeMap: [String: String] = [:]
+    // Current Selections
     @State private var selectedPosition: String?
+    // View Control
+    @Environment(\.presentationMode) var presentationMode
+    @State private var showingConfirmation = false
     @State private var showingDeleteConfirmation = false
+    @State private var keySetExpanded = false
+    // References
+    @State private var allPositions: [Position] = []
+    // Alerts
     @State private var showAlert = false
     @State private var alertMessage = ""
-    
-    @State private var positions: [Position] = []
-
-    @Environment(\.presentationMode) var presentationMode
-
     @State private var activateAlert: AlertType = .none
     enum AlertType {
         case authentication, positionConfirmation, deleteConfirmation, none
@@ -33,22 +42,17 @@ struct AdminUserProfileView: View {
             profileTitleSection
             Form {
                 basicInfoSection
-                authorizationSection
-//                positionSection
                 positionsSection(user: user)
-                Section {
-                    Button("Delete User", role: .destructive) {
-                        activateAlert = .deleteConfirmation
-                        showAlert = true
-                    }
-                }
+                authorizationSection
+                deleteSection
             }
         }
         .navigationTitle("User Details")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            isAuthorizedTemp = isAuthorized
-            getPositions()
+            getAllPositions()
+            loadKeys() {}
+            updateUserAdminStatus()
         }
 //        .alert("Confirm Position", isPresented: $showingConfirmation) {
 //            Button("Cancel", role: .cancel) {}
@@ -89,20 +93,32 @@ struct AdminUserProfileView: View {
             Text("**Student ID:** \(user.studentId.map(String.init) ?? "N/A")")
             Text("**Email:** \(user.email ?? "N/A")")
             Text("**Status:** \(user.isClockedIn ?? false ? "Clocked In" : "Clocked Out")")
-            Text("Created: \(user.dateCreated != nil ? dateFormatter.string(from: user.dateCreated!) : "nil")") //TODO: update this value
-            Text("Last Login: \(user.lastLogin != nil ? dateFormatter.string(from: user.dateCreated!) : "nil")") //TODO: update this value
+            keysGroup
+            Text("Created: \(user.dateCreated != nil ? dateFormatter.string(from: user.dateCreated!) : "nil")")
+            Text("Last Login: \(user.lastLogin != nil ? dateFormatter.string(from: user.dateCreated!) : "nil")")
+        }
+    }
+    
+    private var keysGroup: some View {
+        DisclosureGroup(isExpanded: $keySetExpanded) {
+            ForEach(keyTypeCodeMap.sorted(by: { $0.key < $1.key }), id: \.key) { keyValuePair in
+                let (keyTypeId, keyCode) = keyValuePair
+                Text("\(keyTypeId): \(keyCode)")
+            }
+        } label: {
+            Text("**Key Set:** \(keySet?.name ?? "N/A")")
         }
     }
     
     private var authorizationSection: some View {
         Section(header: Text("Authorization")) {
             VStack(alignment: .leading) {
-                if isAuthorizedTemp {
-                    Text("User email is authorized.").foregroundColor(.green)
+                if isAuthorized {
+                    Text("User is authorized.").foregroundColor(.green)
                 } else {
-                    Text("User email is not authorized.").foregroundColor(.red)
+                    Text("User is not authorized.").foregroundColor(.red)
                 }
-                if !isAuthorizedTemp {
+                if !isAuthorized {
                     Button("Authorize User") {
                         Firestore.firestore().collection("authenticated_emails").document(user.email ?? "").setData(["email": user.email ?? ""]) { error in
                             if let error = error {
@@ -110,7 +126,7 @@ struct AdminUserProfileView: View {
                             } else {
                                 alertMessage = "User authorized successfully."
                                 // update local view
-                                isAuthorizedTemp = true
+                                isAuthorized = true
                             }
                             activateAlert = .authentication
                             showAlert = true
@@ -120,46 +136,79 @@ struct AdminUserProfileView: View {
                     .tint(.blue)
                 }
             }
+            VStack(alignment: .leading) {
+                if isAdmin {
+                    Text("User is an admin.").foregroundColor(.green)
+                } else {
+                    Text("User is not an admin.").foregroundColor(.red)
+                }
+                if !isAdmin {
+                    Button("Grant Admin Access") {
+                        Firestore.firestore().collection("admin").document(user.id).setData([
+                            "name": user.fullName ?? "",
+                            "user_id": user.id
+                        ]) { error in
+                            if let error = error {
+                                alertMessage = "Failed to grant admin access: \(error.localizedDescription)"
+                            } else {
+                                alertMessage = "Access granted successfully."
+                                // update local view
+                                isAdmin = true
+                            }
+                            activateAlert = .authentication
+                            showAlert = true
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                }
+            }
+            VStack(alignment: .leading) {
+                if isAuthenticated {
+                    Text("User has authentication profile.").foregroundColor(.green)
+                } else {
+                    Text("User is not linked to an authentication profile.").foregroundColor(.red)
+                }
+            }
         }
     }
 
-    private var positionSection: some View {
-        Section(header: Text("Assign Position")) {
-            Button("CO") {
-                selectedPosition = "CO"
-                activateAlert = .positionConfirmation
-                showAlert = true
-            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("CO") ?? false))
-
-            Button("SS") {
-                selectedPosition = "SS"
-                activateAlert = .positionConfirmation
-                showAlert = true
-            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("SS") ?? false))
-
-            Button("CS") {
-                selectedPosition = "CS"
-                activateAlert = .positionConfirmation
-                showAlert = true
-            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("CS") ?? false))
-        }
-    }
+//    private var positionSection: some View {
+//        Section(header: Text("Assign Position")) {
+//            Button("CO") {
+//                selectedPosition = "CO"
+//                activateAlert = .positionConfirmation
+//                showAlert = true
+//            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("CO") ?? false))
+//
+//            Button("SS") {
+//                selectedPosition = "SS"
+//                activateAlert = .positionConfirmation
+//                showAlert = true
+//            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("SS") ?? false))
+//
+//            Button("CS") {
+//                selectedPosition = "CS"
+//                activateAlert = .positionConfirmation
+//                showAlert = true
+//            }.buttonStyle(PositionButtonStyle(isSelected: user.positionIds?.contains("CS") ?? false))
+//        }
+//    }
     
     private func userHasPosition(positionId: String) -> Bool {
-        user.positionIds?.contains(positionId) == true
+        userPositions.contains(where: {$0.id == positionId}) == true
     }
     
     private func positionsSection(user: DBUser) -> some View {
-        var userPositions: [Position] = []
-        
         // load the position names
-        if let positionIds = user.positionIds {
+        if let positionIds = self.user.positionIds {
             // for position in user's positionIds array
             for positionId in positionIds {
                 // find position using positionId
-                guard let position = positions.first(where: { $0.id == positionId }) else { continue }
+                guard let position = allPositions.first(where: { $0.id == positionId }) else { continue }
                 // add to position list
                 userPositions.append(position)
+                print("adding \(position.nickname ?? "?") position to userPos list")
                 // sort position list
                 userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
             }
@@ -172,14 +221,16 @@ struct AdminUserProfileView: View {
             HStack {
                 // make a button for each position option above
                 // positionOptions conforms to hashable (using id: \.self)
-                ForEach(positions, id: \.self) { position in
+                ForEach(allPositions, id: \.self) { position in
                     Button(position.nickname ?? "N/A") {
                         // if user has the position
                         if userHasPosition(positionId: position.id) {
-                            // delete the position
+                            print("Button removing user position \(position.nickname ?? "?")")
+                            // delete the position in Firestore and update userPositions
                             removeUserPosition(positionId: position.id)
                         } else {
-                            // otherwise add the position
+                            print("Button adding user position \(position.nickname ?? "?")")
+                            // otherwise add the position in Firestore and update userPositions
                             addUserPosition(positionId: position.id)
                         }
                     }
@@ -196,21 +247,43 @@ struct AdminUserProfileView: View {
         return AnyView(view)
     }
     
+    private var deleteSection: some View {
+        Section {
+            Button("Delete User", role: .destructive) {
+                activateAlert = .deleteConfirmation
+                showAlert = true
+            }
+        }
+    }
+    
     private func addUserPosition(positionId: String) {
         Task {
             // add position to user in Firestore
-            try await UserManager.shared.addUserPosition(userId: user.id, positionId: positionId)
-            // get updated user info from Firestore
-            self.user = try await UserManager.shared.getUser(userId: user.id)
+            try await UserManager.shared.addUserPosition(userId: self.user.id, positionId: positionId)
+            // update view locally
+            if !userPositions.contains(where: { $0.id == positionId }) {
+                if let newPosition = allPositions.first(where: { $0.id == positionId }) {
+                    // add to userPosition list
+                    userPositions.append(newPosition)
+                    // sort userPosition list
+                    userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
+                }
+            }
+//            // get updated user info from Firestore
+//            self.user = try await UserManager.shared.getUser(userId: self.user.id)
         }
     }
     
     private func removeUserPosition(positionId: String) {
         Task {
             // remove position to user in Firestore
-            try await UserManager.shared.removeUserPosition(userId: user.id, positionId: positionId)
+            try await UserManager.shared.removeUserPosition(userId: self.user.id, positionId: positionId)
+            // update view locally
+            if let posIndex = userPositions.firstIndex(where: { $0.id == positionId }) {
+                userPositions.remove(at: posIndex)
+            }
             // get updated user info from Firestore
-            self.user = try await UserManager.shared.getUser(userId: user.id)
+//            self.user = try await UserManager.shared.getUser(userId: self.user.id)
         }
     }
 
@@ -230,28 +303,23 @@ struct AdminUserProfileView: View {
     }
 
     private func deleteUser() {
-        let userId = user.id
-        let db = Firestore.firestore()
-        db.collection("users").document(userId).delete { error in
-            if let error = error {
-                print("Error deleting user: \(error.localizedDescription)")
-            } else {
-                print("User successfully deleted")
-                DispatchQueue.main.async {
-                    presentationMode.wrappedValue.dismiss()
-                }
-            }
-        }
-    }
-    
-    private func getPositions() {
         Task {
             do {
-                positions = try await PositionManager.shared.getAllPositions(descending: false)
+                try await UserManager.shared.deleteUser(userId: user.id)
             } catch {
-                print("Error getting positions: \(error)")
+                print("Error deleting user: \(error)")
             }
-            print("Got \(positions.count) positions.")
+        }
+        presentationMode.wrappedValue.dismiss()
+    }
+    
+    private func getAllPositions() {
+        Task {
+            do {
+                allPositions = try await PositionManager.shared.getAllPositions(descending: false)
+            } catch {
+                print("Error getting all positions: \(error)")
+            }
         }
     }
 
@@ -285,6 +353,36 @@ struct AdminUserProfileView: View {
         }
         .padding(.horizontal)
     }
+    
+    private func loadKeys(completion: @escaping () -> Void) {
+        Task {
+            do {
+                // get optional key set
+                self.keySet = try await KeySetManager.shared.getKeySetForUser(userId: user.id)
+                // get optional keys for set
+                self.keys = try await KeyManager.shared.getKeysForKeySet(keySetId: keySet?.id ?? "")
+                
+                // fetch key type for each key and add to dictionary
+                for key in keys ?? [] {
+                    do {
+                        let keyType = try await KeyTypeManager.shared.getKeyType(keyTypeId: key.keyType ?? "")
+                        keyTypeCodeMap[keyType.name] = key.keyCode
+                    } catch {
+                        print("Error fetching key types: \(error)")
+                    }
+                }
+            } catch {
+                print("Error loading keys: \(error)")
+            }
+            completion()
+        }
+    }
+    
+    private func updateUserAdminStatus() {
+        AdminManager.shared.checkIfUserIsAdmin(userId: user.id) { isAdminResult in
+            self.isAdmin = isAdminResult
+        }
+    }
 }
 
 struct PositionButtonStyle: ButtonStyle {
@@ -304,19 +402,21 @@ struct PositionButtonStyle: ButtonStyle {
 #Preview {
     AdminUserProfileView(
         user: DBUser(
-            userId: "oeWvTMrqMza2nebC8mImsFOaNVL2",
+            userId: "UP4qMGuLhCP3qHvT5tfNnZlzH4h1",
             studentId: 12572353,
             isAnonymous: false,
             hasAuthentication: true,
-            email: "kmjbcw@umsystem.edu",
-            fullName: "Katie Jackson",
-            photoURL: "https://lh3.googleusercontent.com/a/ACg8ocLKDtI4CrjvHhdly2ugqTq9y2NmF2WPWac-yEPLYH9u=s96-c",
+            email: "tmwny4@umsystem.edu",
+            fullName: "Tristan Winship",
+            photoURL: "https://lh3.googleusercontent.com/a/ACg8ocJxVcI6q24DRgPDw3dz1lVJLowgsgaXiARzj9lMBGxS=s96-c",
             dateCreated: Date(),
             lastLogin: Date(),
             isClockedIn: true,
-            positionIds: ["1HujvaLNHtUEs59nTdci", "FYK5L6XdE4YE5kMpDOyr", "xArozhlNGujNsgczkKsr"],
+//            positionIds: ["1HujvaLNHtUEs59nTdci", "FYK5L6XdE4YE5kMpDOyr", "xArozhlNGujNsgczkKsr"],
+            positionIds: [],
             chairReport: nil
         ),
-         isAuthorized: false
+        isAuthorized: false,
+        isAuthenticated: true
     )
 }
