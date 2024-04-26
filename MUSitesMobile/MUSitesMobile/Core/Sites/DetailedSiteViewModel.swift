@@ -23,6 +23,15 @@ final class DetailedSiteViewModel: ObservableObject {
     @Published var inventoryImageURLs: [URL] = []
     @Published var profilePicture: [URL] = []
     
+    //getting siteSpecific computers
+    @Published var pcComputers = [Computer]()
+    @Published var macComputers = [Computer]()
+    private var db = Firestore.firestore()
+    
+    //getting siteSpecific printers
+    @Published var bwPrinters = [Printer]()
+    @Published var colorPrinters = [Printer]()
+    
     func loadBuilding(site: Site, completion: @escaping () -> Void) {
         Task {
             do {
@@ -86,5 +95,90 @@ final class DetailedSiteViewModel: ObservableObject {
         } catch {
             print("Error listing images for site \(siteName) category \(category): \(error.localizedDescription)")
         }
+    }
+    //fetching the site related computers
+    func fetchComputers(forSite siteID: String, withName siteName: String) {
+        let capitalizedSiteName = siteName.uppercased()
+        //fetch PCs
+        db.collection("computers")
+            .whereField("computing_site", isEqualTo: siteID)
+            .whereField("computer_name", isGreaterThanOrEqualTo: "\(capitalizedSiteName)-PC-")
+            .whereField("computer_name", isLessThanOrEqualTo: "\(capitalizedSiteName)-PC-~")
+            .addSnapshotListener { querySnapshot, error in
+                guard let documents = querySnapshot?.documents else {
+                    print("Error fetching documents: \(error?.localizedDescription ?? "Unknown error")")
+                    return
+                }
+                //creating an array of Computer objects
+                self.pcComputers = documents.compactMap { doc -> Computer? in
+                    let data = doc.data()
+                    let id = doc.documentID
+                    guard let name = data["computer_name"] as? String else { return nil }
+                    let lastCleaned = (data["last_cleaned"] as? Timestamp)?.dateValue()
+                    return Computer(id: id, name: name, lastCleaned: lastCleaned)
+                }
+            }
+        //fetch Macs
+        db.collection("computers")
+            .whereField("computing_site", isEqualTo: siteID)
+            .whereField("computer_name", isGreaterThanOrEqualTo: "\(capitalizedSiteName)-MAC-")
+            .whereField("computer_name", isLessThanOrEqualTo: "\(capitalizedSiteName)-MAC-~")
+            .addSnapshotListener { querySnapshot, error in
+                guard let documents = querySnapshot?.documents else {
+                    print("Error fetching documents: \(error?.localizedDescription ?? "Unknown error")")
+                    return
+                }
+                //creating an array of Computer objects
+                self.macComputers = documents.compactMap { doc -> Computer? in
+                    let data = doc.data()
+                    let id = doc.documentID
+                    guard let name = data["computer_name"] as? String else { return nil }
+                    let lastCleaned = (data["last_cleaned"] as? Timestamp)?.dateValue()
+                    return Computer(id: id, name: name, lastCleaned: lastCleaned)
+                }
+            }
+    }
+    //getting the computer names
+    private func extractComputerNames(from querySnapshot: QuerySnapshot?) -> [String] {
+        guard let documents = querySnapshot?.documents else {
+            print("No documents")
+            return []
+        }
+        
+        return documents.compactMap { queryDocumentSnapshot -> String? in
+            let data = queryDocumentSnapshot.data()
+            return data["computer_name"] as? String
+        }
+    }
+    
+    func fetchPrinters(forSite siteID: String) {
+        let printerCollection = db.collection("printers")
+        //B&W printers
+        printerCollection
+            .whereField("computing_site", isEqualTo: siteID)
+            .whereField("type", isEqualTo: "B&W")
+            .addSnapshotListener { querySnapshot, error in
+                //creating an array of Printer objects
+                self.bwPrinters = querySnapshot?.documents.compactMap { doc -> Printer? in
+                    let data = doc.data()
+                    let id = doc.documentID
+                    guard let name = data["name"] as? String else { return nil }
+                    return Printer(id: id, name: name, type: "B&W")
+                } ?? []
+            }
+        
+        //Color printers
+        printerCollection
+            .whereField("computing_site", isEqualTo: siteID)
+            .whereField("type", isEqualTo: "Color")
+            .addSnapshotListener { querySnapshot, error in
+                //creating an array of Printer objects
+                self.colorPrinters = querySnapshot?.documents.compactMap { doc -> Printer? in
+                    let data = doc.data()
+                    let id = doc.documentID
+                    guard let name = data["name"] as? String else { return nil }
+                    return Printer(id: id, name: name, type: "Color")
+                } ?? []
+            }
     }
 }
