@@ -72,16 +72,17 @@ struct SiteCaptain: Codable, Identifiable {
     }
 }
 
-struct SiteCaptainIssue: Codable {
-    let issue: String
-    let ticket: String
+enum SiteCaptainSearchOption: String, CaseIterable, Hashable {
+    case user
+    case updatedInventory
+    
+    var optionLabel: String {
+        switch self {
+        case .user: return "User"
+        case .updatedInventory: return "Updated Inventory"
+        }
+    }
 }
-
-struct SupplyNeeded: Codable {
-    let count: Int
-    let supply: String
-}
-
 
 class SiteCaptainManager {
     // create singleton of manager

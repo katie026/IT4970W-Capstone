@@ -15,7 +15,7 @@ struct ChairReport: Codable {
     let chairCount: Int
 }
 
-struct DBUser: Codable, Identifiable { // allow encoding and decoding
+struct DBUser: Codable, Identifiable, Hashable { // allow encoding and decoding
     var id: String { userId } // conform to identifiable
     let userId: String
     let studentId: Int?
@@ -88,6 +88,13 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
         return components.isEmpty ? nil : components.joined(separator: " ")
     }
     
+    // computed property to extract the username from email
+    var pawprint: String? {
+        guard let email = email else { return nil }
+        let components = email.components(separatedBy: "@").first
+        return components
+    }
+    
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case studentId = "student_id"
@@ -135,6 +142,16 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
         try container.encodeIfPresent(self.isClockedIn, forKey: .isClockedIn)
         try container.encodeIfPresent(self.positionIds, forKey: .positionIds)
         try container.encodeIfPresent(self.chairReport, forKey: .chairReport)
+    }
+    
+    // conforming to Hashable
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(userId)
+    }
+    
+    // conforming to Equatable
+    static func == (lhs: DBUser, rhs: DBUser) -> Bool {
+        return lhs.userId == rhs.userId
     }
 }
 

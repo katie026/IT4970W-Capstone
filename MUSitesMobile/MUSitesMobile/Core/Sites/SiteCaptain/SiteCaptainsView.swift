@@ -45,6 +45,7 @@ final class SiteCaptainsViewModel: ObservableObject {
         Task {
             do {
                 self.users = try await UserManager.shared.getUsersList()
+                self.users = self.users.sorted{ $0.fullName ?? "" <  $1.fullName ?? "" }
             } catch  {
                 print("Error getting users: \(error)")
             }
@@ -133,12 +134,60 @@ struct SiteCaptainsView: View {
     // View Control
     @State private var hasLoadedOnce = false
     @State private var isLoading = true
+    // sort/filter option
+    @State private var searchOption: SiteCaptainSearchOption = .user
+    @State private var optionUpdatedInventory: Bool? = true
+    @State private var optionUser: DBUser? = nil
     
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "M/d/yy HH:mm"
         return formatter
     }()
+    
+    // sorted list of siteCaptains
+    private var sortedSiteCaptains: [SiteCaptain] {
+        // default list
+        let defaultList = viewModel.siteCaptains
+        
+        // if search option requires search bar
+        if (searchOption == .user) {
+            var filteredList = viewModel.siteCaptains
+            
+            if optionUser == nil {
+                // return default list if no user is selected
+                return defaultList
+            } else {
+                // filter issues by user
+                filteredList = viewModel.siteCaptains
+                    .filter { $0.user ?? "" == optionUser?.id ?? "" }
+            }
+            
+            // return filteredList
+            return filteredList
+        // if searching by resolution status
+        } else if searchOption == .updatedInventory {
+            var filteredList = viewModel.siteCaptains
+            
+            if optionUpdatedInventory == true {
+                // filter for entries where user updated Inventory
+                filteredList = viewModel.siteCaptains.filter { $0.updatedInventory ?? false == true }
+            } else if optionUpdatedInventory == false {
+                // filter for entries where user didn't update Inventory
+                filteredList = viewModel.siteCaptains.filter { $0.updatedInventory ?? false == false }
+            } else {
+                // filter for entries where user didn't update Inventory
+                filteredList = viewModel.siteCaptains.filter { $0.updatedInventory == nil }
+            }
+            
+            // return filteredList
+            return filteredList
+        // otherwise
+        } else {
+            // sort issues by timestamp
+            return defaultList
+        }
+    }
     
     var body: some View {
         content
@@ -166,7 +215,7 @@ struct SiteCaptainsView: View {
                 // Header
                 sitePicker.padding([.horizontal, .top])
                 datePickers
-                
+                searchBar
                 // List of SiteCaptains
                 siteCaptainEntryList
             }
@@ -207,11 +256,11 @@ struct SiteCaptainsView: View {
                         in: ...viewModel.endDate,
                         displayedComponents: [.date]
                     ).labelsHidden()
-                }.padding([.horizontal, .bottom])
+                }.padding([.horizontal])
                 
                 Spacer()
                 
-                Text("to").padding([.horizontal, .bottom])
+                Text("to").padding([.horizontal])
                 
                 Spacer()
                 
@@ -223,9 +272,46 @@ struct SiteCaptainsView: View {
                         displayedComponents: [.date]
                     )
                     .labelsHidden()
-                }.padding([.horizontal, .bottom])
+                }.padding([.horizontal])
             }
         }
+    }
+    
+    private var searchBar: some View {
+        HStack(alignment: .center) {
+            Menu {
+                Picker("Search Term", selection: $searchOption) {
+                    ForEach(SiteCaptainSearchOption.allCases, id: \.self) { option in
+                        Text(option.optionLabel)
+                        
+                    }
+                }.multilineTextAlignment(.leading)
+            } label: { HStack{
+                Text(searchOption.optionLabel)
+                Spacer()
+            } }
+            .frame(maxWidth: 90)
+            
+            if searchOption == .user {
+                Picker("User", selection: $optionUser) {
+                    Text("All").tag(nil as DBUser?)
+                    ForEach(viewModel.users, id: \.self) { user in
+                        Text("\(user.fullName ?? "No Name") \(user.pawprint != nil ? "(\(user.pawprint!))" : "")")
+                            .tag(user as DBUser?)
+                    }
+                }.multilineTextAlignment(.leading)
+            }
+            
+            if searchOption == .updatedInventory {
+                Picker("Updated Inventory", selection: $optionUpdatedInventory) {
+                    Text("No Inventory").tag(nil as Bool?)
+                    Text("True").tag(true as Bool?)
+                    Text("False").tag(false as Bool?)
+                }.multilineTextAlignment(.leading)
+            }
+            
+            Spacer()
+        }.padding(.horizontal, 20)
     }
     
     private var siteCaptainEntryList: some View {
@@ -242,7 +328,7 @@ struct SiteCaptainsView: View {
                     .foregroundColor(.gray)
             }
             
-            ForEach(viewModel.siteCaptains) { siteCaptain in
+            ForEach(sortedSiteCaptains) { siteCaptain in
                 SiteCaptainCellView(siteCaptain: siteCaptain, sites: viewModel.sites, users: viewModel.users, supplyTypes: viewModel.supplyTypes, allIssues: viewModel.issues, allSupplyRequests: viewModel.supplyRequests)
             }
         }

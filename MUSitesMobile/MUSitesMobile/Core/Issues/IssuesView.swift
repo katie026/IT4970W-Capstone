@@ -98,14 +98,8 @@ struct IssuesView: View {
     
     // sorted list of issues
     private var sortedIssues: [Issue] {
-        // default list is only sorted by dateCreated
-        let defaultList = viewModel.issues.sorted { issue1, issue2 in
-            guard let date1 = issue1.dateCreated, let date2 = issue2.dateCreated else {
-                print("Error sorting issues, \(issue1.id) or \(issue2.id) have nil dateCreated.")
-                return false // where dateCreated is nil
-            }
-            return date1 < date2
-        }
+        // default list
+        let defaultList = viewModel.issues
         
         // if search option requires search bar
         if (searchOption == .description || searchOption == .userAssigned || searchOption == .userSubmitted || searchOption == .siteName) {
@@ -126,13 +120,6 @@ struct IssuesView: View {
                     if searchText == "" {
                         return viewModel.issues
                             .filter { $0.userAssigned == nil }
-                            .sorted { issue1, issue2 in
-                                guard let date1 = issue1.dateCreated, let date2 = issue2.dateCreated else {
-                                    print("Error sorting issues, \(issue1.id) or \(issue2.id) have nil dateCreated.")
-                                    return false // where dateCreated is nil
-                                }
-                                return date1 < date2
-                            }
                     }
                     
                     // else, filter the list by the user assigned names
@@ -204,14 +191,8 @@ struct IssuesView: View {
                     .filter { $0.issueTypeId ?? "" == optionIssueType?.id ?? "" }
             }
             
-            // take filteredList, sort it, then return
-            return filteredList.sorted { issue1, issue2 in
-                guard let date1 = issue1.dateCreated, let date2 = issue2.dateCreated else {
-                    print("Error sorting issues, \(issue1.id) or \(issue2.id) hae nil dateCreated.")
-                    return false // where dateCreated is nil
-                }
-                return date1 < date2
-            }
+            // return filteredList
+            return filteredList
         // if searching by resolution status
         } else if searchOption == .resolutionStatus {
             var filteredList = viewModel.issues
@@ -224,17 +205,10 @@ struct IssuesView: View {
                 filteredList = viewModel.issues.filter { $0.resolved ?? false == false }
             }
             
-            // take filteredList, sort it, then return
-            return filteredList.sorted { issue1, issue2 in
-                guard let date1 = issue1.dateCreated, let date2 = issue2.dateCreated else {
-                    print("Error sorting issues, \(issue1.id) or \(issue2.id) hae nil dateCreated.")
-                    return false // where dateCreated is nil
-                }
-                return date1 < date2
-            }
+            // return filteredList
+            return filteredList
         // otherwise
         } else {
-            // sort issues by dateCreated
             return defaultList
         }
     }

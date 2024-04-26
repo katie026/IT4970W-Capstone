@@ -130,7 +130,7 @@ struct HourlyCleaningCellView: View {
                 photoURL: "https://lh3.googleusercontent.com/a/ACg8ocIonA7UjQCTfY-8P4NDZM2HB8K8_K-ZOnj3CJl5fikw=s96-c",
                 dateCreated: Date(),
                 isClockedIn: true,
-                positionIdsds: ["CO","SS","CS"],
+                positionIds: ["CO","SS","CS"],
                 chairReport: ChairReport(chairType: "physics_black",
                                          chairCount: 20))
             ],

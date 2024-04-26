@@ -18,7 +18,6 @@ struct SiteCaptainFormView: View {
     @Binding var labelsToReplace: String
     @Binding var hasInventoryLocation: Bool
     @Binding var inventoryChecked: Bool
-    @Binding var suppliesNeeded: [SupplyNeeded]
     @Binding var suppliesNeededCount: Int
     @Binding var selectedSupplyType: SupplyType?
     @Binding var needsSupplies: Bool
