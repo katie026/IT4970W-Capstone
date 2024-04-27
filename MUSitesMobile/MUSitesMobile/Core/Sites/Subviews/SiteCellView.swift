@@ -34,28 +34,28 @@ struct SiteCellView: View {
     }
     
     var siteFeatureIcons: some View {
-            HStack(alignment: .center, spacing: 10) {
-                if site.hasInventory == true {
-                    Image(systemName: "cabinet")
-                        .foregroundColor(.green)
-                }
-                
-                if hasComputers {
-                    Image(systemName: "desktopcomputer")
-                        .foregroundColor(.purple)
-                }
-                
-                if hasPrinters {
-                    Image(systemName: "printer")
-                        .foregroundColor(.pink)
-                }
-                
-                if site.hasPosterBoard == true {
-                    Image(systemName: "rectangle.3.offgrid.fill")
-                        .foregroundColor(.pink)
-                }
-            }.padding(.leading, 5)
-        }
+        HStack(alignment: .center, spacing: 10) {
+            if site.hasInventory == true {
+                Image(systemName: "cabinet")
+                    .foregroundColor(.green)
+            }
+            
+            if hasComputers {
+                Image(systemName: "desktopcomputer")
+                    .foregroundColor(.purple)
+            }
+            
+            if hasPrinters {
+                Image(systemName: "printer")
+                    .foregroundColor(.pink)
+            }
+            
+            if site.hasPosterBoard == true {
+                Image(systemName: "rectangle.3.offgrid.fill")
+                    .foregroundColor(.pink)
+            }
+        }.padding(.leading, 5)
+    }
     
     func getBuilding(completion: @escaping () -> Void) {
         if let buildingId = site.buildingId {

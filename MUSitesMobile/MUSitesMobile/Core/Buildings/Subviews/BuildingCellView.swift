@@ -9,48 +9,78 @@ import SwiftUI
 import FirebaseFirestore // for Preview
 
 struct BuildingCellView: View {
-    
     let building: Building
     @StateObject private var viewModel = DetailedSiteViewModel()
     @State private var profilePictureUrl: URL?
+    @State private var hasComputingSite: Bool = false
+    @State private var hasInventorySite: Bool = false
     
     var body: some View {
-        HStack(alignment: .top) {
-            ProfileImageView(imageURL: viewModel.profilePicture.first)
-
-            VStack(alignment: .leading) {
-                Text("\(building.name ?? "N/A")")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                Text("ID: \(building.id)")
-                Text("\(building.siteGroupId ?? "N/A")")
-                HStack {
-                    if building.isReshall == true {
-                        Text("ResHall")
-                            .font(.callout)
-                            .foregroundStyle(.orange)
-                    }
-                    
-                    if building.isLibrary == true {
-                        Text("Library")
-                            .font(.callout)
-                            .foregroundStyle(.green)
-                    }
+        NavigationLink(destination: BuildingDetailView(building: building)) {
+            HStack(alignment: .center, spacing: 10) {
+                ProfileImageView(imageURL: viewModel.profilePicture.first)
+                
+                VStack(alignment: .leading) {
+                    Text("\(building.name ?? "N/A")")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    subtitleText()
                 }
+                
+                Spacer()
+                
+                siteIcons
             }
-            .font(.callout)
-            .foregroundStyle(.secondary)
+            .background(Color.clear)
             .onAppear {
                 Task {
-                        // Ensure viewModel has the function fetchSiteSpecificImageURLs defined as async
-                        await viewModel.fetchSiteSpecificImageURLs(siteName: building.name ?? "", category: "ProfilePicture")
-                    }
+                    // Ensure viewModel has the function fetchSiteSpecificImageURLs defined as async
+                    await viewModel.fetchSiteSpecificImageURLs(siteName: building.name ?? "", category: "ProfilePicture")
+                    viewModel.loadSiteGroup(siteGroupId: building.siteGroupId ?? ""){}
+                    checkIfSitesInBuilding()
+                }
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func subtitleText() -> some View {
+        let siteGroupName = viewModel.siteGroup?.name
+        var buildingType = "Other"
+        if building.isReshall == true {
+            buildingType = "ResHall"
+        } else if building.isLibrary == true {
+            buildingType = "Library"
+        }
+            
+        let view = Text("\(siteGroupName ?? "N/A") - \(buildingType)")
+        return AnyView(view)
+    }
+    
+    private func checkIfSitesInBuilding() {
+        InventorySitesManager.shared.checkIfSitesInBuilding(buildingId: building.id) { result in
+            hasInventorySite = result
+        }
+        SitesManager.shared.checkIfSitesInBuilding(buildingId: building.id) { result in
+            hasComputingSite = result
+        }
+    }
+    
+    private var siteIcons: some View {
+        HStack(alignment: .center, spacing: 10) {
+            if hasInventorySite {
+                Image(systemName: "cabinet")
+                    .foregroundColor(.green)
             }
             
-        }
+            if hasComputingSite {
+                Image(systemName: "desktopcomputer")
+                    .foregroundColor(.purple)
+            }
+        }.padding(.leading, 5)
     }
 }
 
 #Preview {
-    BuildingCellView(building: Building(id: "001", name: "EBW", address: Address(city: "Columbia", country: "US", state: "MO", street: "1400 Treelane Dr.", zipCode: "65211"), coordinates:GeoPoint(latitude: 1.1, longitude: 2.2) , isLibrary: true, isReshall: true, siteGroupId: "G1"))
+    BuildingCellView(building: Building(id: "g7TPHMNpKVv3xciKcfaq", name: "LTC", address: Address(city: "Columbia", country: "US", state: "MO", street: "1400 Treelane Dr.", zipCode: "65211"), coordinates:GeoPoint(latitude: 1.1, longitude: 2.2) , isLibrary: true, isReshall: true, siteGroupId: "LM0MN0spXlHfd2oZSahO"))
 }

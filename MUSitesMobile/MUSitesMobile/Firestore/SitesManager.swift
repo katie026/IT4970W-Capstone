@@ -202,4 +202,26 @@ final class SitesManager {
     func allSitesCount() async throws -> Int {
         try await sitesCollection.aggregateCount()
     }
+    
+    // check if sites in Building
+    func checkIfSitesInBuilding(buildingId: String, completion: @escaping (Bool) -> Void) {
+        let query = sitesCollection
+                .whereField(Site.CodingKeys.buildingId.rawValue, isEqualTo: buildingId)
+        
+        query.getDocuments { snapshot, error in
+            if let error = error {
+                print("Error fetching computing sites: \(error)")
+                completion(false)
+                return
+            }
+            guard let snapshot = snapshot else {
+                print("Snapshot is nil")
+                completion(false)
+                return
+            }
+            
+            // Check if any documents exist in the snapshot
+            completion(!snapshot.documents.isEmpty) // return true if any sites were returned for that buildingId
+        }
+    }
 }

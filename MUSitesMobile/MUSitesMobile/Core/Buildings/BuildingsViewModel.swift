@@ -33,6 +33,14 @@ final class BuildingsViewModel: ObservableObject {
             case .nameDescending: return true
             }
         }
+        
+        var optionLabel: String {
+            switch self {
+            case .noSort: return "None"
+            case .nameAscending: return "A-Z"
+            case .nameDescending: return "Z-A"
+            }
+        }
     }
     
     enum FilterOption: String, CaseIterable { // may want to relocate this eventually

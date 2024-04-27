@@ -40,27 +40,27 @@ struct SitesMapView: View {
                 }
                 Spacer()
             }
-            .navigationTitle("Map")
-            .background(
-                //TODO: update to NagivationStack? Renable link to in BuildingDetailView
-                NavigationLink(
-                    destination: selectedBuilding != nil ? BuildingDetailView(building: selectedBuilding!) : nil,
-                    isActive: Binding<Bool>(
-                        get: { selectedBuilding != nil },
-                        set: { newValue in
-                            if !newValue { // NavigationLink became inactive
-                                selectedBuilding = nil // Reset selectedBuilding
-                            }
+        }
+        .navigationTitle("Map")
+        .background(
+            //TODO: update to NagivationStack? Renable link to in BuildingDetailView
+            NavigationLink(
+                destination: selectedBuilding != nil ? BuildingDetailView(building: selectedBuilding!) : nil,
+                isActive: Binding<Bool>(
+                    get: { selectedBuilding != nil },
+                    set: { newValue in
+                        if !newValue { // NavigationLink became inactive
+                            selectedBuilding = nil // Reset selectedBuilding
                         }
-                    )
-                ) {
-                    EmptyView()
-                }
-                    .hidden()
-            )
-            .onAppear{
-                getSiteGroups() {}
+                    }
+                )
+            ) {
+                EmptyView()
             }
+                .hidden()
+        )
+        .onAppear{
+            getSiteGroups() {}
         }
     }
     

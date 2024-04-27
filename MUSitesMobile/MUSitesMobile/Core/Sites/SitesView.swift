@@ -19,7 +19,7 @@ struct SitesView: View {
                 .padding(.vertical, 8)
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(10)
-                .padding(.horizontal)
+                .padding([.horizontal, .top])
             if isLoading {
                 ProgressView()
             } else {
