@@ -34,6 +34,7 @@ struct Site: Identifiable, Codable, Equatable, Hashable {
     let namePatternPc: String?
     let namePatternPrinter: String?
     let calendarName: String?
+    var siteCaptain: String?
     
     // create Site manually
     init(
@@ -50,7 +51,8 @@ struct Site: Identifiable, Codable, Equatable, Hashable {
         namePatternMac: String? = nil,
         namePatternPc: String? = nil,
         namePatternPrinter: String? = nil,
-        calendarName: String? = nil
+        calendarName: String? = nil,
+        siteCaptain: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -66,6 +68,7 @@ struct Site: Identifiable, Codable, Equatable, Hashable {
         self.namePatternPc = namePatternPc
         self.namePatternPrinter = namePatternPrinter
         self.calendarName = calendarName
+        self.siteCaptain = siteCaptain
     }
     
     enum CodingKeys: String, CodingKey {
@@ -83,6 +86,7 @@ struct Site: Identifiable, Codable, Equatable, Hashable {
         case namePatternPc = "name_pattern_pc"
         case namePatternPrinter = "name_pattern_printer"
         case calendarName = "calendar_name"
+        case siteCaptain = "site_captain"
     }
     
     init(from decoder: Decoder) throws {
@@ -101,6 +105,7 @@ struct Site: Identifiable, Codable, Equatable, Hashable {
         self.namePatternPc = try container.decodeIfPresent(String.self, forKey: .namePatternPc)
         self.namePatternPrinter = try container.decodeIfPresent(String.self, forKey: .namePatternPrinter)
         self.calendarName = try container.decodeIfPresent(String.self, forKey: .calendarName)
+        self.siteCaptain = try container.decodeIfPresent(String.self, forKey: .siteCaptain)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -119,6 +124,7 @@ struct Site: Identifiable, Codable, Equatable, Hashable {
         try container.encodeIfPresent(self.namePatternPc, forKey: .namePatternPc)
         try container.encodeIfPresent(self.namePatternPrinter, forKey: .namePatternPrinter)
         try container.encodeIfPresent(self.calendarName, forKey: .calendarName)
+        try container.encodeIfPresent(self.siteCaptain, forKey: .siteCaptain)
     }
     
     // Equatable

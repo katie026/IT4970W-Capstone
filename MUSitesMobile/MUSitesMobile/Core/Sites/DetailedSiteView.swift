@@ -14,6 +14,10 @@ struct DetailedSiteView: View {
     // init
     private var site: Site
     
+    // View Control
+    @State var isLoading = true
+    @State var progress = 0
+    
     // WebView
     @State private var isPresentWebView = false
     @State var calendarDate = Date()
@@ -51,14 +55,18 @@ struct DetailedSiteView: View {
     
     var body: some View {
         VStack {
-            Form {
-                informationSection
-                submitForm(site: site)
-                equipmentSection
-                mapSection
-                postersSection
-                if (site.calendarName != nil && site.calendarName != "") {
-                    calendarSection
+            if isLoading {
+                ProgressView("Loading data...")
+            } else {
+                Form {
+                    informationSection
+                    submitForm(site: site)
+                    equipmentSection
+                    mapSection
+                    postersSection
+                    if (site.calendarName != nil && site.calendarName != "") {
+                        calendarSection
+                    }
                 }
             }
         }
@@ -67,14 +75,46 @@ struct DetailedSiteView: View {
             Task {
                 // get building
                 viewModel.loadBuilding(site: self.site) {
+                    print("Got building")
                     // then get group
                     if let siteGroupId = viewModel.building?.siteGroupId {
-                        viewModel.loadSiteGroup(siteGroupId: siteGroupId) {}
+                        viewModel.loadSiteGroup(siteGroupId: siteGroupId) {
+                            print("Got ID")
+                            progress += 1
+                            if progress >= 4 {
+                                isLoading = false
+                                progress = 0
+                            }
+                        }
                     }
                 }
                 // get site type
                 if let siteTypeId = self.site.siteTypeId {
-                    viewModel.loadSiteType(siteTypeId: siteTypeId) {}
+                    viewModel.loadSiteType(siteTypeId: siteTypeId) {
+                        print("Got siteType")
+                        progress += 1
+                        if progress >= 4 {
+                            isLoading = false
+                            progress = 0
+                        }
+                    }
+                }
+                // get inventorySite
+                viewModel.getNearestInventory(inventorySiteId: site.nearestInventoryId ?? "") {
+                    print("Got inventory site")
+                    progress += 1
+                    if progress >= 4 {
+                        isLoading = false
+                        progress = 0
+                    }
+                }
+                // get users
+                viewModel.updateUsers() {
+                    progress += 1
+                    if progress >= 4 {
+                        isLoading = false
+                        progress = 0
+                    }
                 }
                 
                 //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
@@ -96,9 +136,9 @@ struct DetailedSiteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("**Group:** \(viewModel.siteGroup?.name ?? "N/A")")
                         Text("**Building:** \(viewModel.building?.name ?? "N/A")")
+                        Text("**Nearest Inventory:** \(viewModel.inventorySite?.name ?? "N/A")")
                         Text("**Site Type:** \(viewModel.siteType?.name ?? "N/A")")
-                        //TODO: get site captains
-                        Text("**SS Captain:** \(viewModel.building?.siteGroupId ?? "N/A")")
+                        Text("**SS Captain:** \(UserManager.shared.allUsers.first(where: {$0.id == site.siteCaptain ?? ""})?.fullName ?? "N/A")")
                     }
                     .padding(.top)
                     .listRowInsets(EdgeInsets())
@@ -285,31 +325,7 @@ struct DetailedSiteView: View {
             .listRowBackground(Color.clear)
         }
     }
-    //code before 4/23
-//    private var postersSection: some View {
-//        Section() {
-//            DisclosureGroup(
-//                isExpanded: $postersSectionExpanded,
-//                content: {
-//                    Section(header: Text("Posters")) {
-//                        PostersView(imageURLs: viewModel.imageURLs)
-//                    }
-//                    Section(header: Text("Board")) {
-//                        BoardView(imageURLs: viewModel.boardImageURLs)
-//                    }
-//                },
-//                label: {
-//                    Text("Poster Board")
-//                        .font(.title)
-//                        .fontWeight(.bold)
-//                }
-//            )
-//            .padding(.top, 10.0)
-//            .listRowBackground(Color.clear)
-//        }
-//    }
-    //code added after 4/23
-    //checks if theirs a poster/board in a site if not it doesnt display the poster section(works only on DetailedSitesView not on DetailedInventoryView)
+    
     private var postersSection: some View {
         Section {
             // Use DisclosureGroup only if you need the section to be collapsible
@@ -456,10 +472,10 @@ struct DetailedSiteView: View {
     NavigationStack {
         DetailedSiteView(
             site: Site(
-                id: "6tYFeMv41IXzfXkwbbh6",
-                name: "Clark",
+                id: "6tYFeMv41IXzfXkwbbh6", //ncgvyP2RI3wNvTfSwjM2
+                name: "Clark", //A&S
                 buildingId: "SvK0cIKPNTGCReVCw7Ln",
-                nearestInventoryId: "345",
+                nearestInventoryId: "8xSqb2Gf5nfgf7g5P9PA",
                 chairCounts: [ChairCount(count: 3, type: "physics_black")],
                 siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
                 hasClock: true,
@@ -468,7 +484,8 @@ struct DetailedSiteView: View {
                 namePatternMac: "CLARK-MAC-##",
                 namePatternPc: "CLARK-PC-##",
                 namePatternPrinter: "Clark Printer ##",
-                calendarName: "cornell-hall-5-lab"
+                calendarName: "cornell-hall-5-lab",
+                siteCaptain: "ezWofRU3EjNXlXey5P446UeQH6B3"
             )
         )
     }

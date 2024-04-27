@@ -160,6 +160,8 @@ final class UserManager {
     static let shared = UserManager()
     private init() { }
     
+    var allUsers: [DBUser] = []
+    
     // get the 'users' collection as CollectionReference
     private let userCollection: CollectionReference = Firestore.firestore().collection("users")
     
@@ -269,6 +271,18 @@ final class UserManager {
         
         return try await query
             .getDocuments(as: DBUser.self)
+    }
+    
+    func updateAllUsers(completion: @escaping () -> Void) {
+        getAllUsers() { result in
+            switch result {
+            case .success(let fetchedUsers):
+                self.allUsers = fetchedUsers
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+            completion()
+        }
     }
     
     // function to get all the users in the user collection

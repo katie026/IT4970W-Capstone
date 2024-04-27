@@ -9,11 +9,11 @@ import SwiftUI
 
 @MainActor
 final class ContentViewModel: ObservableObject {
-    var structList: [Position] = []
+    var structList: [Site] = []
     func getStructsFromFirestore(completion: @escaping () -> Void) {
         Task {
             do {
-                self.structList = try await PositionManager.shared.getAllPositions(descending: false)
+                self.structList = try await SitesManager.shared.getAllSites(descending: false)
             } catch {
                 print("Error getting structs: \(error)")
             }
@@ -38,6 +38,7 @@ struct ContentView: View {
                 List {
                     ForEach(viewModel.structList) { item in
                         Text(item.name ?? "N/A")
+                        Text(item.siteCaptain ?? "N/A")
                     }
                 }
             }
