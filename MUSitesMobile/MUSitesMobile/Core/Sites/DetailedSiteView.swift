@@ -30,6 +30,8 @@ struct DetailedSiteView: View {
     @State private var postersSectionExpanded: Bool = false
     @State private var calendarSectionExpanded: Bool = false
     @State private var isSiteReadySurveyViewPresented = false
+    
+
 
     
     init(site: Site) {
@@ -81,6 +83,10 @@ struct DetailedSiteView: View {
                     //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
                     await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
                     await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
+                    //for computers it takes the siteID to link it to the related site, it will then get the siteName so it can list all the computers
+                    viewModel.fetchComputers(forSite: site.id, withName: site.name ?? "")
+                    //printers just need siteID since it already has the B&W or color type
+                    viewModel.fetchPrinters(forSite: site.id)
                 }
             }
             
@@ -146,16 +152,26 @@ struct DetailedSiteView: View {
             DisclosureGroup(
                 isExpanded: $equipmentSectionExpanded,
                 content: {
-                    
                     // PC section
                     Section() {
                         DisclosureGroup(
                             isExpanded: $pcSectionExpanded,
                             content: {
-                                Text(site.namePatternPc ?? "N/A")
+                                List(viewModel.pcComputers, id: \.self) { computer in
+                                    VStack(alignment: .leading) {
+                                        Text(computer.name ?? "")
+                                        //checking if there is a last cleaned date
+                                        if let cleanedDate = computer.lastCleaned {
+                                            Text("Last cleaned: \(cleanedDate, formatter: itemFormatter)")
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                }
                             },
                             label: {
-                                Text("**PC Count:** \(1)")
+                                //was able to get computer counts by just calling .count
+                                Text("**PC Count:** \(viewModel.pcComputers.count)")
                             }
                         )
                     }
@@ -164,34 +180,51 @@ struct DetailedSiteView: View {
                         DisclosureGroup(
                             isExpanded: $macSectionExpanded,
                             content: {
-                                Text(site.namePatternMac ?? "N/A")
+                                List(viewModel.macComputers, id: \.self) { computer in
+                                    VStack(alignment: .leading) {
+                                        Text(computer.name ?? "")
+                                        //checking if there is a last cleaned date
+                                        if let cleanedDate = computer.lastCleaned {
+                                            Text("Last cleaned: \(cleanedDate, formatter: itemFormatter)")
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                }
                             },
                             label: {
-                                Text("**MAC Count:** \(1)")
+                                //was able to get computer counts by just calling .count
+                                Text("**MAC Count:** \(viewModel.macComputers.count)")
                             }
                         )
                     }
-                    // B&W Printer section
+                    //B&W Printer section
                     Section() {
                         DisclosureGroup(
                             isExpanded: $bwPrinterSectionExpanded,
                             content: {
-                                Text(site.namePatternMac ?? "N/A")
+                                List(viewModel.bwPrinters) { printer in
+                                    Text(printer.name ?? "")
+                                }
                             },
                             label: {
-                                Text("**B&W Printer Count:** \(1)")
+                                Text("**B&W Printer Count:** \(viewModel.bwPrinters.count)")
                             }
                         )
                     }
+
+                    
                     // Color Printer section
                     Section() {
                         DisclosureGroup(
                             isExpanded: $colorPrinterSectionExpanded,
                             content: {
-                                Text(site.namePatternMac ?? "N/A")
+                                List(viewModel.colorPrinters) { printer in
+                                    Text(printer.name ?? "")
+                                }
                             },
                             label: {
-                                Text("**Color Printer Count:** \(1)")
+                                Text("**Color Printer Count:** \(viewModel.colorPrinters.count)")
                             }
                         )
                     }
@@ -430,6 +463,13 @@ private func submitForm(site: Site) -> some View {
         .padding(.vertical)
     }
 }
+//formating dates for computers 
+let itemFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateStyle = .medium
+    formatter.timeStyle = .none
+    return formatter
+}()
 
 #Preview {
     NavigationStack {
