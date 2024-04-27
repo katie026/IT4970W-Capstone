@@ -10,9 +10,22 @@ import Firebase
 @MainActor
 final class ViewUsersViewModel: ObservableObject {
     @Published var users: [DBUser] = []
-    @Published var isAuthenticated: [String: Bool] = [:]
-    @Published var unLinked: [String: Bool] = [:]
-
+    @Published var isAuthorized: [String: Bool] = [:]
+    @Published var nonAuthenticated: [String: Bool] = [:]
+    @Published var currentUserIsAdmin: Bool = false
+    
+    func checkCurrentUserAdminStatus(completion: @escaping () -> Void) {
+        Task {
+            AdminManager.shared.checkIfCurrentUserIsAdmin() { isAdminResult in
+                if isAdminResult {
+                    self.currentUserIsAdmin = true
+                } else {
+                    self.currentUserIsAdmin = false
+                }
+                completion()
+            }
+        }
+    }
     
     func loadUsers(completion: @escaping () -> Void) {
         Task {
@@ -20,7 +33,7 @@ final class ViewUsersViewModel: ObservableObject {
                 switch result {
                 case .success(let fetchedUsers):
                     self.users = fetchedUsers
-                    self.checkAuthentication(for: fetchedUsers)
+                    self.checkAuthorization(for: fetchedUsers)
                 case .failure(let error):
                     print(error.localizedDescription)
                 }
@@ -29,15 +42,14 @@ final class ViewUsersViewModel: ObservableObject {
         }
     }
     
-    private func checkAuthentication(for users: [DBUser]) {
+    private func checkAuthorization(for users: [DBUser]) {
         for user in users {
             guard let email = user.email else { continue }
-            let docRef = Firestore.firestore().collection("authenticated_emails").document(email)
-            docRef.getDocument { document, error in
-                if let document = document, document.exists {
-                    self.isAuthenticated[email] = true
+            AuthorizationManager.shared.checkIfUserIsInAuthorized(email: email) { result in
+                if result == true {
+                    self.isAuthorized[email] = true
                 } else {
-                    self.isAuthenticated[email] = false
+                    self.isAuthorized[email] = false
                 }
             }
         }
@@ -49,7 +61,7 @@ final class ViewUsersViewModel: ObservableObject {
                 let nonAuthenticatedUsers = try await UserManager.shared.getNonAuthenticatedUsers()
                 for user in nonAuthenticatedUsers {
                     guard let email = user.email else { continue }
-                    self.unLinked[email] = true // Assume true for simplicity, adjust logic as needed
+                    self.nonAuthenticated[email] = true // Assume true for simplicity, adjust logic as needed
                 }
                 completion()
             } catch {
@@ -58,8 +70,6 @@ final class ViewUsersViewModel: ObservableObject {
             }
         }
     }
-
-
 }
 
 struct ViewUsersView: View {
@@ -73,60 +83,85 @@ struct ViewUsersView: View {
     
     enum FilterMode: String, CaseIterable {
         case all = "All"
-        case authenticated = "Authenticated"
-        case nonAuthenticated = "Non-Authenticated"
-        case unLinked = "unLinked"
+        case authorized = "Authorized"
+        case nonAuthorized = "Unauthorized"
+        case nonAuthenticated = "Unauthenticated"
     }
 
     var body: some View {
         VStack {
-            Picker("Filter", selection: $filterMode) {
-                ForEach(FilterMode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue).tag(mode)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding()
-            
-            TextField("Search", text: $searchText)
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(10)
-                .padding(.horizontal)
-            
-//            List(sortedUsers) { user in
-//                NavigationLink(destination: AdminUserProfileView(user: user)) {
-//                    VStack(alignment: .leading) {
-//                        Text(user.fullName ?? "No Name").font(.headline)
-//                        Text(user.email ?? "No Email").font(.subheadline)
-//                    }
-//                }
-//            }
-            List(filteredUsers) { user in
-                NavigationLink(destination: AdminUserProfileView(user: user, isAuthenticated: viewModel.isAuthenticated[user.email ?? ""] ?? false)) {
-                    VStack(alignment: .leading) {
-                        Text(user.fullName ?? "No Name").font(.headline)
-                        Text(user.email ?? "No Email").font(.subheadline)
+            if isLoading {
+                ProgressView("Checking permissions...")
+            } else {
+                if viewModel.currentUserIsAdmin {
+                    filterBar
+                    searchBar
+                    usersList
+                } else {
+                    List {
+                        Text("**Insufficient Permissions:** current user is not an admin")
                     }
                 }
             }
-
         }
         .navigationTitle("User Accounts")
         .onAppear {
             isLoading = true
-            viewModel.loadUsers {
-                isLoading = false
-            }
-            viewModel.loadNonAuthenticatedUsers {
-                isLoading = false
+            // check if current user is admin
+            viewModel.checkCurrentUserAdminStatus {
+                print(viewModel.currentUserIsAdmin)
+                if viewModel.currentUserIsAdmin == true {
+                    // if isAdmin, load the data
+                    viewModel.loadUsers {
+                        isLoading = false
+                    }
+                    viewModel.loadNonAuthenticatedUsers {
+                        isLoading = false
+                    }
+                } else {
+                    isLoading = false
+                }
             }
         }
-
-        .overlay {
-            if isLoading {
-                ProgressView("Loading users...")
+//        .overlay {
+//            if isLoading {
+//                ProgressView("Loading users...")
+//            }
+//        }
+    }
+    
+    private var filterBar: some View {
+        Picker("Filter", selection: $filterMode) {
+            ForEach(FilterMode.allCases, id: \.self) { mode in
+                Text(mode.rawValue).tag(mode)
+            }
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .padding()
+    }
+    
+    private var searchBar: some View {
+        TextField("Search", text: $searchText)
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(10)
+            .padding(.horizontal)
+    }
+    
+    private var usersList: some View {
+        List(filteredUsers) { user in
+            NavigationLink(destination: 
+                AdminUserProfileView(
+                    user: user,
+                    isAuthorized: viewModel.isAuthorized[user.email ?? ""] ?? false,
+                    isAuthenticated: viewModel.nonAuthenticated[user.email ?? ""] == true ? false : true
+                )
+            ) {
+                VStack(alignment: .leading) {
+                    Text(user.fullName ?? "No Name").font(.headline)
+                    Text(user.email ?? "No Email").font(.subheadline)
+                }
             }
         }
     }
@@ -136,7 +171,7 @@ struct ViewUsersView: View {
 //        
 //        if filterMode != .all {
 //            result = result.filter {
-//                ($0.email != nil) && (viewModel.isAuthenticated[$0.email!] == (filterMode == .authenticated))
+//                ($0.email != nil) && (viewModel.isAuthorized[$0.email!] == (filterMode == .authorized))
 //            }
 //        }
 //        
@@ -155,18 +190,18 @@ struct ViewUsersView: View {
         switch filterMode {
         case .all:
             break
-        case .authenticated:
+        case .authorized:
             result = result.filter { user in
-                (user.email != nil) && (viewModel.isAuthenticated[user.email!] == true)
+                (user.email != nil) && (viewModel.isAuthorized[user.email!] == true)
+            }
+        case .nonAuthorized:
+            result = result.filter { user in
+                (user.email != nil) && (viewModel.isAuthorized[user.email!] == false)
             }
         case .nonAuthenticated:
             result = result.filter { user in
-                (user.email != nil) && (viewModel.isAuthenticated[user.email!] == false)
-            }
-        case .unLinked:
-            result = result.filter { user in
                 guard let email = user.email else { return false }
-                return self.viewModel.unLinked[email, default: false] // Default to false if not set
+                return self.viewModel.nonAuthenticated[email, default: false] // Default to false if not set
             }
 
         }

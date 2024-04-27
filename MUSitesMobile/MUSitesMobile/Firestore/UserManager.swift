@@ -15,7 +15,7 @@ struct ChairReport: Codable {
     let chairCount: Int
 }
 
-struct DBUser: Codable, Identifiable { // allow encoding and decoding
+struct DBUser: Codable, Identifiable, Hashable { // allow encoding and decoding
     var id: String { userId } // conform to identifiable
     let userId: String
     let studentId: Int?
@@ -25,22 +25,24 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
     let fullName: String?
     let photoURL: String?
     let dateCreated: Date?
+    var lastLogin: Date?
     let isClockedIn: Bool?
-    var positions: [String]?
+    var positionIds: [String]?
     let chairReport: ChairReport?
     
     // create DBUser manually
     init(
         userId: String,
-        studentId: Int?,
+        studentId: Int? = nil,
         isAnonymous: Bool? = nil,
         hasAuthentication: Bool? = nil,
         email: String? = nil,
         fullName: String? = nil,
         photoURL: String? = nil,
         dateCreated: Date? = nil,
+        lastLogin: Date? = nil,
         isClockedIn: Bool? = nil,
-        positions: [String]? = nil,
+        positionIds: [String]? = nil,
         chairReport: ChairReport? = nil
     ) {
         self.userId = userId
@@ -51,8 +53,9 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
         self.fullName = fullName
         self.photoURL = photoURL
         self.dateCreated = dateCreated
+        self.lastLogin = lastLogin
         self.isClockedIn = isClockedIn
-        self.positions = positions
+        self.positionIds = positionIds
         self.chairReport = chairReport
     }
     
@@ -66,8 +69,9 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
         self.fullName = auth.name
         self.photoURL = auth.photoURL
         self.dateCreated = Date()
+        self.lastLogin = Date()
         self.isClockedIn = false
-        self.positions = nil
+        self.positionIds = nil
         self.chairReport = nil
     }
     
@@ -84,6 +88,13 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
         return components.isEmpty ? nil : components.joined(separator: " ")
     }
     
+    // computed property to extract the username from email
+    var pawprint: String? {
+        guard let email = email else { return nil }
+        let components = email.components(separatedBy: "@").first
+        return components
+    }
+    
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case studentId = "student_id"
@@ -95,8 +106,9 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
         case lastName = "last_name"
         case photoURL = "photo_url"
         case dateCreated = "date_created"
+        case lastLogin = "last_login"
         case isClockedIn = "is_clocked_in"
-        case positions = "positions"
+        case positionIds = "positions"
         case chairReport = "chair_report"
     }
     
@@ -110,24 +122,36 @@ struct DBUser: Codable, Identifiable { // allow encoding and decoding
         self.fullName = try container.decodeIfPresent(String.self, forKey: .fullName)
         self.photoURL = try container.decodeIfPresent(String.self, forKey: .photoURL)
         self.dateCreated = try container.decodeIfPresent(Date.self, forKey: .dateCreated)
+        self.lastLogin = try container.decodeIfPresent(Date.self, forKey: .lastLogin)
         self.isClockedIn = try container.decodeIfPresent(Bool.self, forKey: .isClockedIn)
-        self.positions = try container.decodeIfPresent([String].self, forKey: .positions)
+        self.positionIds = try container.decodeIfPresent([String].self, forKey: .positionIds)
         self.chairReport = try container.decodeIfPresent(ChairReport.self, forKey: .chairReport)
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.userId, forKey: .userId)
-        try container.encodeIfPresent(self.studentId, forKey: .isAnonymous)
+        try container.encodeIfPresent(self.studentId, forKey: .studentId)
         try container.encodeIfPresent(self.isAnonymous, forKey: .isAnonymous)
         try container.encodeIfPresent(self.hasAuthentication, forKey: .hasAuthentication)
         try container.encodeIfPresent(self.email, forKey: .email)
         try container.encodeIfPresent(self.fullName, forKey: .fullName)
         try container.encodeIfPresent(self.photoURL, forKey: .photoURL)
         try container.encodeIfPresent(self.dateCreated, forKey: .dateCreated)
+        try container.encodeIfPresent(self.lastLogin, forKey: .lastLogin)
         try container.encodeIfPresent(self.isClockedIn, forKey: .isClockedIn)
-        try container.encodeIfPresent(self.positions, forKey: .positions)
+        try container.encodeIfPresent(self.positionIds, forKey: .positionIds)
         try container.encodeIfPresent(self.chairReport, forKey: .chairReport)
+    }
+    
+    // conforming to Hashable
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(userId)
+    }
+    
+    // conforming to Equatable
+    static func == (lhs: DBUser, rhs: DBUser) -> Bool {
+        return lhs.userId == rhs.userId
     }
 }
 
@@ -176,21 +200,52 @@ final class UserManager {
         let document = try await userRef.getDocument()
         if document.exists {
             try await userRef.updateData([
-                "last_login": Timestamp(date: Date()),
+                DBUser.CodingKeys.lastLogin.rawValue: Timestamp(date: Date()),
             ])
         } else {
-            try await userRef.setData([
-                "user_id": user.id,
-                "email": user.email ?? "",
-                "date_created": Timestamp(date: Date()),
-                "last_login": Timestamp(date: Date())
-            ])
+            try await createNewUser(user: user)
+//            try await userRef.setData([
+//                "user_id": user.id,
+//                "email": user.email ?? "",
+//                "date_created": Timestamp(date: Date()),
+//                "last_login": Timestamp(date: Date())
+//            ])
         }
     }
     
     // delete a user in Firestore
     func deleteUser(userId: String) async throws {
         try await userDocument(userId: userId).delete()
+    }
+    
+    private func checkAuthorization(user: DBUser, completion: @escaping (Bool) -> Void) {
+        if let email = user.email {
+            let docRef = Firestore.firestore().collection("authenticated_emails").document(email)
+            docRef.getDocument { document, error in
+                if let document = document, document.exists {
+                    completion(true)
+                } else {
+                    completion(false)
+                }
+            }
+        } else {
+            completion(false)
+        }
+    }
+    
+    func checkAuthentication(user: DBUser) async throws -> Bool {
+        let docRef = userCollection.document(user.id)
+        do {
+            let documentSnapshot = try await docRef.getDocument()
+            if let data = documentSnapshot.data(), let isAuthenticated = data[DBUser.CodingKeys.hasAuthentication.rawValue] as? Bool {
+                return isAuthenticated
+            } else {
+                // document data or isAuthenticated value is nil
+                return false
+            }
+        } catch {
+            throw error
+        }
     }
     
     // get non-authenticated DBUsers
@@ -255,20 +310,20 @@ final class UserManager {
         try await userDocument(userId: userId).updateData(data)
     }
     
-    // add position to user
-    func addUserPosition(userId: String, position: String) async throws {
+    // add positionId to user
+    func addUserPosition(userId: String, positionId: String) async throws {
         let data: [String:Any] = [
-            DBUser.CodingKeys.positions.rawValue : FieldValue.arrayUnion([position])
+            DBUser.CodingKeys.positionIds.rawValue : FieldValue.arrayUnion([positionId])
         ]
         
         // pass dictionary and update the key:value pairs for that user
         try await userDocument(userId: userId).updateData(data)
     }
     
-    // remove position to user
-    func removeUserPosition(userId: String, position: String) async throws {
+    // remove positionId to user
+    func removeUserPosition(userId: String, positionId: String) async throws {
         let data: [String:Any] = [
-            DBUser.CodingKeys.positions.rawValue : FieldValue.arrayRemove([position])
+            DBUser.CodingKeys.positionIds.rawValue : FieldValue.arrayRemove([positionId])
         ]
         
         // pass dictionary and update the key:value pairs for that user

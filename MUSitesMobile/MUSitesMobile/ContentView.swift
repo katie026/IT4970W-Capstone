@@ -9,35 +9,44 @@ import SwiftUI
 
 @MainActor
 final class ContentViewModel: ObservableObject {
-    var siteGroups: [SiteGroup] = []
-    func getSiteGroups() {
+    var structList: [Position] = []
+    func getStructsFromFirestore(completion: @escaping () -> Void) {
         Task {
             do {
-                self.siteGroups = try await SiteGroupManager.shared.getAllSiteGroups(descending: nil)
+                self.structList = try await PositionManager.shared.getAllPositions(descending: false)
             } catch {
-                print("Error getting site groups: \(error)")
+                print("Error getting structs: \(error)")
             }
+            print("Got \(structList.count) structs")
+            completion()
         }
     }
 }
 
 struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
+    @State private var isLoading = true
     
     var body: some View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
-            List {
-                ForEach(viewModel.siteGroups) { group in
-                    Text(group.name)
+            if isLoading {
+                ProgressView()
+            } else {
+                List {
+                    ForEach(viewModel.structList) { item in
+                        Text(item.name ?? "N/A")
+                    }
                 }
             }
         }
         .padding()
         .onAppear {
-            viewModel.getSiteGroups()
+            viewModel.getStructsFromFirestore() {
+                isLoading = false
+            }
         }
     }
 }

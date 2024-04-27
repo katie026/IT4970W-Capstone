@@ -91,6 +91,10 @@
 		F668B1E32B9AB392000B2886 /* KeySetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E22B9AB392000B2886 /* KeySetManager.swift */; };
 		F668B1E62B9AB688000B2886 /* KeySetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E52B9AB688000B2886 /* KeySetsView.swift */; };
 		F668B1E82B9AB79C000B2886 /* KeySetCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */; };
+		F66FCE892BDB5181008251F9 /* PositionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FCE882BDB5180008251F9 /* PositionManager.swift */; };
+		F66FCE8B2BDB804B008251F9 /* SiteCaptainsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FCE8A2BDB804B008251F9 /* SiteCaptainsView.swift */; };
+		F66FCE8D2BDB87C6008251F9 /* SiteCaptainCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FCE8C2BDB87C5008251F9 /* SiteCaptainCellView.swift */; };
+		F67CCB522BDC5ED1002AF86B /* AuthorizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67CCB512BDC5ED1002AF86B /* AuthorizationManager.swift */; };
 		F68E1B052BBBE4B300EBE6AC /* TempChangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */; };
 		F68E1B072BBC2CE600EBE6AC /* SheetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B062BBC2CE500EBE6AC /* SheetManager.swift */; };
 		F68E1B0C2BBD2C6B00EBE6AC /* InventoryEntriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B0B2BBD2C6B00EBE6AC /* InventoryEntriesView.swift */; };
@@ -196,6 +200,10 @@
 		F668B1E22B9AB392000B2886 /* KeySetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetManager.swift; sourceTree = "<group>"; };
 		F668B1E52B9AB688000B2886 /* KeySetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetsView.swift; sourceTree = "<group>"; };
 		F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetCellView.swift; sourceTree = "<group>"; };
+		F66FCE882BDB5180008251F9 /* PositionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionManager.swift; sourceTree = "<group>"; };
+		F66FCE8A2BDB804B008251F9 /* SiteCaptainsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainsView.swift; sourceTree = "<group>"; };
+		F66FCE8C2BDB87C5008251F9 /* SiteCaptainCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainCellView.swift; sourceTree = "<group>"; };
+		F67CCB512BDC5ED1002AF86B /* AuthorizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationManager.swift; sourceTree = "<group>"; };
 		F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempChangeView.swift; sourceTree = "<group>"; };
 		F68E1B062BBC2CE500EBE6AC /* SheetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetManager.swift; sourceTree = "<group>"; };
 		F68E1B0B2BBD2C6B00EBE6AC /* InventoryEntriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryEntriesView.swift; sourceTree = "<group>"; };
@@ -346,6 +354,7 @@
 				F6246A7B2BA12FD400828DAE /* KeyManager.swift */,
 				F668B1E22B9AB392000B2886 /* KeySetManager.swift */,
 				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
+				F66FCE882BDB5180008251F9 /* PositionManager.swift */,
 				F69A9C352BD98912006EAE22 /* PrinterManager.swift */,
 				E553CD7B2BCD937E00B9D63B /* SiteCaptainManager.swift */,
 				F6AB560F2BC4D9EE005727D2 /* SiteGroupsManager.swift */,
@@ -377,6 +386,7 @@
 			isa = PBXGroup;
 			children = (
 				6E8C57272B7CB39D00B5BF59 /* AuthenticationManager.swift */,
+				F67CCB512BDC5ED1002AF86B /* AuthorizationManager.swift */,
 				6E8C573A2B7F068600B5BF59 /* SignInAppleHelper.swift */,
 				6E8C57382B7ED9DF00B5BF59 /* SignInGoogleHelper.swift */,
 				6E8C57352B7CF30300B5BF59 /* Utilities */,
@@ -584,6 +594,7 @@
 			isa = PBXGroup;
 			children = (
 				E553CD7E2BCD947000B9D63B /* SiteCaptainSubmissionView.swift */,
+				F66FCE8A2BDB804B008251F9 /* SiteCaptainsView.swift */,
 				E553CD802BCD947B00B9D63B /* SubViews */,
 			);
 			path = SiteCaptain;
@@ -594,6 +605,7 @@
 			children = (
 				E553CD812BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift */,
 				E553CD832BCD94CF00B9D63B /* SiteCaptainSubmissionFormView.swift */,
+				F66FCE8C2BDB87C5008251F9 /* SiteCaptainCellView.swift */,
 			);
 			path = SubViews;
 			sourceTree = "<group>";
@@ -806,10 +818,12 @@
 				E553CD7C2BCD937E00B9D63B /* SiteCaptainManager.swift in Sources */,
 				6E3329812B7F699F009FCD14 /* UserManager.swift in Sources */,
 				6E8C572A2B7CC35100B5BF59 /* RootView.swift in Sources */,
+				F67CCB522BDC5ED1002AF86B /* AuthorizationManager.swift in Sources */,
 				F6B887312BD54C0800E4A7C8 /* IssueTypeManager.swift in Sources */,
 				6EA65F492B8476E9000766C7 /* BuildingCellView.swift in Sources */,
 				F63F46C42BBB01DB00ADEB9D /* InventorySubmissionViewModel.swift in Sources */,
 				F68E1B072BBC2CE600EBE6AC /* SheetManager.swift in Sources */,
+				F66FCE8D2BDB87C6008251F9 /* SiteCaptainCellView.swift in Sources */,
 				6E8C57222B7CAAEB00B5BF59 /* AuthenticationView.swift in Sources */,
 				D5B5E0732BB32FA700AFCE3C /* AdminManager.swift in Sources */,
 				F6246A7F2BA3BC6A00828DAE /* SimpleMapView.swift in Sources */,
@@ -821,6 +835,7 @@
 				6E68583A2B84479100896B16 /* BuildingsViewModel.swift in Sources */,
 				F668B1E62B9AB688000B2886 /* KeySetsView.swift in Sources */,
 				6EA65F632B912058000766C7 /* SitesViewModel.swift in Sources */,
+				F66FCE892BDB5181008251F9 /* PositionManager.swift in Sources */,
 				6EA65F532B871583000766C7 /* UserBuildingsViewModel.swift in Sources */,
 				F6AB560C2BC4C092005727D2 /* Route.swift in Sources */,
 				F668B1E32B9AB392000B2886 /* KeySetManager.swift in Sources */,
@@ -834,6 +849,7 @@
 				E553CD7A2BCD901000B9D63B /* SubmitFormView.swift in Sources */,
 				F63F46BA2BBAA34800ADEB9D /* InventoryEntryTypePopupView.swift in Sources */,
 				F6B4E1C42BBF91DC009644DB /* SupplyEntriesView.swift in Sources */,
+				F66FCE8B2BDB804B008251F9 /* SiteCaptainsView.swift in Sources */,
 				6E8C57282B7CB39D00B5BF59 /* AuthenticationManager.swift in Sources */,
 				6EA65F512B8714FC000766C7 /* UserBuildingsView.swift in Sources */,
 				F6B887242BD19D3100E4A7C8 /* HourlyCleaningSubmissionView.swift in Sources */,

@@ -10,7 +10,7 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Combine
 
-struct SiteCaptain: Codable {
+struct SiteCaptain: Codable, Identifiable {
     let id: String
     let siteId: String?
     let issues: [String]?
@@ -72,16 +72,17 @@ struct SiteCaptain: Codable {
     }
 }
 
-struct SiteCaptainIssue: Codable {
-    let issue: String
-    let ticket: String
+enum SiteCaptainSearchOption: String, CaseIterable, Hashable {
+    case user
+    case updatedInventory
+    
+    var optionLabel: String {
+        switch self {
+        case .user: return "User"
+        case .updatedInventory: return "Updated Inventory"
+        }
+    }
 }
-
-struct SupplyNeeded: Codable {
-    let count: Int
-    let supply: String
-}
-
 
 class SiteCaptainManager {
     // create singleton of manager
@@ -132,51 +133,95 @@ class SiteCaptainManager {
         return document.documentID
     }
     
-    // get hourlyCleanings sorted by Date
-    private func getSiteCaptainsSortedByDateQuery(descending: Bool) -> Query {
+    // get siteCaptains sorted by Date
+    private func getSiteCaptainsSortedByDateQuery(dateDescending: Bool) -> Query {
         siteCaptainsCollection
-            .order(by: SiteCaptain.CodingKeys.timestamp.rawValue, descending: descending)
+            .order(by: SiteCaptain.CodingKeys.timestamp.rawValue, descending: dateDescending)
     }
     
     // get siteCaptains filtered by date range
-    private func getSiteCaptainsByDateQuery(startDate: Date, endDate: Date) -> Query {
+    private func getSiteCaptainsBetweenDatesQuery(startDate: Date, endDate: Date) -> Query {
         siteCaptainsCollection
             .whereField(SiteCaptain.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
             .whereField(SiteCaptain.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
     }
     
+    // get siteCaptains filtered by site & sorted by date
+    private func getSiteCaptainsBySiteAndDateQuery(siteId: String, dateDescending: Bool) -> Query {
+        siteCaptainsCollection
+            // filter by site
+            .whereField(SiteCaptain.CodingKeys.siteId.rawValue, isEqualTo: siteId)
+            // sort by date
+            .order(by: SiteCaptain.CodingKeys.timestamp.rawValue, descending: dateDescending)
+    }
+    
     // get siteCaptains filtered by date & sorted by date
-    private func getSiteCaptainsSortedFilteredByDateQuery(descending: Bool, startDate: Date, endDate: Date) -> Query {
+    private func getSiteCaptainsSortedFilteredByDateQuery(dateDescending: Bool, startDate: Date, endDate: Date) -> Query {
         siteCaptainsCollection
             // filter by date
             .whereField(SiteCaptain.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
             .whereField(SiteCaptain.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
             // sort by date
-            .order(by: SiteCaptain.CodingKeys.timestamp.rawValue, descending: descending)
+            .order(by: SiteCaptain.CodingKeys.timestamp.rawValue, descending: dateDescending)
     }
     
     // get siteCaptains sorted by date
-    private func getAllSiteCaptainsSortedByNameQuery(descending: Bool) -> Query {
+    private func getSiteCaptainsSortedByNameQuery(descending: Bool) -> Query {
         siteCaptainsCollection
             .order(by: SiteCaptain.CodingKeys.timestamp.rawValue, descending: descending)
     }
     
+    // get siteCaptains filtered between dates & sorted by date
+    private func getSiteCaptainsSortedBetweenDatesQuery(dateDescending: Bool, startDate: Date, endDate: Date) -> Query {
+        siteCaptainsCollection
+            // filter for dates
+            .whereField(SiteCaptain.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
+            .whereField(SiteCaptain.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
+            // order by dates
+            .order(by: SiteCaptain.CodingKeys.timestamp.rawValue, descending: dateDescending)
+    }
+    
+    // get siteCaptains filtered between dates, filtered by site, & sorted by date
+    private func getSiteCaptainsSortedBetweenDatesBySiteQuery(siteId: String, dateDescending: Bool, startDate: Date, endDate: Date) -> Query {
+        // The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/sitesmobile-4970/firestore/indexes?create_composite=Cl1wcm9qZWN0cy9zaXRlc21vYmlsZS00OTcwL2RhdGFiYXNlcy8oZGVmYXVsdCkvY29sbGVjdGlvbkdyb3Vwcy9zaXRlX2NhcHRhaW5fZW50cmllcy9pbmRleGVzL18QARoLCgdzaXRlX2lkEAEaDQoJdGltZXN0YW1wEAIaDAoIX19uYW1lX18QAg
+        siteCaptainsCollection
+            // filter for dates
+            .whereField(SiteCaptain.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
+            .whereField(SiteCaptain.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
+            // filter by site
+            .whereField(SiteCaptain.CodingKeys.siteId.rawValue, isEqualTo: siteId)
+            // order by dates
+            .order(by: SiteCaptain.CodingKeys.timestamp.rawValue, descending: dateDescending)
+    }
+    
     // get siteCaptains by name
-    func getAllSiteCaptains(descending: Bool?, startDate: Date?, endDate: Date?) async throws -> [SiteCaptain] {
+    func getAllSiteCaptains(dateDescending: Bool?, siteId: String?, startDate: Date?, endDate: Date?) async throws -> [SiteCaptain] {
+        // start with default query of entire collection
         var query: Query = getAllSiteCaptainsQuery()
         
-        // if given a Site and nameSort
-        if let descending, let startDate, let endDate {
+        // if given site, dateSort, & date range
+        if let dateDescending, let siteId, let startDate, let endDate {
+            // filter by site and date range, then sort by date
+            query = getSiteCaptainsSortedBetweenDatesBySiteQuery(siteId: siteId, dateDescending: dateDescending, startDate: startDate, endDate: endDate)
+        // if given just date range & dateSort
+        } else if let dateDescending, let startDate, let endDate {
             // filter and sort collection
-            query = getSiteCaptainsSortedFilteredByDateQuery(descending: descending, startDate: startDate, endDate: endDate)
-        // if just given sort
-        } else if let descending {
+            query = getSiteCaptainsSortedBetweenDatesQuery(dateDescending: dateDescending, startDate: startDate, endDate: endDate)
+        // if given just site & dateSort
+        } else if let siteId, let dateDescending {
+            // filter and sort collection
+            query = getSiteCaptainsBySiteAndDateQuery(siteId: siteId, dateDescending: dateDescending)
+        // if just given dateSort
+        } else if let dateDescending {
             // sort whole collection
-            query = getSiteCaptainsSortedByDateQuery(descending: descending)
-        // if just given filter
-        } else if let startDate, let endDate {
-            // filter whole collection
-            query = getSiteCaptainsByDateQuery(startDate: startDate, endDate: endDate)
+            query = getSiteCaptainsSortedByDateQuery(dateDescending: dateDescending)
+        // if just given site
+        } else if let siteId {
+            // filter whole collection & sort assuming descending date
+            query = getSiteCaptainsBySiteAndDateQuery(siteId: siteId, dateDescending: true)
+        } else {
+            // new default query: sort by ascending date
+            query = getSiteCaptainsSortedByDateQuery(dateDescending: true)
         }
         
         print("Trying to query siteCaptains collection.")
@@ -226,57 +271,6 @@ class SiteCaptainManager {
         // Commit the batched write operation
         try await batch.commit()
     }
-    
-//    private let db = Firestore.firestore()
-//    private let siteCaptainEntry = "site_captain_entries"
-//    private let supplyRequestCollection = "supply_requests"
-//    
-//    func submitSiteCaptainEntry(_ computingSite: SiteCaptain, completion: @escaping (Error?) -> Void) {
-//        do {
-//            try db.collection(siteCaptainEntry).document(computingSite.id).setData(from: computingSite) { [weak self] error in
-//                if let error = error {
-//                    print("Error submitting site captain entry: \(error.localizedDescription)")
-//                    completion(error)
-//                } else {
-//                    print("Site captain entry submitted successfully!")
-////                    self?.createSupplyRequests(for: computingSite, completion: completion)
-//                }
-//            }
-//        } catch {
-//            print("Error encoding site captain entry: \(error.localizedDescription)")
-//            completion(error)
-//        }
-//    }
-    
-//    private func createSupplyRequests(for computingSite: SiteCaptain, completion: @escaping (Error?) -> Void) {
-//        let supplyRequests = computingSite.suppliesNeeded.map { supplyNeeded -> SupplyRequest in
-//            return SupplyRequest(
-//                id: UUID().uuidString,
-//                countNeeded: supplyNeeded.count,
-//                reportID: computingSite.id,
-//                reportType: "site_captain",
-//                resolved: false,
-//                supplyType: supplyNeeded.supply
-//            )
-//        }
-//        
-//        let batch = db.batch()
-//        
-//        for supplyRequest in supplyRequests {
-//            let supplyRequestRef = db.collection(supplyRequestCollection).document(supplyRequest.id)
-//            batch.setData(try! Firestore.Encoder().encode(supplyRequest), forDocument: supplyRequestRef)
-//        }
-//        
-//        batch.commit { error in
-//            if let error = error {
-//                print("Error creating supply requests: \(error.localizedDescription)")
-//                completion(error)
-//            } else {
-//                print("Supply requests created successfully!")
-//                completion(nil)
-//            }
-//        }
-//    }
 }
 
 // Errors

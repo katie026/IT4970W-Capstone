@@ -14,29 +14,38 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var keySet: KeySet? = nil
     @Published private(set) var keys: [Key]? = nil
     @Published private(set) var keyTypeCodeMap: [String: String] = [:]
-    @Published var positions: [String] = []
+    @Published var userPositions: [Position] = []
+    var userPositionIds: [String] = []
+    var positions: [Position] = []
     
-    func loadCurrentUser() async throws {
-        // get authData for current user
-        let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
-        // use authData to get user data from Firestore as DBUser struct
-        self.user = try await UserManager.shared.getUser(userId: authDataResult.uid)
-        // get optional key set
-        self.keySet = try await KeySetManager.shared.getKeySetForUser(userId: authDataResult.uid)
-        // get optional keys for set
-        self.keys = try await KeyManager.shared.getKeysForKeySet(keySetId: keySet?.id ?? "")
-        
-        // fetch key type for each key and add to dictionary
-        for key in keys ?? [] {
+    func loadCurrentUser(completion: @escaping () -> Void) async throws {
+        Task {
             do {
-                let keyType = try await KeyTypeManager.shared.getKeyType(keyTypeId: key.keyType ?? "")
-                keyTypeCodeMap[keyType.name] = key.keyCode
+                // get authData for current user
+                let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
+                // use authData to get user data from Firestore as DBUser struct
+                self.user = try await UserManager.shared.getUser(userId: authDataResult.uid)
+                // get optional key set
+                self.keySet = try await KeySetManager.shared.getKeySetForUser(userId: authDataResult.uid)
+                // get optional keys for set
+                self.keys = try await KeyManager.shared.getKeysForKeySet(keySetId: keySet?.id ?? "")
+                
+                // fetch key type for each key and add to dictionary
+                for key in keys ?? [] {
+                    do {
+                        let keyType = try await KeyTypeManager.shared.getKeyType(keyTypeId: key.keyType ?? "")
+                        keyTypeCodeMap[keyType.name] = key.keyCode
+                    } catch {
+                        print("Error fetching key types: \(error)")
+                    }
+                }
+                
+                self.userPositionIds = user?.positionIds ?? []
             } catch {
-                print("Error fetching key types: \(error)")
+                print("Error loading current user: \(error)")
             }
+            completion()
         }
-        
-        self.positions = user?.positions ?? []
     }
     
     func toggleClockInStatus() {
@@ -52,25 +61,27 @@ final class ProfileViewModel: ObservableObject {
         }
     }
     
-    func addUserPosition(text: String) {
-        guard let user else {return}
-        
+    func getPositions(completion: @escaping () -> Void) {
         Task {
-            // add position to user in Firestore
-            try await UserManager.shared.addUserPosition(userId: user.userId, position: text)
-            // get updated user info from Firestore
-            self.user = try await UserManager.shared.getUser(userId: user.userId)
-        }
-    }
-    
-    func removeUserPosition(text: String) {
-        guard let user else {return}
-        
-        Task {
-            // remove position to user in Firestore
-            try await UserManager.shared.removeUserPosition(userId: user.userId, position: text)
-            // get updated user info from Firestore
-            self.user = try await UserManager.shared.getUser(userId: user.userId)
+            do {
+                positions = try await PositionManager.shared.getAllPositions(descending: false)
+            } catch {
+                print("Error getting positions: \(error)")
+            }
+            print("Got \(positions.count) positions.")
+            
+            // load position names
+            // for position in user's positionIds array
+            for positionId in userPositionIds {
+                // find position using positionId
+                guard let position = positions.first(where: { $0.id == positionId }) else { continue }
+                // add to position list
+                userPositions.append(position)
+                // sort position list
+                userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
+            }
+            
+            completion()
         }
     }
     

@@ -10,65 +10,50 @@ import SwiftUI
 struct ProfileView: View {
     // View Model
     @StateObject private var viewModel = ProfileViewModel()
-    
+    // View Control
     @Binding var showSignInView: Bool
+    @State private var isLoading: Bool = true
     @State private var isAdmin: Bool = false
     
     // Disclosure Groups
     @State private var keySetExpanded = false
     
-//    let positionOptions: [String] = ["CO", "SS", "CS"]
-    
     private func userHasPosition(text: String) -> Bool {
-        viewModel.user?.positions?.contains(text) == true
+        viewModel.user?.positionIds?.contains(text) == true
     }
     
     var body: some View {
         VStack {
             // check if user is loaded
-            if let user = viewModel.user {
-                List {
-                    // Profile title
-                    profileTitleSection(user: user)
-                    
-                    // Info Section
-                    Section("Basic Information") {
-                        // STUDENT ID
-                        Text("**ID:** \(user.studentId.map(String.init) ?? "N/A")")
-                        
-                        // EMAIL
-                        Text("**Email:** \(user.email ?? "N/A")")
-                        
-                        // KEYS
-                        keysGroup
-                        
-                        // POSITIONS
-                        positionsSection()
-                        
-                        // CHAIR COUNT (for testing)
-//                        chairCountsSection(user: user)
+            if isLoading {
+                ProgressView()
+            } else {
+                if let user = viewModel.user {
+                    List {
+                        // Profile title
+                        profileTitleSection(user: user)
+                        // Info Section
+                        basicInfoSection
+                        // Admin Section
+                        adminSection
+                        // Clock In/Out
+                        clockInSection(user: user)
                     }
-                    Section() {
-                        // ADMIN LINK
-                        if isAdmin {
-                            NavigationLink(destination: AdminView()) {
-                                HStack {
-                                    Text("Admin Panel")
-                                }
-                            }
-                        }
-                    }
-                    
-                    // CLOCK IN/OUT
-                    clockInSection(user: user)
                 }
             }
         }
         .navigationTitle("Profile")
         .onAppear {
-            AdminManager.shared.checkIfUserIsAdmin { isAdminResult in
+            AdminManager.shared.checkIfCurrentUserIsAdmin { isAdminResult in
                 DispatchQueue.main.async {
                     self.isAdmin = isAdminResult
+                }
+            }
+            Task {
+                try await viewModel.loadCurrentUser(){
+                    viewModel.getPositions(){
+                        isLoading = false
+                    }
                 }
             }
         }
@@ -81,14 +66,40 @@ struct ProfileView: View {
                     .font(.headline)}
             }
         }
-        .task {
-            try? await viewModel.loadCurrentUser()
+    }
+    
+    private var basicInfoSection: some View {
+        Section("Basic Information") {
+            // STUDENT ID
+            Text("**ID:** \(viewModel.user?.studentId.map(String.init) ?? "N/A")")
+            // EMAIL
+            Text("**Email:** \(viewModel.user?.email ?? "N/A")")
+            Text("**Date:** \(viewModel.user?.lastLogin?.formatted(.dateTime) ?? "N/A")")
+            // KEYS
+            keysGroup
+            // POSITIONS
+            positionsSection()
+            // CHAIR COUNT (for testing)
+//            chairCountsSection(user: user)
+        }
+    }
+    
+    private var adminSection: some View {
+        Section("Administrator Access") {
+            // ADMIN LINK
+            if isAdmin {
+                NavigationLink(destination: AdminView()) {
+                    HStack {
+                        Text("Admin Panel")
+                    }
+                }
+            }
         }
     }
     
     private func positionsSection() -> some View {
         Section() {
-            Text("**Positions**: \(viewModel.positions.joined(separator: ","))")
+            Text("**Positions**: \((viewModel.userPositions.map{$0.nickname ?? ""}).joined(separator: ", "))")
         }
     }
     
@@ -163,34 +174,6 @@ struct ProfileView: View {
         }
         return AnyView(EmptyView())
     }
-    
-//    private func positionsSection(user: DBUser) -> some View {
-//        VStack {
-//            Text("**Positions**: \((user.positions ?? []).joined(separator: ", "))")
-//                .frame(maxWidth: .infinity, alignment: .leading)
-//            HStack {
-//                // make a button for each position option above
-//                // positionOptions conforms to hashable (using id: \.self)
-//                ForEach(positionOptions, id: \.self) { string in
-//                    Button(string) {
-//                        // if user has the position
-//                        if userHasPosition(text: string) {
-//                            // delete the position
-//                            viewModel.removeUserPosition(text: string)
-//                        } else {
-//                            // otherwise add the position
-//                            viewModel.addUserPosition(text: string)
-//                        }
-//                    }
-//                    .buttonStyle(.borderedProminent)
-//                    // green if user already has position, red otherwise
-//                    .tint(userHasPosition(text: string) ? .green : .red)
-//                }
-//                
-//                Spacer()
-//            }
-//        }
-//    }
     
     private func chairCountsSection(user: DBUser) -> some View {
         Button {
