@@ -17,6 +17,7 @@ final class DetailedSiteViewModel: ObservableObject {
     var building: Building?
     var siteType: SiteType?
     var siteGroup: SiteGroup?
+    var inventorySite: InventorySite?
     
     @Published var imageURLs: [URL] = []
     @Published var boardImageURLs: [URL] = []
@@ -48,10 +49,10 @@ final class DetailedSiteViewModel: ObservableObject {
         Task {
             do {
                 self.siteType = try await SiteTypeManager.shared.getSiteType(siteTypeId: siteTypeId)
-                completion()
             } catch {
                 print("Error loading site type: \(error)")
             }
+            completion()
         }
     }
     
@@ -59,13 +60,30 @@ final class DetailedSiteViewModel: ObservableObject {
         Task {
             do {
                 self.siteGroup = try await SiteGroupManager.shared.getSiteGroup(siteGroupId: siteGroupId)
-                completion()
             } catch {
                 print("Error loading site group: \(error)")
             }
+            completion()
         }
     }
-
+    
+    func getNearestInventory(inventorySiteId: String, completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.inventorySite = try await InventorySitesManager.shared.getInventorySite(inventorySiteId: inventorySiteId)
+            } catch {
+                print("Error getting inventory site: \(error)")
+            }
+            completion()
+        }
+    }
+    
+    func updateUsers(completion: @escaping () -> Void) {
+        UserManager.shared.updateAllUsers {
+            completion()
+        }
+    }
+    
     func fetchSiteSpecificImageURLs(siteName: String, category: String) async {
         Task {
             // The reference should include the site name and the category (e.g., "Posters").
