@@ -123,4 +123,35 @@ final class InventorySitesManager {
     func allInventorySitesCount() async throws -> Int {
         try await inventorySitesCollection.aggregateCount()
     }
+    
+    // get sites by building
+    func getInventorySitesByBuilding(buildingId: String) async throws -> [InventorySite] {
+        let query = inventorySitesCollection
+            .whereField(Site.CodingKeys.buildingId.rawValue, isEqualTo: buildingId)
+        
+        return try await query
+            .getDocuments(as: InventorySite.self)
+    }
+    
+    // check if sites in Building
+    func checkIfSitesInBuilding(buildingId: String, completion: @escaping (Bool) -> Void) {
+        let query = inventorySitesCollection
+                .whereField(InventorySite.CodingKeys.buildingId.rawValue, isEqualTo: buildingId)
+        
+        query.getDocuments { snapshot, error in
+            if let error = error {
+                print("Error fetching inventory sites: \(error)")
+                completion(false)
+                return
+            }
+            guard let snapshot = snapshot else {
+                print("Snapshot is nil")
+                completion(false)
+                return
+            }
+            
+            // Check if any documents exist in the snapshot
+            completion(!snapshot.documents.isEmpty) // return true if any invetnory sites were returned for that buildingId
+        }
+    }
 }

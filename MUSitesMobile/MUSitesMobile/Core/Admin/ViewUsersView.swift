@@ -91,7 +91,7 @@ struct ViewUsersView: View {
     var body: some View {
         VStack {
             if isLoading {
-                ProgressView("Checking permissions...")
+                ProgressView("Loading users...")
             } else {
                 if viewModel.currentUserIsAdmin {
                     filterBar
@@ -108,19 +108,12 @@ struct ViewUsersView: View {
         .onAppear {
             isLoading = true
             // check if current user is admin
-            viewModel.checkCurrentUserAdminStatus {
-                print(viewModel.currentUserIsAdmin)
-                if viewModel.currentUserIsAdmin == true {
-                    // if isAdmin, load the data
-                    viewModel.loadUsers {
-                        isLoading = false
-                    }
-                    viewModel.loadNonAuthenticatedUsers {
-                        isLoading = false
-                    }
-                } else {
-                    isLoading = false
-                }
+            viewModel.checkCurrentUserAdminStatus(){}
+            viewModel.loadUsers {
+                isLoading = false
+            }
+            viewModel.loadNonAuthenticatedUsers {
+                isLoading = false
             }
         }
 //        .overlay {

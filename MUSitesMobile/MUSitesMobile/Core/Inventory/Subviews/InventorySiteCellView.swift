@@ -10,61 +10,53 @@ import SwiftUI
 struct InventorySiteCellView: View {
     // Init
     let inventorySite: InventorySite
+    @State private var building: Building? = nil
     @State private var inventoryTypes: [InventoryType] = []
-    
-    func getInventoryTypes(completion: @escaping () -> Void) {
-        Task {
-            do {
-                self.inventoryTypes = try await InventoryTypeManager.shared.getAllInventoryTypes(descending: false)
-                completion()
-            } catch {
-                print("Error getting inventoryTypes: \(error)")
-            }
-        }
-    }
+    @State private var siteGroup: SiteGroup? = nil
     
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             // IMAGE
-            AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 70, height: 70)
-                    .cornerRadius(8)
-            } placeholder: {
-                ProgressView()
+            Group {
+                AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
+                        .cornerRadius(25)
+                } placeholder: {
+                    ProgressView()
+                }
             }
-            .frame(width: 60, height: 60)
+            .frame(width: 50, height: 50)
             .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-            .padding(10)
             
             // INFO BLOCK
-            VStack {
-                // name and type icons
-                HStack() {
-                    // name
-                    Text("\(inventorySite.name ?? "N/A")")
-                        .font(.headline)
-                    // type icons
-                    inventoryTypeIcons().padding(.leading, 5)
-                    Spacer()
-                }
+            VStack(alignment: .leading) {
+                // site name
+                Text("\(inventorySite.name ?? "N/A")")
+                    .font(.headline)
                 
                 // subtitle
-                HStack {
-                    //TODO: get group
-                    Text("Group here")
-                    Spacer()
-                }
-                .font(.callout)
-                .foregroundStyle(.secondary)
+                //TODO: get group
+                Text("\(siteGroup?.name ?? "Unknown Group")")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
             
             Spacer()
+            
+            // TYPE ICONS
+            inventoryTypeIcons()
         }
         .onAppear {
+            getSiteGroup(){}
             getInventoryTypes{}
+            //TODO: adjust this for InventorySites
+//            Task {
+//                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "", category: "ProfilePicture")
+//                getEquipmentInfo()
+//            }
         }
     }
     
@@ -96,6 +88,50 @@ struct InventorySiteCellView: View {
         
         // else
         return AnyView(EmptyView())
+    }
+    
+    func getInventoryTypes(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.inventoryTypes = try await InventoryTypeManager.shared.getAllInventoryTypes(descending: false)
+                completion()
+            } catch {
+                print("Error getting inventoryTypes: \(error)")
+            }
+        }
+    }
+    
+    func getSiteGroup(completion: @escaping () -> Void) {
+        getBuilding(){
+            if let groupId = building?.siteGroupId {
+                Task {
+                    do {
+                        self.siteGroup = try await SiteGroupManager.shared.getSiteGroup(siteGroupId: groupId)
+                        completion()
+                    } catch {
+                        print("Error getting site group: \(error)")
+                    }
+                }
+            } else {
+                print("No siteGroupId from the building.")
+            }
+        }
+    }
+    
+    func getBuilding(completion: @escaping () -> Void) {
+        if let buildingId = inventorySite.buildingId {
+            Task {
+                do {
+                    self.building = try await BuildingsManager.shared.getBuilding(buildingId: buildingId)
+                    print("Got building: \(building?.name ?? "")")
+                    completion()
+                } catch {
+                    print("Error getting building: \(error)")
+                }
+            }
+        } else {
+            print("No buildingId.")
+        }
     }
 }
 

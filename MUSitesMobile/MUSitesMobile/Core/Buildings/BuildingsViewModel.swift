@@ -11,10 +11,12 @@ import FirebaseFirestore
 @MainActor
 final class BuildingsViewModel: ObservableObject {
     
-    @Published private(set) var buildings: [Building] = []
+    @Published var buildings: [Building] = []
     @Published private(set) var buildingTest: Building? = nil
-    @Published var selectedSort: SortOption? = nil
-    @Published var selectedFilter: FilterOption? = nil
+    @Published var selectedSort: SortOption = .noSort
+    @Published var selectedFilter: FilterOption = .noFilter
+    @Published var selectedGroup: SiteGroup? = nil
+    var allSiteGroups: [SiteGroup] = []
     
     //temp
     private var buildingsManager = BuildingsManager.shared
@@ -33,6 +35,14 @@ final class BuildingsViewModel: ObservableObject {
             case .nameDescending: return true
             }
         }
+        
+        var optionLabel: String {
+            switch self {
+            case .noSort: return "None"
+            case .nameAscending: return "A-Z"
+            case .nameDescending: return "Z-A"
+            }
+        }
     }
     
     enum FilterOption: String, CaseIterable { // may want to relocate this eventually
@@ -49,6 +59,17 @@ final class BuildingsViewModel: ObservableObject {
                 return nil
             }
             return self.rawValue
+        }
+        
+        var optionLabel: String {
+            switch self {
+            case .noFilter: return "All"
+            case .G1: return "G1"
+            case .G2: return "G2"
+            case .G3: return "G3"
+            case .R1: return "R1"
+            case .R2: return "R2"
+            }
         }
     }
     
@@ -73,6 +94,22 @@ final class BuildingsViewModel: ObservableObject {
         }
     }
     
+    func swapBuildingsOrder() {
+        buildings.reverse()
+    }
+    
+    func getSiteGroups(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.allSiteGroups = try await SiteGroupManager.shared.getAllSiteGroups(descending: nil)
+                allSiteGroups.sort{ $0.name < $1.name }
+                completion()
+            } catch {
+                print("Error getting site groups: \(error)")
+            }
+        }
+    }
+    
     func sortSelected(option: SortOption) async throws {
         // set sort option
         self.selectedSort = option
@@ -90,7 +127,7 @@ final class BuildingsViewModel: ObservableObject {
     
     func getBuildings() {
         Task {
-            self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: selectedSort?.sortDescending, group: selectedFilter?.filterKey)
+            self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: false, group: nil)
         }
     }
     

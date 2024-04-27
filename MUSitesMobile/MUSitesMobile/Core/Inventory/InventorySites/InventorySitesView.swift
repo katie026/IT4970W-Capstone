@@ -9,51 +9,38 @@ import SwiftUI
 
 @MainActor
 final class InventorySitesViewModel: ObservableObject {
-    
     @Published private(set) var inventorySites: [InventorySite] = []
-    @Published var selectedSort: SortOption? = nil
+    @Published var selectedGroup: SiteGroup? = nil
+    var allSiteGroups: [SiteGroup] = []
     var inventoryTypes: [InventoryType] = []
-    
-    //TODO: implement getting building and group info to display
-    enum SortOption: String, CaseIterable {
-        // CaseIterable so we can loop through them
-        case noSort
-        case nameAscending
-        case nameDescending
-        
-        var sortDescending: Bool? {
-            switch self {
-            case .noSort: return nil
-            case .nameAscending: return false
-            case .nameDescending: return true
-            }
-        }
-    }
-    
-    enum FilterOption: String, CaseIterable { // may want to relocate this eventually
-        // CaseIterable so we can loop through them
-        case noFilter
-        case hasInventory
-        
-        var filterKey: String? {
-            if self == .noFilter {
-                return nil
-            }
-            return self.rawValue
-        }
-    }
+    var buildings: [Building] = []
     
     func getInventorySites() {
         Task {
-            self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: selectedSort?.sortDescending)
+            self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: false)
         }
     }
     
-    func filteredInventorySites(searchText: String) -> [InventorySite] {
-        if searchText.isEmpty {
-            return inventorySites
-        } else {
-            return inventorySites.filter { $0.name?.localizedCaseInsensitiveContains(searchText) ?? false }
+    func swapInventorySitesOrder() {
+        inventorySites.reverse()
+    }
+    
+    func getSiteGroups(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.allSiteGroups = try await SiteGroupManager.shared.getAllSiteGroups(descending: nil)
+                allSiteGroups.sort{ $0.name < $1.name }
+                completion()
+            } catch {
+                print("Error getting site groups: \(error)")
+            }
+        }
+    }
+    
+    func getBuildings(completion: @escaping () -> Void) {
+        Task {
+            self.buildings = try await BuildingsManager.shared.getAllBuildings(descending: false, group: nil)
+            completion()
         }
     }
 }
@@ -66,29 +53,97 @@ struct InventorySitesView: View {
     // Search Text
     @State private var searchText: String = ""
     
-    var body: some View {
-        NavigationView {
-            VStack {
-                Spacer()
-                TextField("Search", text: $searchText)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-                
-                List {
-                    ForEach(viewModel.filteredInventorySites(searchText: searchText)) { inventorySite in
-                        NavigationLink(destination: DetailedInventorySiteView(path: $path, inventorySite: inventorySite)) {
-                            InventorySiteCellView(inventorySite: inventorySite)
+    var filteredInventorySites: [InventorySite] {
+        let selectedGroupId = viewModel.selectedGroup?.id
+        
+        if searchText.isEmpty {
+            if selectedGroupId != nil {
+                return viewModel.inventorySites
+                    .filter { site in
+                        let building = viewModel.buildings.first(where: { $0.id == site.buildingId })
+                        if building != nil {
+                            return building?.siteGroupId == selectedGroupId
+                        } else {
+                            return false
                         }
                     }
-                }
-                .navigationTitle("Inventory Sites")
-                .onAppear {
-                    viewModel.getInventorySites()
+            } else {
+                return viewModel.inventorySites // no filter
+            }
+        } else {
+            if selectedGroupId != nil {
+                return viewModel.inventorySites
+                    .filter { site in
+                        let building = viewModel.buildings.first(where: { $0.id == site.buildingId })
+                        if building != nil {
+                            return building?.siteGroupId == selectedGroupId
+                        } else {
+                            return false
+                        }
+                    }
+                    .filter { $0.name?.localizedCaseInsensitiveContains(searchText) ?? false }
+                    .sorted { $0.name?.localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending }
+            } else {
+                return viewModel.inventorySites
+                    .filter { $0.name?.localizedCaseInsensitiveContains(searchText) ?? false }
+                    .sorted { $0.name?.localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending }
+            }
+        }
+    }
+    
+    var body: some View {
+        VStack {
+            HStack(alignment: .center, spacing: 5) {
+                searchBar
+                    .frame(width: .infinity)
+                Spacer()
+                sortButton
+            }
+            .padding()
+            
+            List {
+                ForEach(filteredInventorySites) { inventorySite in
+                    NavigationLink(destination: DetailedInventorySiteView(path: $path, inventorySite: inventorySite)) {
+                        InventorySiteCellView(inventorySite: inventorySite)
+                    }
                 }
             }
+        }
+        .navigationTitle("Inventory Sites")
+        .onAppear {
+            viewModel.getInventorySites()
+            viewModel.getSiteGroups(){}
+            viewModel.getBuildings(){}
+        }
+        .toolbar(content: {
+            // Filtering
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu("Site Group: \(viewModel.selectedGroup?.name ?? "All")") {
+                    Picker("Site Group", selection: $viewModel.selectedGroup) {
+                        Text("All").tag(nil as SiteGroup?)
+                        ForEach(viewModel.allSiteGroups, id: \.self) { group in
+                            Text(group.name).tag(group as SiteGroup?)
+                        }
+                    }.multilineTextAlignment(.leading)
+                }
+            }
+        })
+    }
+    
+    private var searchBar: some View {
+        TextField("Search", text: $searchText)
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(10)
+    }
+    
+    private var sortButton: some View {
+        Button(action: {
+            viewModel.swapInventorySitesOrder()
+        }) {
+            Image(systemName: "arrow.up.arrow.down.circle")
+                .font(.system(size: 20))
         }
     }
 }
