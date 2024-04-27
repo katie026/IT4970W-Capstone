@@ -27,6 +27,7 @@ import UIKit
 //}
 struct CategoryPickerView: View {
     var selectedSiteName: String
+    var selectedSiteId: String
     @State private var isDeleteMode = false
 
     var body: some View {
@@ -46,12 +47,21 @@ struct CategoryPickerView: View {
         }
         .navigationTitle("Select a Category")
     }
-
+    
     @ViewBuilder
     private func destinationView(for category: String) -> some View {
-        if isDeleteMode {
-            ImageDeleteView(siteName: selectedSiteName, category: category)
-        } else {
+        //if in delete mode it will link to the ImageDeleteView
+        if category == "Posters" && isDeleteMode == false{
+            PostersSelectionView(siteId: selectedSiteId)
+        }
+        else if category == "Posters" && isDeleteMode == true{
+            ImageDeleteView(siteName: selectedSiteName, selectedSiteId: selectedSiteId, category: "Posters")
+        }
+        else if isDeleteMode {
+            ImageDeleteView(siteName: selectedSiteName, selectedSiteId: selectedSiteId, category: category)
+        }
+        //otherwise it will link to the ImageUploadView
+        else {
             ImageUploadView(siteName: selectedSiteName, category: category)
         }
     }

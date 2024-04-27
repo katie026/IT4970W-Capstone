@@ -19,6 +19,7 @@ final class StorageManager {
 
     private var imagesReferences: StorageReference {
         storage.child("sites")
+        return storage.child("Posters")
     }
     
     
@@ -80,20 +81,35 @@ final class StorageManager {
         }
     }
     
-    func listImages(siteName: String, category: String, completion: @escaping (Result<[String], Error>) -> Void) {
-        let ref = Storage.storage().reference().child("Sites/\(siteName)/\(category)")
+//    func listImages(siteName: String, category: String, completion: @escaping (Result<[String], Error>) -> Void) {
+//        let ref = Storage.storage().reference().child("Sites/\(siteName)/\(category)")
+//        ref.listAll { (result, error) in
+//            if let error = error {
+//                completion(.failure(error))
+//                return
+//            }
+//
+//            // Safely unwrap the result
+//            guard let result = result else {
+//                completion(.failure(URLError(.cannotParseResponse))) // Provide a more specific error as needed
+//                return
+//            }
+//
+//            let fileNames = result.items.map { $0.name }
+//            completion(.success(fileNames))
+//        }
+//    }
+    func listImages(category: String, completion: @escaping (Result<[String], Error>) -> Void) {
+        let ref = storage.child(category)
         ref.listAll { (result, error) in
             if let error = error {
                 completion(.failure(error))
                 return
             }
-
-            // Safely unwrap the result
             guard let result = result else {
-                completion(.failure(URLError(.cannotParseResponse))) // Provide a more specific error as needed
+                completion(.failure(URLError(.cannotParseResponse)))
                 return
             }
-
             let fileNames = result.items.map { $0.name }
             completion(.success(fileNames))
         }

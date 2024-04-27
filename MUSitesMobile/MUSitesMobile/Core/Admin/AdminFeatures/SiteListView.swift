@@ -36,7 +36,7 @@ struct SiteListView: View {
     @ViewBuilder
     private func listSites() -> some View {
         List(sites) { site in  // 'sites' must conform to Identifiable
-            NavigationLink(destination: CategoryPickerView(selectedSiteName: site.name ?? "Default")) {
+            NavigationLink(destination: CategoryPickerView(selectedSiteName: site.name ?? "Default", selectedSiteId: site.id)) {
                 Text(site.name ?? "Default")
             }
         }

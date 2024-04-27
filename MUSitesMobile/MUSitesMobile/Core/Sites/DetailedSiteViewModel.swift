@@ -98,6 +98,39 @@ final class DetailedSiteViewModel: ObservableObject {
             }
         }
     }
+    
+    // Fetching URLs for images related to a specific site from the Posters category
+     func fetchSiteSpecificPosters(siteId: String) async {
+         // Firestore references to the necessary collections
+         let postersRef = Firestore.firestore().collection("posters")
+         let posterTypesRef = Firestore.firestore().collection("poster_types")
+
+         do {
+             // Query posters that are linked to the specific site
+             let querySnapshot = try await postersRef.whereField("computing_site", isEqualTo: siteId).getDocuments()
+             for document in querySnapshot.documents {
+                 let posterData = document.data()
+
+                 // Ensure there's a poster_type ID to lookup in the poster_types collection
+                 guard let posterTypeId = posterData["poster_type"] as? String else { continue }
+                 let posterTypeDoc = try await posterTypesRef.document(posterTypeId).getDocument()
+                 if let posterTypeData = posterTypeDoc.data(),
+                    let imageName = posterTypeData["image"] as? String {
+                     // Construct the path to the image in the Posters folder
+                     let imagePath = "Posters/\(imageName)"
+                     let imageRef = Storage.storage().reference(withPath: imagePath)
+
+                     // Retrieve the download URL
+                     let downloadURL = try await imageRef.downloadURL()
+                     print("Fetched download URL: \(downloadURL)")
+                     self.imageURLs.append(downloadURL)
+                 }
+             }
+         } catch {
+             print("Error fetching posters for site \(siteId): \(error.localizedDescription)")
+         }
+     }
+ 
     //fetching the site related computers
     func fetchComputers(forSite siteID: String, withName siteName: String) {
         let capitalizedSiteName = siteName.uppercased()
