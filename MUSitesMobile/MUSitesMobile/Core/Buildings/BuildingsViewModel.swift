@@ -16,7 +16,7 @@ final class BuildingsViewModel: ObservableObject {
     @Published var selectedSort: SortOption = .noSort
     @Published var selectedFilter: FilterOption = .noFilter
     @Published var selectedGroup: SiteGroup? = nil
-    @Published var allSiteGroups: [SiteGroup] = []
+    var allSiteGroups: [SiteGroup] = []
     
     //temp
     private var buildingsManager = BuildingsManager.shared

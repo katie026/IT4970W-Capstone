@@ -44,7 +44,7 @@ struct BuildingsView: View {
                 Spacer()
                 sortButton
             }
-            .padding([.horizontal, .top])
+            .padding()
             
             List(filteredBuildings) { building in
                 BuildingCellView(building: building)

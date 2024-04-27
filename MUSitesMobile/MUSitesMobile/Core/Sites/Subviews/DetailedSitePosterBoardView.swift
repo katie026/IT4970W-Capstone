@@ -295,6 +295,7 @@ struct ProfileImageView: View {
             }
         }
         .frame(width: 50, height: 50)
+        .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
     }
 }
 
