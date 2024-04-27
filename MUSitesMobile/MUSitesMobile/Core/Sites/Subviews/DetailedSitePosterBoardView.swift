@@ -275,7 +275,7 @@ struct ProfileImageView: View {
                             .frame(width: 50, height: 50)
                             .cornerRadius(25)
                     case .failure(_):
-                        Image(systemName: "person.crop.circle.fill")  // Placeholder image
+                        Image(systemName: "photo.circle.fill")  // Placeholder image
                             .resizable()
                             .scaledToFit()
                             .frame(width: 50, height: 50)
@@ -287,7 +287,7 @@ struct ProfileImageView: View {
                     }
                 }
             } else {
-                Image(systemName: "person.crop.circle.fill")  // Placeholder image if URL is nil
+                Image(systemName: "photo.circle.fill")  // Placeholder image if URL is nil
                     .resizable()
                     .scaledToFit()
                     .frame(width: 50, height: 50)

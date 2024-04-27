@@ -14,6 +14,7 @@ struct BuildingCellView: View {
     @State private var profilePictureUrl: URL?
     @State private var hasComputingSite: Bool = false
     @State private var hasInventorySite: Bool = false
+    @State private var siteGroup: SiteGroup? = nil
     
     var body: some View {
         NavigationLink(destination: BuildingDetailView(building: building)) {
@@ -36,7 +37,7 @@ struct BuildingCellView: View {
                 Task {
                     // Ensure viewModel has the function fetchSiteSpecificImageURLs defined as async
                     await viewModel.fetchSiteSpecificImageURLs(siteName: building.name ?? "", category: "ProfilePicture")
-                    viewModel.loadSiteGroup(siteGroupId: building.siteGroupId ?? ""){}
+                    getSiteGroup(){}
                     checkIfSitesInBuilding()
                 }
             }
@@ -45,7 +46,7 @@ struct BuildingCellView: View {
     }
     
     private func subtitleText() -> some View {
-        let siteGroupName = viewModel.siteGroup?.name
+        let siteGroupName = siteGroup?.name
         var buildingType = "Other"
         if building.isReshall == true {
             buildingType = "ResHall"
@@ -55,15 +56,6 @@ struct BuildingCellView: View {
             
         let view = Text("\(siteGroupName ?? "N/A") - \(buildingType)")
         return AnyView(view)
-    }
-    
-    private func checkIfSitesInBuilding() {
-        InventorySitesManager.shared.checkIfSitesInBuilding(buildingId: building.id) { result in
-            hasInventorySite = result
-        }
-        SitesManager.shared.checkIfSitesInBuilding(buildingId: building.id) { result in
-            hasComputingSite = result
-        }
     }
     
     private var siteIcons: some View {
@@ -78,6 +70,30 @@ struct BuildingCellView: View {
                     .foregroundColor(.purple)
             }
         }.padding(.leading, 5)
+    }
+    
+    private func checkIfSitesInBuilding() {
+        InventorySitesManager.shared.checkIfSitesInBuilding(buildingId: building.id) { result in
+            hasInventorySite = result
+        }
+        SitesManager.shared.checkIfSitesInBuilding(buildingId: building.id) { result in
+            hasComputingSite = result
+        }
+    }
+    
+    func getSiteGroup(completion: @escaping () -> Void) {
+        if let groupId = building.siteGroupId {
+            Task {
+                do {
+                    self.siteGroup = try await SiteGroupManager.shared.getSiteGroup(siteGroupId: groupId)
+                    completion()
+                } catch {
+                    print("Error getting site group: \(error)")
+                }
+            }
+        } else {
+            print("No siteGroupId from the building.")
+        }
     }
 }
 
