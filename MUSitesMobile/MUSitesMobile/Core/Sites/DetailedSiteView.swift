@@ -118,7 +118,7 @@ struct DetailedSiteView: View {
                 }
                 
                 //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
-                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
+                await viewModel.fetchSiteSpecificPosters(siteId: site.id)
                 await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
                 //for computers it takes the siteID to link it to the related site, it will then get the siteName so it can list all the computers
                 viewModel.fetchComputers(forSite: site.id, withName: site.name ?? "")
