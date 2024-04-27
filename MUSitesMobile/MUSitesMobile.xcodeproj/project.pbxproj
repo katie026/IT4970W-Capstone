@@ -100,6 +100,7 @@
 		F68E1B0C2BBD2C6B00EBE6AC /* InventoryEntriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B0B2BBD2C6B00EBE6AC /* InventoryEntriesView.swift */; };
 		F69670602BBF041F00A56AA5 /* SupplyEntriesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F696705F2BBF041F00A56AA5 /* SupplyEntriesManager.swift */; };
 		F69A9C362BD98914006EAE22 /* PrinterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69A9C352BD98912006EAE22 /* PrinterManager.swift */; };
+		F6A23E372BDD58E80065BF78 /* SiteReadyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A23E362BDD58E80065BF78 /* SiteReadyManager.swift */; };
 		F6AB560A2BC472CD005727D2 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB56092BC472CD005727D2 /* WebView.swift */; };
 		F6AB560C2BC4C092005727D2 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB560B2BC4C092005727D2 /* Route.swift */; };
 		F6AB560E2BC4D5FD005727D2 /* SiteTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */; };
@@ -209,6 +210,7 @@
 		F68E1B0B2BBD2C6B00EBE6AC /* InventoryEntriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryEntriesView.swift; sourceTree = "<group>"; };
 		F696705F2BBF041F00A56AA5 /* SupplyEntriesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyEntriesManager.swift; sourceTree = "<group>"; };
 		F69A9C352BD98912006EAE22 /* PrinterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrinterManager.swift; sourceTree = "<group>"; };
+		F6A23E362BDD58E80065BF78 /* SiteReadyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteReadyManager.swift; sourceTree = "<group>"; };
 		F6AB56092BC472CD005727D2 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		F6AB560B2BC4C092005727D2 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
 		F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteTypeManager.swift; sourceTree = "<group>"; };
@@ -357,6 +359,7 @@
 				F66FCE882BDB5180008251F9 /* PositionManager.swift */,
 				F69A9C352BD98912006EAE22 /* PrinterManager.swift */,
 				E553CD7B2BCD937E00B9D63B /* SiteCaptainManager.swift */,
+				F6A23E362BDD58E80065BF78 /* SiteReadyManager.swift */,
 				F6AB560F2BC4D9EE005727D2 /* SiteGroupsManager.swift */,
 				F6AB560D2BC4D5FC005727D2 /* SiteTypeManager.swift */,
 				6EA65F5E2B911B33000766C7 /* SitesManager.swift */,
@@ -837,6 +840,7 @@
 				6EA65F632B912058000766C7 /* SitesViewModel.swift in Sources */,
 				F66FCE892BDB5181008251F9 /* PositionManager.swift in Sources */,
 				6EA65F532B871583000766C7 /* UserBuildingsViewModel.swift in Sources */,
+				F6A23E372BDD58E80065BF78 /* SiteReadyManager.swift in Sources */,
 				F6AB560C2BC4C092005727D2 /* Route.swift in Sources */,
 				F668B1E32B9AB392000B2886 /* KeySetManager.swift in Sources */,
 				F63F46BC2BBAA45200ADEB9D /* InventoryEntriesManager.swift in Sources */,

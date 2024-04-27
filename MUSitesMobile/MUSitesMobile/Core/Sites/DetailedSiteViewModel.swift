@@ -67,33 +67,35 @@ final class DetailedSiteViewModel: ObservableObject {
     }
 
     func fetchSiteSpecificImageURLs(siteName: String, category: String) async {
-        // The reference should include the site name and the category (e.g., "Posters").
-        let siteCategoryImagesRef = Storage.storage().reference(withPath: "Sites/\(siteName)/\(category)")
-        print("Attempting to access image path: Sites/\(siteName)/\(category)")
-
-        do {
-            // List all images in the specific site's category folder
-            let result = try await siteCategoryImagesRef.listAll()
-            let siteSpecificImages = result.items
-
-            for item in siteSpecificImages {
-                // Asynchronously get the download URL for each item
-                print("Accessing image: \(item.name)")
-                let downloadURL = try await item.downloadURL()
-                print("Fetched download URL: \(downloadURL)")
-                if category == "Posters" {
-                    self.imageURLs.append(downloadURL)
-                } else if category == "Board" {
-                    self.boardImageURLs.append(downloadURL)
-                } else if category == "Inventory" {
-                    self.inventoryImageURLs.append(downloadURL)
-                    print("Appending the downloadURL: \(downloadURL)")
-                } else if category == "ProfilePicture" {
-                    self.profilePicture.append(downloadURL)
+        Task {
+            // The reference should include the site name and the category (e.g., "Posters").
+            let siteCategoryImagesRef = Storage.storage().reference(withPath: "Sites/\(siteName)/\(category)")
+            print("Attempting to access image path: Sites/\(siteName)/\(category)")
+            
+            do {
+                // List all images in the specific site's category folder
+                let result = try await siteCategoryImagesRef.listAll()
+                let siteSpecificImages = result.items
+                
+                for item in siteSpecificImages {
+                    // Asynchronously get the download URL for each item
+                    print("Accessing image: \(item.name)")
+                    let downloadURL = try await item.downloadURL()
+                    print("Fetched download URL: \(downloadURL)")
+                    if category == "Posters" {
+                        self.imageURLs.append(downloadURL)
+                    } else if category == "Board" {
+                        self.boardImageURLs.append(downloadURL)
+                    } else if category == "Inventory" {
+                        self.inventoryImageURLs.append(downloadURL)
+                        print("Appending the downloadURL: \(downloadURL)")
+                    } else if category == "ProfilePicture" {
+                        self.profilePicture.append(downloadURL)
+                    }
                 }
+            } catch {
+                print("Error listing images for site \(siteName) category \(category): \(error.localizedDescription)")
             }
-        } catch {
-            print("Error listing images for site \(siteName) category \(category): \(error.localizedDescription)")
         }
     }
     //fetching the site related computers

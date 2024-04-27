@@ -43,6 +43,16 @@ struct SubmitFormView: View {
                         Spacer()
                     }.padding(.vertical, 10)
                 }
+                
+                // Site Ready Link
+                NavigationLink(destination: SiteReadySurveyView(site: computingSite)) {
+                    HStack {
+                        Text("Site Ready")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }.padding(.vertical, 10)
+                }
             }
         }.navigationTitle("SUBMIT")
     }

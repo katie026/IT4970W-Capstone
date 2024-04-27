@@ -176,7 +176,7 @@ struct BoardView: View {
     }
 }
 
-struct InventoryView: View {
+struct InventoryImageView: View {
     var imageURLs: [URL]
     @State private var selectedImageURL: URL?
     @Namespace private var animationNamespace
