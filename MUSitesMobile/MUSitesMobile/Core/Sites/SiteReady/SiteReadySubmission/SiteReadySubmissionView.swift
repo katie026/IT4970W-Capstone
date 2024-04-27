@@ -9,192 +9,218 @@ import Firebase
 
 struct SiteReadySurveyView: View {
     @Environment(\.presentationMode) var presentationMode
-    let siteId: String
-    let userId: String
+    let site: Site
+//    let userId: String
+    @State var user: AuthDataResultModel? = nil
     @StateObject var viewModel = ViewModel()
     @State private var showAlert = false
 
     var body: some View {
-        NavigationView {
-            VStack {
-                Form {
-                    ComputersSection(viewModel: viewModel)
-                    PrintersSection(viewModel: viewModel)
-                    PostersSection(viewModel: viewModel)
-                    RoomSection(viewModel: viewModel)
-                    AdditionalCommentsSection(viewModel: viewModel)
-                    
-                }
-                Spacer()
-                Button(action: {
-                    // Attempt to get the authenticated user and submit the site ready survey data
-                    do {
-                        let db = Firestore.firestore()
-
-                        // Submitting reported issues
-                        submitReportedIssues(db: db) { reportedIssuesUUIDs in
-                            // Submitting printer label issues
-                            Task {
-                                let printerLabelIssuesUUIDs = await submitPrinterLabelIssues(db: db)
-                                // Submitting site ready survey data with reported and printer label issues' UUIDs
-                                submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs)
-                            }
-                        }
-                        // Submitting label issues
-                        Task {
-                            await submitLabelIssues(db: db)
-                        }
-                    } catch {
-                        print("Error submitting site ready survey data: \(error)")
-                    }
-                }) {
-                    // Button content
-                    Text("Submit")
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-                .padding(.vertical)
+        VStack {
+            Form {
+                ComputersSection(viewModel: viewModel)
+                PrintersSection(viewModel: viewModel)
+                PostersSection(viewModel: viewModel)
+                RoomSection(viewModel: viewModel)
+                AdditionalCommentsSection(viewModel: viewModel)
             }
-            .navigationTitle("Site Ready Survey")
-            .navigationBarItems(leading: Button(action: {
-                self.presentationMode.wrappedValue.dismiss()
+            Spacer()
+            Button(action: {
+                if let user = user {
+                    // Attempt to get the authenticated user and submit the site ready survey data
+                    Task {
+                        do {
+                            let db = Firestore.firestore()
+                            
+                            // Submitting reported issues
+                            await submitReportedIssues(db: db, userId: user.uid) { reportedIssuesUUIDs in
+                                // Submitting printer label issues
+                                Task {
+                                    let printerLabelIssuesUUIDs = await submitPrinterLabelIssues(db: db, userId: user.uid)
+                                    // Submitting site ready survey data with reported and printer label issues' UUIDs
+                                    try await submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs)
+                                }
+                            }
+                            // Submitting label issues
+                            Task {
+                                await submitLabelIssues(db: db)
+                            }
+                        } catch {
+                            print("Error submitting site ready survey data: \(error)")
+                        }
+                    }
+                } else {
+                    print("User is not logged in/authenticated.")
+                }
             }) {
-                Text("Back")
-            })
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text("Submission Successful"), message: Text("Your survey has been successfully submitted."), dismissButton: .default(Text("OK")))
+                // Button content
+                Text("Submit")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .cornerRadius(10)
+            }
+            .padding(.vertical)
+        }
+        .navigationTitle("Site Ready Survey")
+//        .navigationBarItems(leading: Button(action: {
+//            self.presentationMode.wrappedValue.dismiss()
+//        }) {
+//            Text("Back")
+//        })
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("Submission Successful"), message: Text("Your survey has been successfully submitted."), dismissButton: .default(Text("OK")))
+        }
+        .onAppear {
+            Task {
+                self.user = try AuthenticationManager.shared.getAuthenticatedUser()
             }
         }
     }
     
 
-    private func submitSiteReadySurvey(db: Firestore, reportedIssuesUUIDs: [String], printerLabelIssuesUUIDs: [String]) {
-        let documentId = UUID().uuidString
-        let docRef = db.collection("site_ready_entries").document(documentId)
-        let timestamp = Timestamp(date: Date())
-        
-        var data: [String: Any] = [
-            "bw_printer_count": viewModel.bwPrinterCount,
-            "chair_count": viewModel.chairCount,
-            // Include reported and printer label issues' UUIDs in the "issues" array
-            "issues": reportedIssuesUUIDs + printerLabelIssuesUUIDs,
-            // Other fields...
-            // "computing_site": siteId,
-            "comments": viewModel.additionalComments,
-            // "id": documentId,
-            // "mac_count": viewModel.macCount,
-            // "missing_chairs": viewModel.missingChairs,
-            // "pc_count": viewModel.pcCount,
-            // "user": userId,
-            // "timestamp": timestamp
-        ]
-
-        // Add other data to the dictionary if needed
-
-        data["computing_site"] = siteId
-        data["id"] = documentId
-        data["mac_count"] = viewModel.macCount
-        data["missing_chairs"] = viewModel.missingChairs
-        data["pc_count"] = viewModel.pcCount
-        data["user"] = userId
-        data["timestamp"] = timestamp
-
-        // Write data to Firestore
-        docRef.setData(data) { error in
-            if let error = error {
-                print("Error writing document: \(error)")
-            } else {
-                print("Site ready survey data successfully written!")
-                // Show the alert
-                showAlert = true
+    private func submitSiteReadySurvey(db: Firestore, reportedIssuesUUIDs: [String], printerLabelIssuesUUIDs: [String]) async throws {
+        do {
+            if let user = user {
+                let documentId = try await SiteReadyManager.shared.getNewSiteReadyId()
+                let docRef = db.collection("site_ready_entries").document(documentId)
+                let timestamp = Timestamp(date: Date())
+                
+                var data: [String: Any] = [
+                    SiteReady.CodingKeys.bwPrinterCount.rawValue: viewModel.bwPrinterCount,
+                    SiteReady.CodingKeys.chairCount.rawValue: viewModel.chairCount,
+                    // Include reported and printer label issues' UUIDs in the "issues" array
+                    SiteReady.CodingKeys.issues.rawValue: reportedIssuesUUIDs + printerLabelIssuesUUIDs,
+                    // Other fields...
+                    // "computing_site": site.id,
+                    SiteReady.CodingKeys.comments.rawValue: viewModel.additionalComments,
+                    // "id": documentId,
+                    // "mac_count": viewModel.macCount,
+                    // "missing_chairs": viewModel.missingChairs,
+                    // "pc_count": viewModel.pcCount,
+                    // "user": userId,
+                    // "timestamp": timestamp
+                ]
+                
+                // Add other data to the dictionary if needed
+                
+                data["computing_site"] = site.id
+                data["id"] = documentId
+                data["mac_count"] = viewModel.macCount
+                data["missing_chairs"] = viewModel.missingChairs
+                data["pc_count"] = viewModel.pcCount
+                data["user"] = user.uid
+                data["timestamp"] = timestamp
+                
+                // Write data to Firestore
+                docRef.setData(data) { error in
+                    if let error = error {
+                        print("Error writing document: \(error)")
+                    } else {
+                        print("Site ready survey data successfully written!")
+                        // Show the alert
+                        showAlert = true
+                    }
+                }
             }
+        } catch {
+            print("Error submitting site ready: \(error)")
         }
     }
 
-    private func submitReportedIssues(db: Firestore, completion: @escaping ([String]) -> Void) {
-        var reportedIssuesUUIDs: [String] = []
-
-        let group = DispatchGroup()
-
-        for index in 0..<viewModel.failedToLoginCount {
-            group.enter()
-            let documentId = UUID().uuidString
-            let docRef = db.collection("reported_issues").document(documentId)
-            let timestamp = Timestamp(date: Date())
-
-            let data: [String: Any] = [
-                "description": viewModel.computerFailures[index],
-                "id": documentId,
-                "issue_type": "GxFGSkbDySZmdkCFExt9",
-                "report_id": viewModel.reportId,
-                "report_type": "site_ready",
-                "resolved": false,
-                "site": siteId,
-                "ticket": viewModel.failedLoginTicketNumbers[index],
-                "timestamp": timestamp,
-                "user_assigned": "",
-                "user_submitted": userId
-            ]
-
-            // Write data to Firestore
-            docRef.setData(data) { error in
-                if let error = error {
-                    print("Error writing document: \(error)")
-                } else {
-                    print("Reported issue \(index + 1) successfully written!")
-                    reportedIssuesUUIDs.append(documentId)
+    private func submitReportedIssues(db: Firestore, userId: String, completion: @escaping ([String]) -> Void) async {
+        do {
+            var reportedIssuesUUIDs: [String] = []
+            
+            let group = DispatchGroup()
+            
+            for index in 0..<viewModel.failedToLoginCount {
+                group.enter()
+                let documentId = try await IssueManager.shared.getNewIssueId()
+                let docRef = db.collection("reported_issues").document(documentId)
+                let timestamp = Timestamp(date: Date())
+                
+                let data: [String: Any] = [
+                    Issue.CodingKeys.description.rawValue: viewModel.computerFailures[index],
+                    Issue.CodingKeys.id.rawValue: documentId,
+                    Issue.CodingKeys.issueTypeId.rawValue: "GxFGSkbDySZmdkCFExt9",
+                    Issue.CodingKeys.reportId.rawValue: viewModel.reportId,
+                    Issue.CodingKeys.reportType.rawValue: "site_ready",
+                    Issue.CodingKeys.resolved.rawValue: false,
+                    Issue.CodingKeys.siteId.rawValue: site.id,
+                    Issue.CodingKeys.ticket.rawValue: viewModel.failedLoginTicketNumbers[index],
+                    Issue.CodingKeys.dateCreated.rawValue: timestamp,
+                    Issue.CodingKeys.userAssigned.rawValue: "",
+                    Issue.CodingKeys.userSubmitted.rawValue: userId
+                ]
+                
+                // Write data to Firestore
+                docRef.setData(data) { error in
+                    if let error = error {
+                        print("Error writing document: \(error)")
+                    } else {
+                        print("Reported issue \(index + 1) successfully written!")
+                        reportedIssuesUUIDs.append(documentId)
+                    }
+                    group.leave()
                 }
-                group.leave()
             }
-        }
-
-        group.notify(queue: .main) {
-            completion(reportedIssuesUUIDs)
+            
+            group.notify(queue: .main) {
+                completion(reportedIssuesUUIDs)
+            }
+        } catch {
+            print("Error submitting issues: \(error)")
+            completion([])
         }
     }
-    private func submitPrinterLabelIssues(db: Firestore) async -> [String] {
-        var reportedIssuesUUIDs: [String] = []
-
-        let group = DispatchGroup()
-
-        for index in 0..<viewModel.printerLabelsToReplace {
-            group.enter()
-            let documentId = UUID().uuidString
-            let docRef = db.collection("reported_issues").document(documentId)
-            let timestamp = Timestamp(date: Date())
-
-            let data: [String: Any] = [
-                "description": viewModel.printerLabels[index],
-                "id": documentId,
-                "issue_type": "PrinterLabelIssue", // Assuming a constant issue type for printer label issues
-                "report_id": viewModel.reportId ?? "", // Ensure reportId is available in the ViewModel
-                "report_type": "site_ready",
-                "resolved": false,
-                "site": siteId,
-                "timestamp": timestamp,
-                "user_submitted": userId
-            ]
-
-            // Write data to Firestore
-            docRef.setData(data) { error in
-                if let error = error {
-                    print("Error writing document: \(error)")
-                } else {
-                    print("Reported printer label issue \(index + 1) successfully written!")
-                    reportedIssuesUUIDs.append(documentId)
+    private func submitPrinterLabelIssues(db: Firestore, userId: String) async -> [String] {
+        do {
+            var reportedIssuesUUIDs: [String] = []
+            
+            let group = DispatchGroup()
+            
+            for index in 0..<viewModel.printerLabelsToReplace {
+                group.enter()
+                let documentId = try await IssueManager.shared.getNewIssueId()
+                let docRef = db.collection("reported_issues").document(documentId)
+                let timestamp = Timestamp(date: Date())
+                
+                let data: [String: Any] = [
+                    Issue.CodingKeys.description.rawValue: viewModel.printerLabels[index],
+                    Issue.CodingKeys.id.rawValue: documentId,
+                    Issue.CodingKeys.issueTypeId.rawValue: "PrinterLabelIssue", // Assuming a constant issue type for printer label issues
+                    Issue.CodingKeys.reportId.rawValue: viewModel.reportId ?? "", // Ensure reportId is available in the ViewModel
+                    Issue.CodingKeys.reportType.rawValue: "site_ready",
+                    Issue.CodingKeys.resolved.rawValue: false,
+                    Issue.CodingKeys.siteId.rawValue: site.id,
+                    Issue.CodingKeys.dateCreated.rawValue: timestamp,
+                    Issue.CodingKeys.userAssigned.rawValue: "",
+                    Issue.CodingKeys.userSubmitted.rawValue: userId
+                ]
+                
+                // Write data to Firestore
+                docRef.setData(data) { error in
+                    if let error = error {
+                        print("Error writing document: \(error)")
+                    } else {
+                        print("Reported printer label issue \(index + 1) successfully written!")
+                        reportedIssuesUUIDs.append(documentId)
+                    }
+                    group.leave()
                 }
-                group.leave()
             }
+            
+            group.notify(queue: .main) {
+                // No completion handler needed for async function, just return the UUIDs
+            }
+            return reportedIssuesUUIDs
+        } catch {
+            print("Error submitting label issues: \(error)")
+            return []
         }
-
-        group.notify(queue: .main) {
-            // No completion handler needed for async function, just return the UUIDs
-        }
-        return reportedIssuesUUIDs
     }
 
     private func submitLabelIssues(db: Firestore) async {
@@ -699,10 +725,33 @@ extension SiteReadySurveyView {
     }
 }
 
-struct SiteReadySurveyView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Provide a placeholder siteId for preview purposes
-        let placeholderSiteId = "6tYFeMv41IXzfXkwbbh6"
-        return SiteReadySurveyView(siteId: placeholderSiteId, userId: "UP4qMGuLhCP3qHvT5tfNnZlzH4h1")
-    }
+//struct SiteReadySurveyView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        // Provide a placeholder site.id for preview purposes
+//        let placeholderSiteId = "6tYFeMv41IXzfXkwbbh6"
+//        return SiteReadySurveyView(siteId: placeholderSiteId, userId: "UP4qMGuLhCP3qHvT5tfNnZlzH4h1")
+//    }
+//}
+
+#Preview {
+    SiteReadySurveyView(site: Site(
+        id: "BezlCe1ospf57zMdop2z",
+        name: "Bluford",
+        buildingId: "SvK0cIKPNTGCReVCw7Ln",
+        nearestInventoryId: "345",
+        chairCounts: [ChairCount(count: 3, type: "physics_black")],
+        siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
+        hasClock: true,
+        hasInventory: true,
+        hasWhiteboard: true,
+        namePatternMac: "CLARK-MAC-##",
+        namePatternPc: "CLARK-PC-##",
+        namePatternPrinter: "Clark Printer ##",
+        calendarName: "cornell-hall-5-lab"
+    ))
+}
+
+// Errors
+enum SiteReadyError: Error {
+    case userNotAuth
 }

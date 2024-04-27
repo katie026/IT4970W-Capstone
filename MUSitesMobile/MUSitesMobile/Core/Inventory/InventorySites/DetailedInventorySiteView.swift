@@ -13,35 +13,57 @@ final class DetailedInventorySiteViewModel: ObservableObject {
     @Published var building: Building?
     @Published var inventoryTypes: [InventoryType] = []
     @Published var keyTypes: [KeyType] = []
+    @Published var siteGroup: SiteGroup? = nil
     
-    func loadBuilding(buildingId: String) async {
-        do {
-            self.building = try await BuildingsManager.shared.getBuilding(buildingId: buildingId)
-        } catch {
-            print("Error loading building: \(error.localizedDescription)")
+    func loadBuilding(buildingId: String, completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.building = try await BuildingsManager.shared.getBuilding(buildingId: buildingId)
+            } catch {
+                print("Error loading building: \(error.localizedDescription)")
+            }
+            completion()
         }
     }
     
-    func loadInventoryTypes(inventoryTypeIds: [String]) async {
+    func loadInventoryTypes(inventoryTypeIds: [String]) {
         inventoryTypes = []
         keyTypes = []
-        
-        do {
-            for typeId in inventoryTypeIds {
-                // try to get each
-                let inventoryType = try await InventoryTypeManager.shared.getInventoryType(inventoryTypeId: typeId)
-                inventoryTypes.append(inventoryType)
-                
-                // if keyTypeId is not nil
-                if let keyTypeId = inventoryType.keyTypeId {
-                    let keyType = try await KeyTypeManager.shared.getKeyType(keyTypeId: keyTypeId)
-                    keyTypes.append(keyType)
-                } else {
-                    print("Warning: keyTypeId is nil for inventoryType with ID \(inventoryType.id)")
+        Task {
+            do {
+                for typeId in inventoryTypeIds {
+                    // try to get each
+                    let inventoryType = try await InventoryTypeManager.shared.getInventoryType(inventoryTypeId: typeId)
+                    inventoryTypes.append(inventoryType)
+                    
+                    // if keyTypeId is not nil
+                    if let keyTypeId = inventoryType.keyTypeId {
+                        let keyType = try await KeyTypeManager.shared.getKeyType(keyTypeId: keyTypeId)
+                        keyTypes.append(keyType)
+                    } else {
+                        print("Warning: keyTypeId is nil for inventoryType with ID \(inventoryType.id)")
+                    }
                 }
+            } catch {
+                print("Error loading inventory types: \(error.localizedDescription)")
             }
-        } catch {
-            print("Error loading inventory types: \(error.localizedDescription)")
+        }
+    }
+    
+    func loadSiteGroup(buildingId: String, completion: @escaping () -> Void) {
+        loadBuilding(buildingId: buildingId) {
+            if let groupId = self.building?.siteGroupId {
+                Task {
+                    do {
+                        self.siteGroup = try await SiteGroupManager.shared.getSiteGroup(siteGroupId: groupId)
+                        completion()
+                    } catch {
+                        print("Error getting site group: \(error)")
+                    }
+                }
+            } else {
+                print("No siteGroupId from the building.")
+            }
         }
     }
 }
@@ -54,8 +76,8 @@ struct DetailedInventorySiteView: View {
     @Binding private var path: [Route]
     @StateObject var sheetManager = SheetManager()
     // Section Bools
-    @State private var mapSectionExpanded: Bool = true
-    @State private var pictureSectionExpanded: Bool = true
+    @State private var mapSectionExpanded: Bool = false
+    @State private var pictureSectionExpanded: Bool = false
     // Passed-In Values
     let inventorySite: InventorySite
     
@@ -67,7 +89,7 @@ struct DetailedInventorySiteView: View {
     var body: some View {
         // Content
         ScrollView {
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
                 Header
                 BasicInfo
                 SubmitInventoryButton
@@ -75,12 +97,13 @@ struct DetailedInventorySiteView: View {
                 PictureSection
             }
         }
+        .padding()
         // View Title
         .navigationTitle("Inventory: \(inventorySite.name ?? "N/A")")
         // On Appear
         .onAppear {
             Task {
-                await viewModel.loadBuilding(buildingId: inventorySite.buildingId ?? "")
+                viewModel.loadSiteGroup(buildingId: inventorySite.buildingId ?? "") {}
                 await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
                 await siteViewModel.fetchSiteSpecificImageURLs(siteName: inventorySite.name ?? "Clark", category: "Inventory")
             }
@@ -100,7 +123,7 @@ struct DetailedInventorySiteView: View {
         // Basic Info
         HStack {
             VStack(alignment: .leading, spacing: 8) {
-                Text("**Group:** \(viewModel.building?.siteGroupId ?? "N/A")")
+                Text("**Group:** \(viewModel.siteGroup?.name ?? "N/A")")
                     .font(.subheadline)
                     .foregroundColor(.primary)
                 
@@ -119,6 +142,7 @@ struct DetailedInventorySiteView: View {
             Spacer()
         }
         .padding(.horizontal, 15.0)
+        .padding(.bottom, 10.0)
     }
     
     private var SubmitInventoryButton: some View {
@@ -131,16 +155,14 @@ struct DetailedInventorySiteView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .foregroundColor(Color(UIColor.systemGray5))
                     HStack {
-                        Text("Submit Inventory Entry")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
+                        Label("Submit Inventory", systemImage: "pencil.and.list.clipboard")
+                            .foregroundColor(.blue)
                         Spacer()
                     }
                     .padding(10)
                 }
             }
-        }
+        }.padding(.trailing, 14)
     }
     
     private var MapSection: some View {
@@ -158,6 +180,18 @@ struct DetailedInventorySiteView: View {
                 isExpanded: $mapSectionExpanded,
                 content: {
                     VStack {
+                        // Button to Apple Maps
+                        Button {
+                            openMapDirections(to: coordinates)
+                        } label: {
+                            HStack {
+                                Text("Get Directions")
+                                Image(systemName: "figure.walk")
+                                    .foregroundColor(Color.accentColor)
+                            }
+                        }
+                        .padding(.top, 10)
+                        
                         // Map Preview
                         SimpleMapView(
                             coordinates: coordinates,
@@ -165,12 +199,6 @@ struct DetailedInventorySiteView: View {
                         )
                         .frame(height: 200)
                         .cornerRadius(8)
-                        .padding(.top, 10)
-                        
-                        // Button to Apple Maps
-                        Button("Get Directions") {
-                            openMapDirections(to: coordinates)
-                        }
                     }
                 },
                 label: {
@@ -178,9 +206,10 @@ struct DetailedInventorySiteView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .foregroundColor(Color(UIColor.systemGray5))
                         HStack {
-                            Text("Map")
-                                .font(.title)
-                                .fontWeight(.bold)
+                            Label("Map", systemImage: "mappin.and.ellipse")
+//                            Text("Map")
+//                                .font(.title)
+//                                .fontWeight(.semibold)
                                 .foregroundColor(.primary)
                             Spacer()
                         }
@@ -190,6 +219,7 @@ struct DetailedInventorySiteView: View {
             )
             .padding(.top, 10.0)
         }
+        .listRowBackground(Color(UIColor.systemGray5))
     }
         
     private var PictureSection: some View {
@@ -198,16 +228,18 @@ struct DetailedInventorySiteView: View {
             DisclosureGroup(
                 isExpanded: $pictureSectionExpanded,
                 content: {
-                    InventoryView(imageURLs: siteViewModel.inventoryImageURLs)
+                    InventoryImageView(imageURLs: siteViewModel.inventoryImageURLs)
+                        .padding(.vertical)
                 },
                 label: {
                     ZStack {
                         RoundedRectangle(cornerRadius: 8)
                             .foregroundColor(Color(UIColor.systemGray5))
                         HStack {
-                            Text("Pictures")
-                                .font(.title)
-                                .fontWeight(.bold)
+                            Label("Pictures", systemImage: "photo")
+//                            Text("Pictures")
+//                                .font(.title)
+//                                .fontWeight(.semibold)
                                 .foregroundColor(.primary)
                             Spacer()
                         }

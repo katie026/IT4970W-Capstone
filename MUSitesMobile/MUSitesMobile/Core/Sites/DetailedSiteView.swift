@@ -29,10 +29,6 @@ struct DetailedSiteView: View {
     @State private var mapSectionExpanded: Bool = false
     @State private var postersSectionExpanded: Bool = false
     @State private var calendarSectionExpanded: Bool = false
-    @State private var isSiteReadySurveyViewPresented = false
-    
-
-
     
     init(site: Site) {
         self.site = site
@@ -57,67 +53,37 @@ struct DetailedSiteView: View {
         VStack {
             Form {
                 informationSection
+                submitForm(site: site)
                 equipmentSection
                 mapSection
                 postersSection
-                
                 if (site.calendarName != nil && site.calendarName != "") {
                     calendarSection
                 }
             }
-            .navigationTitle(site.name ?? "N/A")
-            .onAppear {
-                Task {
-                    // get building
-                    viewModel.loadBuilding(site: self.site) {
-                        // then get group
-                        if let siteGroupId = viewModel.building?.siteGroupId {
-                            viewModel.loadSiteGroup(siteGroupId: siteGroupId) {}
-                        }
-                    }
-                    // get site type
-                    if let siteTypeId = self.site.siteTypeId {
-                        viewModel.loadSiteType(siteTypeId: siteTypeId) {}
-                    }
-                    
-                    //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
-                    await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
-                    await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
-                    //for computers it takes the siteID to link it to the related site, it will then get the siteName so it can list all the computers
-                    viewModel.fetchComputers(forSite: site.id, withName: site.name ?? "")
-                    //printers just need siteID since it already has the B&W or color type
-                    viewModel.fetchPrinters(forSite: site.id)
-                }
-            }
-            
-            Button(action: {
-                // Attempt to get the authenticated user
-                if let user = try? AuthenticationManager.shared.getAuthenticatedUser() {
-                    isSiteReadySurveyViewPresented = true
-                } else {
-                    // Handle the case where the user is not authenticated
-                    print("User not authenticated")
-                }
-            }) {
-                Text("Submit Site Ready Entry")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-            }
-            .padding(.bottom, 20)
-            .fullScreenCover(isPresented: $isSiteReadySurveyViewPresented) {
-                NavigationView {
-                    if let user = try? AuthenticationManager.shared.getAuthenticatedUser() {
-                        SiteReadySurveyView(siteId: site.id, userId: user.uid)
-                    } else {
-                        // Handle the case where the user is not authenticated
-                        Text("User not authenticated")
+        }
+        .navigationTitle(site.name ?? "N/A")
+        .onAppear {
+            Task {
+                // get building
+                viewModel.loadBuilding(site: self.site) {
+                    // then get group
+                    if let siteGroupId = viewModel.building?.siteGroupId {
+                        viewModel.loadSiteGroup(siteGroupId: siteGroupId) {}
                     }
                 }
+                // get site type
+                if let siteTypeId = self.site.siteTypeId {
+                    viewModel.loadSiteType(siteTypeId: siteTypeId) {}
+                }
+                
+                //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
+                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Posters")
+                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", category: "Board")
+                //for computers it takes the siteID to link it to the related site, it will then get the siteName so it can list all the computers
+                viewModel.fetchComputers(forSite: site.id, withName: site.name ?? "")
+                //printers just need siteID since it already has the B&W or color type
+                viewModel.fetchPrinters(forSite: site.id)
             }
         }
     }
@@ -134,15 +100,15 @@ struct DetailedSiteView: View {
                         //TODO: get site captains
                         Text("**SS Captain:** \(viewModel.building?.siteGroupId ?? "N/A")")
                     }
+                    .padding(.top)
                     .listRowInsets(EdgeInsets())
                 },
                 label: {
-                    Text("Information")
-                        .font(.title)
-                        .fontWeight(.bold)
+                    Label("Information", systemImage: "info.circle")
+                        .font(.title3)
+                        .fontWeight(.semibold)
                 }
             )
-            .padding(.top, 10.0)
             .listRowBackground(Color.clear)
         }
     }
@@ -265,50 +231,57 @@ struct DetailedSiteView: View {
                     }
                 },
                 label: {
-                    Text("Equipment")
-                        .font(.title)
-                        .fontWeight(.bold)
+                    Label("Equipment", systemImage: "desktopcomputer")
+                        .font(.title3)
+                        .fontWeight(.semibold)
                 }
             )
-            .padding(.vertical, 8)
             .listRowBackground(Color.clear)
         }
     }
     
     private var mapSection: some View {
+        let coordinates: CLLocationCoordinate2D?
+        if let buildingCoordinates = viewModel.building?.coordinates {
+            coordinates = CLLocationCoordinate2D(latitude: buildingCoordinates.latitude, longitude: buildingCoordinates.longitude)
+        } else {
+            coordinates = nil
+        }
+        
         // Map
-        Section() {
+        return Section() {
             DisclosureGroup(
                 isExpanded: $mapSectionExpanded,
                 content: {
-                    if let buildingCoordinates = viewModel.building?.coordinates {
-                        SimpleMapView(
-                            coordinates: CLLocationCoordinate2D(
-                                latitude: buildingCoordinates.latitude,
-                                longitude: buildingCoordinates.longitude
-                            ),
-                            label: self.site.name ?? "N/A"
-                        )
-                        .listRowInsets(EdgeInsets())
-                        .frame(height: 200)
-                        .cornerRadius(8)
+                    if coordinates != nil {
+                        VStack {
+                            // Button to Apple Maps
+                            Button {
+                                openMapDirections(to: coordinates!)
+                            } label: {
+                                HStack {
+                                    Text("Get Directions")
+                                    Image(systemName: "figure.walk")
+                                        .foregroundColor(Color.accentColor)
+                                }
+                            }
+                            .padding(.top, 10)
+                            // Map View
+                            SimpleMapView(coordinates: coordinates!, label: self.site.name ?? "N/A")
+                            .listRowInsets(EdgeInsets())
+                            .frame(height: 200)
+                            .cornerRadius(8)
+                        }
                     } else {
-                        SimpleMapView(
-                            coordinates: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-                            label: self.site.name ?? "N/A"
-                        )
-                        .listRowInsets(EdgeInsets())
-                        .frame(height: 200)
-                        .cornerRadius(8)
+                        Text("No coordinates have been provided for this site.")
                     }
                 },
                 label: {
-                    Text("Map")
-                        .font(.title)
-                        .fontWeight(.bold)
+                    Label("Map", systemImage: "mappin.and.ellipse")
+                        .font(.title3)
+                        .fontWeight(.semibold)
                 }
             )
-            .padding(.top, 10.0)
             .listRowBackground(Color.clear)
         }
     }
@@ -345,23 +318,24 @@ struct DetailedSiteView: View {
                     isExpanded: $postersSectionExpanded,
                     content: {
                         if !viewModel.imageURLs.isEmpty {
-                            Section(header: Text("Posters")) {
+                            VStack(alignment: .leading) {
+                                Text("Posters")
                                 PostersView(imageURLs: viewModel.imageURLs)
                             }
                         }
                         if !viewModel.boardImageURLs.isEmpty {
-                            Section(header: Text("Board")) {
+                            VStack(alignment: .leading) {
+                                Text("Board")
                                 BoardView(imageURLs: viewModel.boardImageURLs)
                             }
                         }
                     },
                     label: {
-                        Text("Poster Board")
-                            .font(.title)
-                            .fontWeight(.bold)
+                        Label("Poster Board", systemImage: "rectangle.3.group")
+                            .font(.title3)
+                            .fontWeight(.semibold)
                     }
                 )
-                .padding(.top, 10.0)
                 .listRowBackground(Color.clear)
             }
         }
@@ -379,12 +353,11 @@ struct DetailedSiteView: View {
                     }
                 },
                 label: {
-                    Text("Calendar")
-                        .font(.title)
-                        .fontWeight(.bold)
+                    Label("Calendar", systemImage: "calendar")
+                        .font(.title3)
+                        .fontWeight(.semibold)
                 }
             )
-            .padding(.top, 10.0)
             .listRowBackground(Color.clear)
         }
     }
@@ -398,20 +371,20 @@ struct DetailedSiteView: View {
                 displayedComponents: [.date]
             ).labelsHidden().padding(.leading, 10)
             Spacer()
-        }
+        }.padding(.top,4)
     }
     
     private var CalendarWebViewButton: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
-                .foregroundColor(Color.yellow)
+                .foregroundColor(Color.accentColor)
             Button {
                 isPresentWebView = true
             } label: {
                 Text("Open Calendar")
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                    .padding(10)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .padding(6)
             }
         }
         .frame(maxWidth: .infinity)
@@ -446,30 +419,38 @@ struct DetailedSiteView: View {
         formatter.dateFormat = "yyyyMMdd"
         return formatter
     }()
-}
-
-private func submitForm(site: Site) -> some View {
-    //Submit a Form section
-    NavigationLink(destination: SubmitFormView(computingSite: site))
-    {        HStack {
-            Spacer(minLength: 4)
-            Text("Submit a Form")
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundColor(.blue)
-            Spacer()
-        }
-        .padding(.horizontal)
-        .padding(.vertical)
+    
+    func openMapDirections(to destinationCoordinate: CLLocationCoordinate2D) {
+        // specify destination
+        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: destinationCoordinate))
+        
+        // define destination name
+        mapItem.name = (site.name ?? "N/A")
+        
+        // launch Apple Maps with walking directions
+        mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking])
     }
+    
+    private func submitForm(site: Site) -> some View {
+        //Submit a Form section
+        NavigationLink(destination: SubmitFormView(computingSite: site)) {
+            HStack {
+                Label("Submit a Form", systemImage: "pencil.and.list.clipboard")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+        }
+    }
+
+    //formating dates for computers
+    let itemFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
 }
-//formating dates for computers 
-let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    formatter.timeStyle = .none
-    return formatter
-}()
 
 #Preview {
     NavigationStack {

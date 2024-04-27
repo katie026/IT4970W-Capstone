@@ -61,6 +61,10 @@ final class ProfileViewModel: ObservableObject {
         }
     }
     
+    func hasPosition(position: Position) -> Bool {
+        userPositions.contains(where: {$0.id == position.id})
+    }
+    
     func getPositions(completion: @escaping () -> Void) {
         Task {
             do {
@@ -76,9 +80,11 @@ final class ProfileViewModel: ObservableObject {
                 // find position using positionId
                 guard let position = positions.first(where: { $0.id == positionId }) else { continue }
                 // add to position list
-                userPositions.append(position)
-                // sort position list
-                userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
+                if !hasPosition(position: position) {
+                    userPositions.append(position)
+                    // sort position list
+                    userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
+                }
             }
             
             completion()
