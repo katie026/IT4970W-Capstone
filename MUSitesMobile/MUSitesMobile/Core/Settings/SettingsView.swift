@@ -29,7 +29,7 @@ struct SettingsView: View {
                             print(error)
                         }
                     }
-                }
+                }.foregroundStyle(Color.blue)
             }
             // apps where user can create an account, MUST allow users to delete their account
             Button("Delete Account", role: .destructive) {

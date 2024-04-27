@@ -78,10 +78,15 @@ struct AdminUserProfileView: View {
         Section(header: Text("Basic Information")) {
             Text("**Student ID:** \(user.studentId.map(String.init) ?? "N/A")")
             Text("**Email:** \(user.email ?? "N/A")")
-            Text("**Status:** \(user.isClockedIn ?? false ? "Clocked In" : "Clocked Out")")
+            HStack {
+                Text("**Status:**")
+                Text("\(user.isClockedIn ?? false ? "Clocked In" : "Clocked Out")")
+                    .foregroundStyle(user.isClockedIn ?? false ? .green : .red)
+                Spacer()
+            }
             keysGroup
             Text("Created: \(user.dateCreated != nil ? dateFormatter.string(from: user.dateCreated!) : "nil")")
-            Text("Last Login: \(user.lastLogin != nil ? dateFormatter.string(from: user.dateCreated!) : "nil")")
+            Text("Last Login: \(user.lastLogin != nil ? dateFormatter.string(from: user.lastLogin!) : "nil")")
         }
     }
     

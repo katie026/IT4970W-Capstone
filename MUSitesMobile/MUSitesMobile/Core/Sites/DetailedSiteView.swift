@@ -449,7 +449,7 @@ struct DetailedSiteView: View {
     
     private func submitForm(site: Site) -> some View {
         //Submit a Form section
-        NavigationLink(destination: SubmitFormView(computingSite: site)) {
+        NavigationLink(destination: SubmitFormView(computingSite: site, inventorySite: viewModel.inventorySite)) {
             HStack {
                 Label("Submit a Form", systemImage: "pencil.and.list.clipboard")
                     .font(.title3)

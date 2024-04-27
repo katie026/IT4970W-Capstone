@@ -41,6 +41,14 @@ struct AuthenticationView: View {
             VStack {
                 Spacer()
                 
+                Text("SitesMobile")
+                    .fontDesign(.monospaced)
+                    .font(.system(size: 48))
+                    .fontWeight(.heavy)
+                Text("with the Univeristy of Misouri DoIT")
+                    .padding(.bottom, 30)
+                    .foregroundColor(.secondary)
+                
                 // Sign in with Google
                 googleSignInButton
                     .padding(.horizontal)

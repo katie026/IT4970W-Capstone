@@ -297,50 +297,57 @@ struct SiteCaptainSubmissionView: View {
         return AnyView(view)
     }
     
+    func createEmptyIssues() {
+        if viewModel.issueCount > 0 {
+            // create an issue for each issue count
+            viewModel.issues = Array(repeating: Issue(
+                id: "", // must edit before creating in Firebase
+                description: nil, // should be editted by user using State var
+                dateCreated: Date(),
+                dateResolved: nil, // keep nil
+                issueTypeId: nil, // should be editted by user using State var
+                resolved: false,
+                ticket: nil, // should be editted by user using State var
+                reportId: nil, // must edit before creating in Firebase
+                reportType: "site_captain",
+                siteId: site.id,
+                userSubmitted: viewModel.user?.uid,
+                userAssigned: nil // keep nil
+            ), count: viewModel.issueCount)
+            viewModel.issues.enumerated().forEach { index, _ in
+                viewModel.issues[index].id = "\(index)"
+            }
+        }
+    }
+    
     func issueInputSection() -> some View {
         let view = Section() {
             VStack(alignment: .leading) {
                 HStack {
                     // ask how many issues
-                    Text("How many issues are there?")
-                        .frame(width: 250)
+                    Text("How many issues are there? (\(viewModel.issueCount))")
+                        .frame(width: 200)
                     Spacer()
                     // issue count input
-                    TextField("#", text: Binding(
-                        get: { String(viewModel.issueCount) },
-                        set: { newValue in
-                            // limit how many issues can be reported
-                            if Int(newValue) ?? 0 > 5 {
-                                viewModel.issueCount = 5
-                            } else {
-                                // define issue count
-                                viewModel.issueCount = Int(newValue) ?? 0
-                            }
-                            
-                            // create an issue for each issue count
-                            viewModel.issues = Array(repeating: Issue(
-                                id: "", // must edit before creating in Firebase
-                                description: nil, // should be editted by user using State var
-                                dateCreated: Date(),
-                                dateResolved: nil, // keep nil
-                                issueTypeId: nil, // should be editted by user using State var
-                                resolved: false,
-                                ticket: nil, // should be editted by user using State var
-                                reportId: nil, // must edit before creating in Firebase
-                                reportType: "site_captain",
-                                siteId: site.id,
-                                userSubmitted: viewModel.user?.uid,
-                                userAssigned: nil // keep nil
-                            ), count: viewModel.issueCount)
-                            viewModel.issues.enumerated().forEach { index, _ in
-                                viewModel.issues[index].id = "\(index)"
-                            }
+                    Stepper("", onIncrement: {
+                        // limit how many issues can be reported
+                        if viewModel.issueCount < 5 {
+                            viewModel.issueCount += 1
+                        } else {
+                            // define issue count
+                            viewModel.issueCount = 5
                         }
-                    ))
-                    .multilineTextAlignment(.center)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 50)
-                    .keyboardType(.numberPad)
+                        createEmptyIssues()
+                    }, onDecrement: {
+                        // set minimum issues
+                        if viewModel.issueCount > 0 {
+                            viewModel.issueCount -= 1
+                        } else {
+                            // define issue count
+                            viewModel.issueCount = 0
+                        }
+                        createEmptyIssues()
+                    })
                     Spacer()
                 }
                 
@@ -432,55 +439,62 @@ struct SiteCaptainSubmissionView: View {
         )
     }
     
+    func createEmptyLabelIssues() {
+        if viewModel.labelIssueCount > 0 {
+            // create an issue for each issue count
+            viewModel.labelIssues = Array(repeating: Issue(
+                id: "", // must edit before creating in Firebase
+                description: nil, // should be editted by user using State var
+                dateCreated: Date(),
+                dateResolved: nil, // keep nil
+                issueTypeId: "GxFGSkbDySZmdkCFExt9", // label issue
+                resolved: false,
+                ticket: nil, // labels don't need tickets
+                reportId: nil, // must edit before creating in Firebase
+                reportType: "site_captain",
+                siteId: site.id,
+                userSubmitted: viewModel.user?.uid,
+                userAssigned: nil // keep nil
+            ), count: viewModel.labelIssueCount)
+            viewModel.labelIssues.enumerated().forEach { index, _ in
+                viewModel.labelIssues[index].id = "\(index)"
+            }
+        }
+    }
+    
     func labelInputSection() -> some View {
         let view = Section() {
             VStack(alignment: .leading) {
                 HStack {
                     // ask how many issues
-                    Text("How many labels need replacement?")
-                        .frame(width: 250)
+                    Text("How many labels need replacement? (\(viewModel.labelIssueCount))")
+                        .frame(width: 200)
                     // issue count input
-                    TextField("#", text: Binding(
-                        get: { String(viewModel.labelIssueCount) },
-                        set: { newValue in
-                            // limit how many issues can be reported
-                            if Int(newValue) ?? 0 > 5 {
-                                viewModel.labelIssueCount = 5
-                            } else {
-                                // define issue count
-                                viewModel.labelIssueCount = Int(newValue) ?? 0
-                            }
-                            
-                            // create an issue for each issue count
-                            viewModel.labelIssues = Array(repeating: Issue(
-                                id: "", // must edit before creating in Firebase
-                                description: nil, // should be editted by user using State var
-                                dateCreated: Date(),
-                                dateResolved: nil, // keep nil
-                                issueTypeId: "GxFGSkbDySZmdkCFExt9", // label issue
-                                resolved: false,
-                                ticket: nil, // labels don't need tickets
-                                reportId: nil, // must edit before creating in Firebase
-                                reportType: "site_captain",
-                                siteId: site.id,
-                                userSubmitted: viewModel.user?.uid,
-                                userAssigned: nil // keep nil
-                            ), count: viewModel.labelIssueCount)
-                            viewModel.labelIssues.enumerated().forEach { index, _ in
-                                viewModel.labelIssues[index].id = "\(index)"
-                            }
+                    Stepper("", onIncrement: {
+                        // limit how many issues can be reported
+                        if viewModel.labelIssueCount < 5 {
+                            viewModel.labelIssueCount += 1
+                        } else {
+                            // define issue count
+                            viewModel.labelIssueCount = 5
                         }
-                    ))
-                    .multilineTextAlignment(.center)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 50)
-                    .keyboardType(.numberPad)
+                        createEmptyLabelIssues()
+                    }, onDecrement: {
+                        // set minimum issues
+                        if viewModel.labelIssueCount > 0 {
+                            viewModel.labelIssueCount -= 1
+                        } else {
+                            // define issue count
+                            viewModel.labelIssueCount = 0
+                        }
+                        createEmptyLabelIssues()
+                    })
                     Spacer()
-                }
+                }.padding(.horizontal)
                 
                 // Issue Form for each issue indicated
                 ForEach(0..<(viewModel.labelIssues.count), id: \.self) { index in
-                    labelInputRow(index: index)
+                    labelInputRow(index: index).padding(.horizontal)
                 }
             }
         }
@@ -589,47 +603,54 @@ struct SiteCaptainSubmissionView: View {
         }
     }
     
+    func createEmptySupplyRequests() {
+        if viewModel.supplyRequestCount > 0 {
+            // create SupplyRequest for each requested
+            viewModel.supplyRequests = Array(repeating: SupplyRequest(
+                id: "", // must edit before creating in Firebase
+                siteId: site.id,
+                supplyTypeId: nil, // should be editted by user using State var
+                countNeeded: nil, // should be editted by user using State var
+                reportId: nil, // must edit before creating in Firebase
+                reportType: "site_captain",
+                resolved: false,
+                dateCreated: Date(),
+                dateResolved: nil // keep nil
+            ), count: viewModel.supplyRequestCount)
+            // set temporary ids
+            viewModel.supplyRequests.enumerated().forEach { index, _ in
+                viewModel.supplyRequests[index].id = "\(index)"
+            }
+        }
+    }
+    
     func supplyInputSection() -> some View {
         let view = Section() {
             VStack(alignment: .leading) {
                 HStack {
-                    // ask how many issues
-                    Text("How many supply types are needed?")
-                        .frame(width: 250)
-                    // issue count input
-                    TextField("#", text: Binding(
-                        get: { String(viewModel.supplyRequestCount) },
-                        set: { newValue in
-                            // limit how many supply types can be requested
-                            if Int(newValue) ?? 0 > 5 {
-                                viewModel.supplyRequestCount = 5
-                            } else {
-                                // define supply request count
-                                viewModel.supplyRequestCount = Int(newValue) ?? 0
-                            }
-                            
-                            // create SupplyRequest for each requested
-                            viewModel.supplyRequests = Array(repeating: SupplyRequest(
-                                id: "", // must edit before creating in Firebase
-                                siteId: site.id,
-                                supplyTypeId: nil, // should be editted by user using State var
-                                countNeeded: nil, // should be editted by user using State var
-                                reportId: nil, // must edit before creating in Firebase
-                                reportType: "site_captain",
-                                resolved: false,
-                                dateCreated: Date(),
-                                dateResolved: nil // keep nil
-                            ), count: viewModel.supplyRequestCount)
-                            // set temporary ids
-                            viewModel.supplyRequests.enumerated().forEach { index, _ in
-                                viewModel.supplyRequests[index].id = "\(index)"
-                            }
+                    // ask how many supplyRequests
+                    Text("How many supply types are needed? (\(viewModel.supplyRequestCount))")
+                        .frame(width: 200)
+                    // supplyRequests count input
+                    Stepper("", onIncrement: {
+                        // limit how many requests can be submitted
+                        if viewModel.supplyRequestCount < 5 {
+                            viewModel.supplyRequestCount += 1
+                        } else {
+                            // define supplyRequest count
+                            viewModel.supplyRequestCount = 5
                         }
-                    ))
-                    .multilineTextAlignment(.center)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 50)
-                    .keyboardType(.numberPad)
+                        createEmptySupplyRequests()
+                    }, onDecrement: {
+                        // set minimum issues
+                        if viewModel.supplyRequestCount > 0 {
+                            viewModel.supplyRequestCount -= 1
+                        } else {
+                            // define supplyRequest count
+                            viewModel.supplyRequestCount = 0
+                        }
+                        createEmptySupplyRequests()
+                    })
                     Spacer()
                 }
                 

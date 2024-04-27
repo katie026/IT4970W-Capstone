@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SubmitFormView: View {
     let computingSite: Site
+    let inventorySite: InventorySite?
     
     var body: some View {
         VStack {
@@ -32,6 +33,20 @@ struct SubmitFormView: View {
                             .fontWeight(.semibold)
                         Spacer()
                     }.padding(.vertical, 10)
+                }
+                
+                // Inventory Link
+                if let inventorySite = inventorySite {
+                    NavigationLink{ InventorySubmissionView(inventorySite: inventorySite)
+                            .environmentObject(SheetManager())
+                    } label: {
+                        HStack {
+                            Text("Inventory Submission")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                            Spacer()
+                        }.padding(.vertical, 10)
+                    }
                 }
                 
                 // Site Captain Link
@@ -60,20 +75,28 @@ struct SubmitFormView: View {
 
 #Preview {
     NavigationView {
-        SubmitFormView(computingSite: Site(
-            id: "BezlCe1ospf57zMdop2z",
-            name: "Bluford",
-            buildingId: "SvK0cIKPNTGCReVCw7Ln",
-            nearestInventoryId: "345",
-            chairCounts: [ChairCount(count: 3, type: "physics_black")],
-            siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
-            hasClock: true,
-            hasInventory: true,
-            hasWhiteboard: true,
-            namePatternMac: "CLARK-MAC-##",
-            namePatternPc: "CLARK-PC-##",
-            namePatternPrinter: "Clark Printer ##",
-            calendarName: "cornell-hall-5-lab"
-        ))
+        SubmitFormView(
+            computingSite: Site(
+                id: "BezlCe1ospf57zMdop2z",
+                name: "Bluford",
+                buildingId: "SvK0cIKPNTGCReVCw7Ln",
+                nearestInventoryId: "345",
+                chairCounts: [ChairCount(count: 3, type: "physics_black")],
+                siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
+                hasClock: true,
+                hasInventory: true,
+                hasWhiteboard: true,
+                namePatternMac: "CLARK-MAC-##",
+                namePatternPc: "CLARK-PC-##",
+                namePatternPrinter: "Clark Printer ##",
+                calendarName: "cornell-hall-5-lab"
+            ),
+            inventorySite: InventorySite(
+                id: "TzLMIsUbadvLh9PEgqaV",
+                name: "BCC 122",
+                buildingId: "yXT87CrCZCoJVRvZn5DC",
+                inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+           )
+        )
     }
 }
