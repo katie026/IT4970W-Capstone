@@ -10,114 +10,79 @@ import MapKit
 
 struct SitesMapView: View {
     @State private var selectedBuilding: Building? = nil
-    @State private var selectedSiteGroup: String? = nil
+    @State private var selectedSiteGroup: SiteGroup? = nil
     @State private var siteGroupChosen: String? = nil
-    
+    @State private var allSiteGroups: [SiteGroup] = []
     
     var body: some View {
-            NavigationView {
-                ZStack {
-                    MapView(selectedBuilding: $selectedBuilding, selectedSiteGroup: $selectedSiteGroup)
-                        .edgesIgnoringSafeArea(.top)
-                    
-                    VStack {
-                        Spacer()
-                        
-                        
-                        Menu {
-                            Button(action: {
-                                selectedSiteGroup = nil
-                                siteGroupChosen = "All"
-                            }) {
-                                Text("All")
+        ZStack {
+            MapView(selectedBuilding: $selectedBuilding, selectedSiteGroup: $selectedSiteGroup)
+                .edgesIgnoringSafeArea(.top)
+            
+            VStack() {
+                HStack {
+                    Menu {
+                        Picker("Site Group", selection: $selectedSiteGroup) {
+                            Text("All").tag(nil as SiteGroup?)
+                            ForEach(allSiteGroups, id: \.self) { group in
+                                Text(group.name).tag(group as SiteGroup?)
                             }
-
-                            //TODO: get site_groups from firestore
-                            Button(action: {
-                                selectedSiteGroup = "LM0MN0spXlHfd2oZSahO"
-                                siteGroupChosen = "R1"
-                            }) {
-                                Text("R1")
-                            }
-                            
-                            Button(action: {
-                                selectedSiteGroup = "gkRTxs7OyARmxGHHPuMV"
-                                siteGroupChosen = "R1"
-
-                            }) {
-                                Text("G1")
-                            }
-                            
-                            Button(action: {
-                                selectedSiteGroup = "kxeYimfnOx1YnB9TVXp9"
-                                siteGroupChosen = "R1"
-                            }) {
-                                Text("G2")
-                            }
-                            
-                            Button(action: {
-                                selectedSiteGroup = "zw1TFIf7KQxMNrThdfD1"
-                                siteGroupChosen = "R1"
-
-                            }) {
-                                Text("G3")
-                            }
-                            Button(action: {
-                                selectedSiteGroup = ""
-                                siteGroupChosen = "R1"
-                            }) {
-                                Text("None")
-                            }
-                            
-                            // Add more site groups as needed
-                        } label: {
-                            Text("Select Site Group")
-                                .padding(10) // Adjust the padding size here
-                                .background(Color.yellow)
-                                .cornerRadius(10) // Adjust the corner radius as needed
-                                .foregroundColor(.black) // Set text color to black
-                        }
-
-                        Text("Selected Option: \(siteGroupChosen ?? "None")")
-                            .padding(5) // Adjust the padding size here
-                            .background(Color.black)
-                            .cornerRadius(5) // Adjust the corner radius as needed
-                            .foregroundColor(.yellow) // Set text color to yellow
-                            .font(.system(size: 14)) // Set a smaller font size
+                        }.multilineTextAlignment(.leading)
+                    } label: {
+                        Text("**Site Group:** \(selectedSiteGroup?.name ?? "All")")
                             .padding(10) // Adjust the padding size here
-                        
+                            .background(Color.accentColor)
+                            .cornerRadius(10) // Adjust the corner radius as needed
+                            .foregroundColor(.black) // Set text color to black
                     }
+                    .padding()
+                    Spacer()
                 }
-                .navigationTitle("Map")
-                .navigationBarHidden(true)
-                .background(
-                    //TODO: update to NagivationStack? Renable link to in BuildingDetailView
-                    NavigationLink(
-                        destination: selectedBuilding != nil ? BuildingDetailView(building: selectedBuilding!) : nil,
-                        isActive: Binding<Bool>(
-                            get: { selectedBuilding != nil },
-                            set: { newValue in
-                                if !newValue { // NavigationLink became inactive
-                                    selectedBuilding = nil // Reset selectedBuilding
-                                }
+                Spacer()
+            }
+            .navigationTitle("Map")
+            .background(
+                //TODO: update to NagivationStack? Renable link to in BuildingDetailView
+                NavigationLink(
+                    destination: selectedBuilding != nil ? BuildingDetailView(building: selectedBuilding!) : nil,
+                    isActive: Binding<Bool>(
+                        get: { selectedBuilding != nil },
+                        set: { newValue in
+                            if !newValue { // NavigationLink became inactive
+                                selectedBuilding = nil // Reset selectedBuilding
                             }
-                        )
-                    ) {
-                        EmptyView()
-                    }
+                        }
+                    )
+                ) {
+                    EmptyView()
+                }
                     .hidden()
-                )
+            )
+            .onAppear{
+                getSiteGroups() {}
             }
         }
     }
-   
+    
+    func getSiteGroups(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.allSiteGroups = try await SiteGroupManager.shared.getAllSiteGroups(descending: nil)
+                completion()
+            } catch {
+                print("Error getting site groups: \(error)")
+            }
+        }
+    }
+}
+
 
 
 
 struct MapView: UIViewRepresentable {
     @State private var userTrackingMode: MKUserTrackingMode = .follow
     @Binding var selectedBuilding: Building?
-    @Binding var selectedSiteGroup: String?
+    @Binding var selectedSiteGroup: SiteGroup?
     
     private let locationManager = CLLocationManager()
     
@@ -139,9 +104,9 @@ struct MapView: UIViewRepresentable {
         addAnnotations(to: mapView)
         
         fetchBuildingsFromFirestore { fetchedBuildings in
-                    self.buildings = fetchedBuildings
-                    addAnnotations(to: mapView)
-                }
+            self.buildings = fetchedBuildings
+            addAnnotations(to: mapView)
+        }
         
         return mapView
     }
@@ -156,9 +121,11 @@ struct MapView: UIViewRepresentable {
     }
     
     private func fetchBuildingsFromFirestore(completion: @escaping ([Building]) -> Void) {
+        let selectedSiteGroupId = selectedSiteGroup?.id
+        
         Task {
             do {
-                let fetchedBuildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: selectedSiteGroup)
+                let fetchedBuildings = try await BuildingsManager.shared.getAllBuildings(descending: nil, group: selectedSiteGroupId)
                 DispatchQueue.main.async {
                     completion(fetchedBuildings)
                 }
@@ -169,10 +136,11 @@ struct MapView: UIViewRepresentable {
     }
     
     private func addAnnotations(to mapView: MKMapView) {
+        let selectedSiteGroupId = selectedSiteGroup?.id
         mapView.removeAnnotations(mapView.annotations)
         
         for building in buildings {
-            if let coordinates = building.coordinates, selectedSiteGroup == nil || building.siteGroupId == selectedSiteGroup {
+            if let coordinates = building.coordinates, selectedSiteGroup == nil || building.siteGroupId == selectedSiteGroupId {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude)
                 annotation.subtitle = building.siteGroupId
@@ -182,7 +150,7 @@ struct MapView: UIViewRepresentable {
         }
     }
     
-
+    
     
     class Coordinator: NSObject, CLLocationManagerDelegate, MKMapViewDelegate {
         var parent: MapView
@@ -192,11 +160,11 @@ struct MapView: UIViewRepresentable {
         }
         
         func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-                    if let annotationTitle = view.annotation?.title, let buildingName = annotationTitle {
-                        // Find the selected building from the buildings array
-                        parent.selectedBuilding = parent.buildings.first(where: { $0.name == buildingName })
-                    }
-                }
+            if let annotationTitle = view.annotation?.title, let buildingName = annotationTitle {
+                // Find the selected building from the buildings array
+                parent.selectedBuilding = parent.buildings.first(where: { $0.name == buildingName })
+            }
+        }
         
         func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
             if status == .authorizedWhenInUse {
@@ -209,6 +177,14 @@ struct MapView: UIViewRepresentable {
 }
 
 #Preview {
-    SitesMapView()
+    TabView {
+        NavigationStack {
+            SitesMapView()
+        }
+        .tabItem {
+            Image(systemName: "map")
+            Text("Map")
+        }
+    }
 }
 

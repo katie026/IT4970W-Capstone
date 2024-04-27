@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct SiteGroup: Codable, Identifiable {
+struct SiteGroup: Codable, Identifiable, Hashable {
     let id: String
     let name: String
     
