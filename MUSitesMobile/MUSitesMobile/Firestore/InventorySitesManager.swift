@@ -124,6 +124,15 @@ final class InventorySitesManager {
         try await inventorySitesCollection.aggregateCount()
     }
     
+    // get sites by building
+    func getInventorySitesByBuilding(buildingId: String) async throws -> [InventorySite] {
+        let query = inventorySitesCollection
+            .whereField(Site.CodingKeys.buildingId.rawValue, isEqualTo: buildingId)
+        
+        return try await query
+            .getDocuments(as: InventorySite.self)
+    }
+    
     // check if sites in Building
     func checkIfSitesInBuilding(buildingId: String, completion: @escaping (Bool) -> Void) {
         let query = inventorySitesCollection

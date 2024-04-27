@@ -26,6 +26,8 @@ struct BuildingCellView: View {
                         .font(.headline)
                         .foregroundStyle(.primary)
                     subtitleText()
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
                 
                 Spacer()

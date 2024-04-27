@@ -203,6 +203,15 @@ final class SitesManager {
         try await sitesCollection.aggregateCount()
     }
     
+    // get sites by building
+    func getSitesByBuilding(buildingId: String) async throws -> [Site] {
+        let query = sitesCollection
+            .whereField(Site.CodingKeys.buildingId.rawValue, isEqualTo: buildingId)
+        
+        return try await query
+            .getDocuments(as: Site.self)
+    }
+    
     // check if sites in Building
     func checkIfSitesInBuilding(buildingId: String, completion: @escaping (Bool) -> Void) {
         let query = sitesCollection
