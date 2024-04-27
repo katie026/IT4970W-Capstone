@@ -107,7 +107,6 @@ struct InventoryEntriesView: View {
     // View Model
     @StateObject private var viewModel = InventoryEntriesViewModel()
     // View Control
-    @State private var path: [Route] = []
     @State private var hasLoadedOnce = false
     // Track loading status
     @State private var isLoading = true

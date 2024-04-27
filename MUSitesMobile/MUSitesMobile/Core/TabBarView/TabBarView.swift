@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TabBarView: View {
-    
+    @EnvironmentObject var router: AppRouter
     @Binding var showSignInView: Bool
     @State private var isAdmin = false
     
@@ -50,15 +50,6 @@ struct TabBarView: View {
                 Text("Inventory")
             }
             
-            // UserTasks View
-            NavigationStack {
-                UserBuildingsView()
-            }
-            .tabItem {
-                Image(systemName: "checklist")
-                Text("Tasks")
-            }
-            
             // Profile View
             NavigationStack {
                 ProfileView(showSignInView: $showSignInView)
@@ -67,15 +58,6 @@ struct TabBarView: View {
                 Image(systemName: "person.crop.circle")
                 Text(isAdmin ? "Admin" : "Profile")
             }
-//            
-//             NonAuthUser View
-//            NavigationStack {
-//                NonAuthUsersView()
-//            }
-//            .tabItem {
-//                Image(systemName: "person.circle")
-//                Text("Non-Auth Users")
-//            }
         }
     }
 }

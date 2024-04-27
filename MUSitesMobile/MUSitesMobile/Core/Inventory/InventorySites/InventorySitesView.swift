@@ -46,10 +46,10 @@ final class InventorySitesViewModel: ObservableObject {
 }
 
 struct InventorySitesView: View {
+    // View Control
+    @EnvironmentObject var router: AppRouter
     // View Model
     @StateObject private var viewModel = InventorySitesViewModel()
-    @State private var path: [Route] = []
-    
     // Search Text
     @State private var searchText: String = ""
     
@@ -92,37 +92,23 @@ struct InventorySitesView: View {
     }
     
     var body: some View {
-        NavigationStack (path: $path) {
-            VStack {
-                HStack(alignment: .center, spacing: 5) {
-                    searchBar
-                        .frame(width: .infinity)
-                    Spacer()
-                    sortButton
-                }
-                .padding()
-                
-                List {
-                    ForEach(filteredInventorySites) { inventorySite in
-                        Button {
-                            path.append(Route.detailedInventorySite(inventorySite))
-                        } label: {
-                            InventorySiteCellView(inventorySite: inventorySite)
-                        }
-                        .buttonStyle(.plain)
-                        .navigationDestination(for: Route.self) { view in
-                            switch view {
-                            case .inventorySitesList:
-                                InventorySitesView()
-                            case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-                            case .inventorySubmission(let inventorySite):
-                                InventorySubmissionView(path: $path, inventorySite: inventorySite)
-                                    .environmentObject(SheetManager())
-                            case .inventoryChange(let inventorySite):
-                                InventoryChangeView(path: $path, inventorySite: inventorySite)
-                            }
-                        }
+        VStack {
+            HStack(alignment: .center, spacing: 5) {
+                searchBar
+                    .frame(width: .infinity)
+                Spacer()
+                sortButton
+            }
+            .padding()
+            
+            List {
+                ForEach(filteredInventorySites) { inventorySite in
+                    Button {
+                        router.push(to: Destination.test/*detailedInventorySite(inventorySite)*/)
+                    } label: {
+                        InventorySiteCellView(inventorySite: inventorySite)
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
             .navigationTitle("Inventory Sites")

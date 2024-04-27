@@ -51,7 +51,7 @@ struct DetailedInventorySiteView: View {
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
     @StateObject private var siteViewModel = DetailedSiteViewModel()
     // View Managing
-    @Binding private var path: [Route]
+    @EnvironmentObject var router: AppRouter
     @StateObject var sheetManager = SheetManager()
     // Section Bools
     @State private var mapSectionExpanded: Bool = true
@@ -59,8 +59,7 @@ struct DetailedInventorySiteView: View {
     // Passed-In Values
     let inventorySite: InventorySite
     
-    init(path: Binding<[Route]>, inventorySite: InventorySite) {
-        self._path = path
+    init(inventorySite: InventorySite) {
         self.inventorySite = inventorySite
     }
     
@@ -75,6 +74,7 @@ struct DetailedInventorySiteView: View {
                 PictureSection
             }
         }
+        .padding()
         // View Title
         .navigationTitle("Inventory: \(inventorySite.name ?? "N/A")")
         // On Appear
@@ -125,7 +125,7 @@ struct DetailedInventorySiteView: View {
         // Submit Inventory Button
         VStack {
             Button (action: {
-                path.append(Route.inventorySubmission(inventorySite))
+                router.push(to: Destination.inventorySubmission(inventorySite))
             }) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
@@ -234,7 +234,7 @@ struct DetailedInventorySiteView: View {
 
 //MARK: Previews
 private struct DetailedInventorySitePreview: View {
-    @State private var path: [Route] = []
+    @EnvironmentObject var router: AppRouter
     
     private var inventorySite: InventorySite = InventorySite(
         id: "TzLMIsUbadvLh9PEgqaV",
@@ -244,25 +244,14 @@ private struct DetailedInventorySitePreview: View {
     )
     
     var body: some View {
-        NavigationStack (path: $path) {
+        VStack {
             Button ("Hello World") {
-                path.append(Route.detailedInventorySite(inventorySite))
-            }
-            .navigationDestination(for: Route.self) { view in
-                switch view {
-                case .inventorySitesList:
-                    InventorySitesView()
-                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-                case .inventorySubmission(let inventorySite):
-                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
-                        .environmentObject(SheetManager())
-                case .inventoryChange(let inventorySite):
-                    InventoryChangeView(path: $path, inventorySite: inventorySite)
-                }
+                router.push(to: Destination.detailedInventorySite(inventorySite))
             }
         }
         .onAppear {
-            path.append(Route.detailedInventorySite(inventorySite))
+            router.navPath = .init()
+//            router.push(to: Destination.detailedInventorySite(inventorySite))
         }
     }
 }
@@ -270,4 +259,14 @@ private struct DetailedInventorySitePreview: View {
     
 #Preview {
     DetailedInventorySitePreview()
+//    NavigationView {
+//        DetailedInventorySiteView(
+//            inventorySite: InventorySite (
+//                id: "TzLMIsUbadvLh9PEgqaV",
+//                name: "BCC 122",
+//                buildingId: "yXT87CrCZCoJVRvZn5DC",
+//                inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+//            )
+//        )
+//    }
 }

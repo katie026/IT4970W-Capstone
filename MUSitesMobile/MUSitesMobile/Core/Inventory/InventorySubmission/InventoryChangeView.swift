@@ -11,15 +11,14 @@ struct InventoryChangeView: View {
     // View Model
     @StateObject private var viewModel = InventorySubmissionViewModel()
     // View Control
-    @Binding private var path: [Route]
+    @EnvironmentObject var router: AppRouter
     @State private var reloadView = false
     @State private var summaryExpanded = false
     // Alerts
     @State private var showNoChangesAlert = false
     // init
     let inventorySite: InventorySite
-    init(path: Binding<[Route]>, inventorySite: InventorySite) {
-        self._path = path
+    init(inventorySite: InventorySite) {
         self.inventorySite = inventorySite
     }
 
@@ -108,7 +107,7 @@ struct InventoryChangeView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    path.removeLast(path.count - 1)
+                    router.pop(2)
                 }) {
                     Text("Cancel")
                         .foregroundColor(Color.white)
@@ -419,7 +418,7 @@ struct InventoryChangeView: View {
                         viewModel.submitAnInventoryEntry() { print("Entry completion.") }
                         
                         // return to DetailedInventoryView
-                        path.removeLast(path.count - 1)
+                        router.pop(2)
                     }
                 }) {
                     // Label
@@ -445,7 +444,7 @@ struct InventoryChangeView: View {
                 },
                 secondaryButton: .destructive(Text("Cancel Submission")) {
                     // return to DetailedInventoryView
-                    path.removeLast(path.count - 1)
+                    router.pop(2)
                 }
             )
         }
@@ -454,7 +453,7 @@ struct InventoryChangeView: View {
 
 //MARK: Previews
 private struct InventoryChangePreview: View {
-    @State private var path: [Route] = []
+    @EnvironmentObject var router: AppRouter
     
     private var inventorySite: InventorySite = InventorySite(
         id: "TzLMIsUbadvLh9PEgqaV",
@@ -464,30 +463,26 @@ private struct InventoryChangePreview: View {
     )
     
     var body: some View {
-        NavigationStack (path: $path) {
+        VStack {
             Button ("Hello World") {
-                path.append(Route.inventoryChange(inventorySite))
-            }
-            .navigationDestination(for: Route.self) { view in
-                switch view {
-                case .inventorySitesList:
-                    InventorySitesView()
-                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-                case .inventorySubmission(let inventorySite):
-                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
-                        .environmentObject(SheetManager())
-                case .inventoryChange(let inventorySite):
-                    InventoryChangeView(path: $path, inventorySite: inventorySite)
-                }
+                router.push(to: Destination.inventoryChange(inventorySite))
             }
         }
         .onAppear {
-            path.append(Route.inventoryChange(inventorySite))
+            router.push(to: Destination.inventoryChange(inventorySite))
         }
     }
 }
 
     
 #Preview {
-    InventoryChangePreview()
+//    InventoryChangePreview()
+    NavigationView {
+        InventoryChangeView(inventorySite: InventorySite(
+            id: "TzLMIsUbadvLh9PEgqaV",
+            name: "GO BCC",
+            buildingId: "yXT87CrCZCoJVRvZn5DC",
+            inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+        ))
+    }
 }

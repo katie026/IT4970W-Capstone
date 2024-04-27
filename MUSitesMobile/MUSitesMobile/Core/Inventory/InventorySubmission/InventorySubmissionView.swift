@@ -11,7 +11,7 @@ struct InventorySubmissionView: View {
     // View Model
     @StateObject private var viewModel = InventorySubmissionViewModel()
     // View Controls
-    @Binding private var path: [Route] // passed-in
+    @EnvironmentObject var router: AppRouter
     @EnvironmentObject var sheetManager: SheetManager // passed-in, for pop up view
     @State private var reloadView = false
     @State private var confirmOption: ConfirmOption = .Exit // button selection
@@ -22,8 +22,7 @@ struct InventorySubmissionView: View {
     
     // Initializer
     let inventorySite: InventorySite
-    init(path: Binding<[Route]>, inventorySite: InventorySite) {
-        self._path = path
+    init(inventorySite: InventorySite) {
         self.inventorySite = inventorySite
     }
     
@@ -82,11 +81,11 @@ struct InventorySubmissionView: View {
                                 // if user clicked Confirm & Continue
                                 if confirmOption == .Continue {
                                     // go to next view
-                                    path.append(Route.inventoryChange(inventorySite))
+                                    router.push(to: Destination.inventoryChange(inventorySite))
                                 // if user clicked Confirm & Exit
                                 } else {
                                     // dismiss current view
-                                    path.removeLast()
+                                    router.pop(1)
                                 }
                             } else {
                             // if CLOSE was clicked
@@ -553,10 +552,10 @@ struct InventorySubmissionView: View {
             
             if confirmOption == .Exit {
                 // dismiss submission view
-                path.removeLast()
+                router.pop(1)
             } else {
                 // go to next view
-                path.append(Route.inventoryChange(inventorySite))
+                router.push(to: Destination.inventoryChange(inventorySite))
             }
         // if any toggles are false (newSupplyTypes has data)
         } else {
@@ -588,7 +587,7 @@ struct InventorySubmissionView: View {
 
 //MARK: Previews
 private struct InventorySubmissionPreview: View {
-    @State private var path: [Route] = []
+    @EnvironmentObject var router: AppRouter
     
     private var inventorySite: InventorySite = InventorySite(
         id: "TzLMIsUbadvLh9PEgqaV",
@@ -598,30 +597,27 @@ private struct InventorySubmissionPreview: View {
     )
     
     var body: some View {
-        NavigationStack (path: $path) {
+        VStack {
             Button ("Hello World") {
-                path.append(Route.inventorySubmission(inventorySite))
-            }
-            .navigationDestination(for: Route.self) { view in
-                switch view {
-                case .inventorySitesList:
-                    InventorySitesView()
-                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-                case .inventorySubmission(let inventorySite):
-                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
-                        .environmentObject(SheetManager())
-                case .inventoryChange(let inventorySite):
-                    InventoryChangeView(path: $path, inventorySite: inventorySite)
-                }
+                router.push(to: Destination.inventorySubmission(inventorySite))
             }
         }
         .onAppear {
-            path.append(Route.inventorySubmission(inventorySite))
+            router.push(to: Destination.inventorySubmission(inventorySite))
         }
     }
 }
 
-    
 #Preview {
-    InventorySubmissionPreview()
+//    InventorySubmissionPreview()
+    NavigationView {
+        InventorySubmissionView(inventorySite: InventorySite (
+                id: "TzLMIsUbadvLh9PEgqaV",
+                name: "BCC 122",
+                buildingId: "yXT87CrCZCoJVRvZn5DC",
+                inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+            )
+        )
+        .environmentObject(SheetManager())
+    }
 }

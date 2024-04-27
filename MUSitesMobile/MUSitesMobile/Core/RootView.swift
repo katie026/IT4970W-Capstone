@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RootView: View {
-    
+    @EnvironmentObject var router: AppRouter
     @State private var showSignInView: Bool = false
     // @State will allow the view to update based on the value of this bool whenever it changes
     

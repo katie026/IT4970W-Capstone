@@ -10,6 +10,7 @@ import SwiftUI
 struct InventorySiteCellView: View {
     // Init
     let inventorySite: InventorySite
+    // reference variables
     @State private var building: Building? = nil
     @State private var inventoryTypes: [InventoryType] = []
     @State private var siteGroup: SiteGroup? = nil
