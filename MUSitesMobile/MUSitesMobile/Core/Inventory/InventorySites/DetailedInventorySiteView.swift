@@ -73,18 +73,12 @@ struct DetailedInventorySiteView: View {
     @StateObject private var viewModel = DetailedInventorySiteViewModel()
     @StateObject private var siteViewModel = DetailedSiteViewModel()
     // View Managing
-    @Binding private var path: [Route]
     @StateObject var sheetManager = SheetManager()
     // Section Bools
     @State private var mapSectionExpanded: Bool = false
     @State private var pictureSectionExpanded: Bool = false
     // Passed-In Values
     let inventorySite: InventorySite
-    
-    init(path: Binding<[Route]>, inventorySite: InventorySite) {
-        self._path = path
-        self.inventorySite = inventorySite
-    }
     
     var body: some View {
         // Content
@@ -104,7 +98,7 @@ struct DetailedInventorySiteView: View {
         .onAppear {
             Task {
                 viewModel.loadSiteGroup(buildingId: inventorySite.buildingId ?? "") {}
-                await viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
+                viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
                 await siteViewModel.fetchSiteSpecificImageURLs(siteName: inventorySite.name ?? "Clark", category: "Inventory")
             }
         }
@@ -148,9 +142,9 @@ struct DetailedInventorySiteView: View {
     private var SubmitInventoryButton: some View {
         // Submit Inventory Button
         VStack {
-            Button (action: {
-                path.append(Route.inventorySubmission(inventorySite))
-            }) {
+            NavigationLink{ InventorySubmissionView(inventorySite: inventorySite)
+                    .environmentObject(SheetManager())
+            } label: {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
                         .foregroundColor(Color(UIColor.systemGray5))
@@ -162,6 +156,20 @@ struct DetailedInventorySiteView: View {
                     .padding(10)
                 }
             }
+//            Button (action: {
+//                path.append(Route.inventorySubmission(inventorySite))
+//            }) {
+//                ZStack {
+//                    RoundedRectangle(cornerRadius: 8)
+//                        .foregroundColor(Color(UIColor.systemGray5))
+//                    HStack {
+//                        Label("Submit Inventory", systemImage: "pencil.and.list.clipboard")
+//                            .foregroundColor(.blue)
+//                        Spacer()
+//                    }
+//                    .padding(10)
+//                }
+//            }
         }.padding(.trailing, 14)
     }
     
@@ -264,42 +272,45 @@ struct DetailedInventorySiteView: View {
 }
 
 
-//MARK: Previews
-private struct DetailedInventorySitePreview: View {
-    @State private var path: [Route] = []
+////MARK: Previews
+//private struct DetailedInventorySitePreview: View {
+//    private var inventorySite: InventorySite = InventorySite(
+//        id: "TzLMIsUbadvLh9PEgqaV",
+//        name: "BCC 122",
+//        buildingId: "yXT87CrCZCoJVRvZn5DC",
+//        inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+//    )
+//    
+//    var body: some View {
+//        NavigationStack (path: $path) {
+//            Button ("Hello World") {
+//                path.append(Route.detailedInventorySite(inventorySite))
+//            }
+//            .navigationDestination(for: Route.self) { view in
+//                switch view {
+//                case .inventorySitesList:
+//                    InventorySitesView()
+//                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
+//                case .inventorySubmission(let inventorySite):
+//                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
+//                        .environmentObject(SheetManager())
+//                case .inventoryChange(let inventorySite):
+//                    InventoryChangeView(path: $path, inventorySite: inventorySite)
+//                }
+//            }
+//        }
+//        .onAppear {
+//            path.append(Route.detailedInventorySite(inventorySite))
+//        }
+//    }
+//}
+
     
-    private var inventorySite: InventorySite = InventorySite(
+#Preview {
+    DetailedInventorySiteView(inventorySite: InventorySite(
         id: "TzLMIsUbadvLh9PEgqaV",
         name: "BCC 122",
         buildingId: "yXT87CrCZCoJVRvZn5DC",
         inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
-    )
-    
-    var body: some View {
-        NavigationStack (path: $path) {
-            Button ("Hello World") {
-                path.append(Route.detailedInventorySite(inventorySite))
-            }
-            .navigationDestination(for: Route.self) { view in
-                switch view {
-                case .inventorySitesList:
-                    InventorySitesView()
-                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-                case .inventorySubmission(let inventorySite):
-                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
-                        .environmentObject(SheetManager())
-                case .inventoryChange(let inventorySite):
-                    InventoryChangeView(path: $path, inventorySite: inventorySite)
-                }
-            }
-        }
-        .onAppear {
-            path.append(Route.detailedInventorySite(inventorySite))
-        }
-    }
-}
-
-    
-#Preview {
-    DetailedInventorySitePreview()
+        ))
 }

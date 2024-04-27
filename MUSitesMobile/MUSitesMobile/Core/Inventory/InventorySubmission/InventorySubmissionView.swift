@@ -11,7 +11,9 @@ struct InventorySubmissionView: View {
     // View Model
     @StateObject private var viewModel = InventorySubmissionViewModel()
     // View Controls
-    @Binding private var path: [Route] // passed-in
+    @Environment(\.presentationMode) var presentationMode // presentationMode.wrappedValue.dismiss()
+    @State private var submissionOver = false
+    @State private var goToNextView = false
     @EnvironmentObject var sheetManager: SheetManager // passed-in, for pop up view
     @State private var reloadView = false
     @State private var confirmOption: ConfirmOption = .Exit // button selection
@@ -22,93 +24,103 @@ struct InventorySubmissionView: View {
     
     // Initializer
     let inventorySite: InventorySite
-    init(path: Binding<[Route]>, inventorySite: InventorySite) {
-        self._path = path
-        self.inventorySite = inventorySite
-    }
     
     var body: some View {
         // Content
-        content
+            content
             // On appear
-            .onAppear {
-                // tell the viewModel which inventorySite this is
-                viewModel.inventorySite = inventorySite
-                // Get supply info
-                Task {
-                    viewModel.getSupplyCounts(inventorySiteId: inventorySite.id)
-                    viewModel.getSupplyTypes()
-                    // Get inventory sites if list is empty
-                    if (viewModel.inventorySites.isEmpty) {
-                        // load all inventory sites
-                        viewModel.getInventorySites {
-                            // wait for completion
-                            // remove the current Site from the list
-                            viewModel.inventorySites.removeAll { $0.id == inventorySite.id }
-                            // assign a destinationSite
-                            if !viewModel.inventorySites.isEmpty {
-                                viewModel.destinationSite = viewModel.inventorySites[0]
+                .onAppear {
+                    // tell the viewModel which inventorySite this is
+                    viewModel.inventorySite = inventorySite
+                    // Get supply info
+                    Task {
+                        viewModel.getSupplyCounts(inventorySiteId: inventorySite.id)
+                        viewModel.getSupplyTypes()
+                        // Get inventory sites if list is empty
+                        if (viewModel.inventorySites.isEmpty) {
+                            // load all inventory sites
+                            viewModel.getInventorySites {
+                                // wait for completion
+                                // remove the current Site from the list
+                                viewModel.inventorySites.removeAll { $0.id == inventorySite.id }
+                                // assign a destinationSite
+                                if !viewModel.inventorySites.isEmpty {
+                                    viewModel.destinationSite = viewModel.inventorySites[0]
+                                }
                             }
                         }
                     }
                 }
-            }
             // View Title
-            .navigationTitle("Submit Inventory")
+                .navigationTitle("Submit Inventory")
             // Assign id to view
-            .id(reloadView) // triggers update when reloadView changes
+                .id(reloadView) // triggers update when reloadView changes
             // EntryType Popup
-            .overlay(alignment: .bottom) {
-                // when sheetManager.present() is called -> sheetManager's enum Action == .isPresented
-                if sheetManager.action.isPresented {
-                    // overlay the PopupView
-                    EntryTypePopupView(
-                        // pass in closure
-                        didClose: { // after closure is called
-                            // if SUBMIT was clicked
-                            if submitClicked {
-                                // submit an entry
-                                print("Submit entry as \(viewModel.inventoryEntryType).")
-                                viewModel.submitAnInventoryEntry() { print("Entry completion.") }
-                                
-                                // reset submitClicked status
-                                submitClicked = false
-                                
-                                // dismiss popup
-                                withAnimation {
-                                    sheetManager.dismiss()
-                                }
-                                
-                                // if user clicked Confirm & Continue
-                                if confirmOption == .Continue {
-                                    // go to next view
-                                    path.append(Route.inventoryChange(inventorySite))
-                                // if user clicked Confirm & Exit
+                .overlay(alignment: .bottom) {
+                    // when sheetManager.present() is called -> sheetManager's enum Action == .isPresented
+                    if sheetManager.action.isPresented {
+                        // overlay the PopupView
+                        EntryTypePopupView(
+                            // pass in closure
+                            didClose: { // after closure is called
+                                // if SUBMIT was clicked
+                                if submitClicked {
+                                    // submit an entry
+                                    print("Submit entry as \(viewModel.inventoryEntryType).")
+                                    viewModel.submitAnInventoryEntry() { print("Entry completion.") }
+                                    
+                                    // reset submitClicked status
+                                    submitClicked = false
+                                    
+                                    // dismiss popup
+                                    withAnimation {
+                                        sheetManager.dismiss()
+                                    }
+                                    
+                                    // if user clicked Confirm & Continue
+                                    if confirmOption == .Continue {
+                                        // go to next view
+                                        print("Go to next view")
+                                        goToNextView = true
+                                        // if user clicked Confirm & Exit
+                                    } else {
+                                        // dismiss current view
+                                        dismissView()
+                                    }
                                 } else {
-                                    // dismiss current view
-                                    path.removeLast()
+                                    // if CLOSE was clicked
+                                    // dismiss popup
+                                    withAnimation {
+                                        sheetManager.dismiss()
+                                    }
                                 }
-                            } else {
-                            // if CLOSE was clicked
-                                // dismiss popup
-                                withAnimation {
-                                    sheetManager.dismiss()
-                                }
-                            }
-                        },
-                        // pass in entryType
-                        selectedOption: $viewModel.inventoryEntryType,
-                        // pass in submitClicked bool
-                        submitClicked: $submitClicked)
+                            },
+                            // pass in entryType
+                            selectedOption: $viewModel.inventoryEntryType,
+                            // pass in submitClicked bool
+                            submitClicked: $submitClicked)
+                    }
                 }
-            }
-            .alert(isPresented: $showDuplicateAlert) {
-                Alert(
-                    title: Text("Duplicate Count"),
-                    message: Text("One of these supply counts is the same. Either change or confirm the value."),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
+                .alert(isPresented: $showDuplicateAlert) {
+                    Alert(
+                        title: Text("Duplicate Count"),
+                        message: Text("One of these supply counts is the same. Either change or confirm the value."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
+                .onChange(of: submissionOver) {
+                    if submissionOver {
+                        dismissView()
+                    }
+                }
+            // add a button to dismiss keypad when needed
+                .toolbar {
+                    ToolbarItem(placement: .keyboard) {
+                        Button("Done") {
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
+                    }
+                }
     }
 
     private var content: some View {
@@ -120,6 +132,12 @@ struct InventorySubmissionView: View {
                 endPoint: .center
             )
             .edgesIgnoringSafeArea(.top)
+            
+            NavigationLink(
+                destination: InventoryChangeView(inventorySite: inventorySite, submissionOver: $submissionOver),
+                isActive: $goToNextView) {
+                    EmptyView()
+                }
             
             // Content window
             VStack() {
@@ -152,14 +170,6 @@ struct InventorySubmissionView: View {
                 
                 // Action Button section
                 actionButtonsSection
-            }
-        }
-        // add a button to dismiss keypad when needed
-        .toolbar {
-            ToolbarItem(placement: .keyboard) {
-                Button("Done") {
-                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                }
             }
         }
     }
@@ -519,6 +529,7 @@ struct InventorySubmissionView: View {
         Button(action: {
             // indicate which button was pressed
             confirmOption = .Continue
+            print("Button confirm continue")
             confirm()
         }) {
             // Button display
@@ -536,6 +547,7 @@ struct InventorySubmissionView: View {
     }
     
     private func confirm() {
+        print("confirm function start")
         // check if newSupplyCounts is empty
         var allTogglesConfirmed = false
         if viewModel.newSupplyCounts.isEmpty {
@@ -553,10 +565,11 @@ struct InventorySubmissionView: View {
             
             if confirmOption == .Exit {
                 // dismiss submission view
-                path.removeLast()
+                dismissView()
             } else {
                 // go to next view
-                path.append(Route.inventoryChange(inventorySite))
+                print("Go to next view")
+                goToNextView = true
             }
         // if any toggles are false (newSupplyTypes has data)
         } else {
@@ -578,50 +591,65 @@ struct InventorySubmissionView: View {
             // otherwise, the user entered intentional changes
             } else {
                 // display popup -> update entry type (.Fix or .Delivery) -> may submit entry
+                print("Should sheet")
                 withAnimation {
+                    print("Should withAnimationPresent")
                     sheetManager.present()
                 }
             }
         }
     }
-}
-
-//MARK: Previews
-private struct InventorySubmissionPreview: View {
-    @State private var path: [Route] = []
     
-    private var inventorySite: InventorySite = InventorySite(
-        id: "TzLMIsUbadvLh9PEgqaV",
-        name: "BCC 122",
-        buildingId: "yXT87CrCZCoJVRvZn5DC",
-        inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
-    )
-    
-    var body: some View {
-        NavigationStack (path: $path) {
-            Button ("Hello World") {
-                path.append(Route.inventorySubmission(inventorySite))
-            }
-            .navigationDestination(for: Route.self) { view in
-                switch view {
-                case .inventorySitesList:
-                    InventorySitesView()
-                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-                case .inventorySubmission(let inventorySite):
-                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
-                        .environmentObject(SheetManager())
-                case .inventoryChange(let inventorySite):
-                    InventoryChangeView(path: $path, inventorySite: inventorySite)
-                }
-            }
-        }
-        .onAppear {
-            path.append(Route.inventorySubmission(inventorySite))
-        }
+    func dismissView() {
+        presentationMode.wrappedValue.dismiss()
     }
 }
 
+//MARK: Previews
+//private struct InventorySubmissionPreview: View {
+//    @State private var path: [Route] = []
+//    
+//    private var inventorySite: InventorySite = InventorySite(
+//        id: "TzLMIsUbadvLh9PEgqaV",
+//        name: "BCC 122",
+//        buildingId: "yXT87CrCZCoJVRvZn5DC",
+//        inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+//    )
+//    
+//    var body: some View {
+//        NavigationStack (path: $path) {
+//            Button ("Hello World") {
+//                path.append(Route.inventorySubmission(inventorySite))
+//            }
+//            .navigationDestination(for: Route.self) { view in
+//                switch view {
+//                case .inventorySitesList:
+//                    InventorySitesView()
+//                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
+//                case .inventorySubmission(let inventorySite):
+//                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
+//                        .environmentObject(SheetManager())
+//                case .inventoryChange(let inventorySite):
+//                    InventoryChangeView(path: $path, inventorySite: inventorySite)
+//                }
+//            }
+//        }
+//        .onAppear {
+//            path.append(Route.inventorySubmission(inventorySite))
+//        }
+//    }
+//}
+
     
 #Preview {
-    InventorySubmissionPreview()
+    NavigationStack {
+        InventorySubmissionView(inventorySite: InventorySite(
+            id: "TzLMIsUbadvLh9PEgqaV",
+            name: "BCC 122",
+            buildingId: "yXT87CrCZCoJVRvZn5DC",
+            inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+        )
+        )
+        .environmentObject(SheetManager())
+    }
 }

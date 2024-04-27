@@ -12,44 +12,26 @@ struct BuildingDetailView: View {
     let building: Building
     @State private var computingSites: [Site] = []
     @State private var inventorySites: [InventorySite] = []
-    @State var path: [Route] = []
-
+    
     var body: some View {
-        NavigationStack(path: $path) {
-            VStack {
-                // Combined Sites Section
-                List {
-                    Section(header: Text("Sites")) {
-                        ForEach(computingSites) { site in
-                            SiteCellView(site: site)
-                        }
+        VStack {
+            // Combined Sites Section
+            List {
+                Section(header: Text("Sites")) {
+                    ForEach(computingSites) { site in
+                        SiteCellView(site: site)
                     }
-                    Section(header: Text("Inventory Sites")) {
-                        ForEach(inventorySites) { site in
-                            Button {
-                                path.append(Route.detailedInventorySite(site))
-                            } label: {
-                                InventorySiteCellView(inventorySite: site)
-                            }
-                            .buttonStyle(.plain)
-                            .navigationDestination(for: Route.self) { view in
-                                switch view {
-                                case .inventorySitesList:
-                                    InventorySitesView()
-                                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-                                case .inventorySubmission(let inventorySite):
-                                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
-                                        .environmentObject(SheetManager())
-                                case .inventoryChange(let inventorySite):
-                                    InventoryChangeView(path: $path, inventorySite: inventorySite)
-                                }
-                            }
+                }
+                Section(header: Text("Inventory Sites")) {
+                    ForEach(inventorySites) { site in
+                        NavigationLink{ DetailedInventorySiteView(inventorySite: site)} label: {
+                            InventorySiteCellView(inventorySite: site)
                         }
                     }
                 }
-                .listStyle(GroupedListStyle())
-                .navigationTitle(building.name ?? "")
             }
+            .listStyle(GroupedListStyle())
+            .navigationTitle(building.name ?? "")
         }
         .onAppear {
             Task {
