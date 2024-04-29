@@ -19,7 +19,9 @@ struct SupplyRequest: Codable {
     let resolved: Bool?
     let dateCreated: Date?
     let dateResolved: Date?
+    let supplyType: String?
     
+
     init(
         id: String,
         siteId: String? = nil,
@@ -29,7 +31,8 @@ struct SupplyRequest: Codable {
         reportType: String? = nil,
         resolved: Bool? = nil,
         dateCreated: Date? = nil,
-        dateResolved: Date? = nil
+        dateResolved: Date? = nil,
+        supplyType: String? = nil // Added supplyType initialization
     )
     {
         self.id = id
@@ -41,7 +44,7 @@ struct SupplyRequest: Codable {
         self.resolved = resolved
         self.dateResolved = dateResolved
         self.dateCreated = dateCreated
-        
+        self.supplyType = supplyType
     }
     
     enum CodingKeys: String, CodingKey {
@@ -54,10 +57,10 @@ struct SupplyRequest: Codable {
         case resolved = "resolved"
         case dateCreated = "date_created"
         case dateResolved = "date_resolved"
-        
+        case supplyType = "supplyType" // Corrected supplyType key
     }
     
-    init(from decoder: any Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(String.self, forKey: .id)
         self.siteId = try container.decodeIfPresent(String.self, forKey: .siteId)
@@ -68,9 +71,10 @@ struct SupplyRequest: Codable {
         self.resolved = try container.decodeIfPresent(Bool.self, forKey: .resolved)
         self.dateCreated = try container.decodeIfPresent(Date.self, forKey: .dateCreated)
         self.dateResolved = try container.decodeIfPresent(Date.self, forKey: .dateResolved)
+        self.supplyType = try container.decodeIfPresent(String.self, forKey: .supplyType) // Corrected decoding for supplyType
     }
-    
-    func encode(to encoder: any Encoder) throws {
+
+    func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.id, forKey: .id)
         try container.encodeIfPresent(self.siteId, forKey: .siteId)
@@ -81,6 +85,7 @@ struct SupplyRequest: Codable {
         try container.encodeIfPresent(self.resolved, forKey: .resolved)
         try container.encodeIfPresent(self.dateCreated, forKey: .dateCreated)
         try container.encodeIfPresent(self.dateResolved, forKey: .dateResolved)
+        try container.encodeIfPresent(self.supplyType, forKey: .supplyType) // Corrected encoding for supplyType
     }
 }
 
@@ -98,16 +103,10 @@ final class SupplyRequestManager {
     }
     
     // create Firestore encoder
-    private let encoder: Firestore.Encoder = {
-        let encoder = Firestore.Encoder()
-        return encoder
-    }()
+    private let encoder: Firestore.Encoder = Firestore.Encoder()
     
     // create Firestore decoder
-    private let decoder: Firestore.Decoder = {
-        let decoder = Firestore.Decoder()
-        return decoder
-    }()
+    private let decoder: Firestore.Decoder = Firestore.Decoder()
     
     // get a supplyRequest from Firestore as SupplyRequest struct
     func getSupplyRequest(supplyRequestId: String) async throws -> SupplyRequest {
@@ -213,6 +212,14 @@ final class SupplyRequestManager {
         // Commit the batched write operation
         try await batch.commit()
     }
+    
+    func toggleSupplyRequestResolution(request: SupplyRequest) async throws {
+        // Update the resolved status of the supply request in Firestore
+        try await supplyRequestDocument(supplyRequestId: request.id).updateData([
+            "resolved": !(request.resolved ?? false) // Toggle the resolved status
+        ])
+    }
+
 }
 
 // Errors
