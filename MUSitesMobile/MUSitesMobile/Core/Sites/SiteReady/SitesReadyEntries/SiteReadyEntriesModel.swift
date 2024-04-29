@@ -8,63 +8,48 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 
-let dateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "MMMM d, yyyy 'at' h:mm:ss a z"
-    return formatter
-}()
-
 class SitesReadyEntriesViewModel: ObservableObject {
     @Published var entries: [SiteReadyEntry] = []
     private let db = Firestore.firestore()
-    
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+    @Published var endDate = Date()
+
     func fetchSitesReadyEntries() {
-        db.collection("site_ready_entries").getDocuments { [weak self] querySnapshot, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print("Error fetching site ready entries: \(error)")
-                return
-            }
-            
-            guard let documents = querySnapshot?.documents else {
-                print("No documents found.")
-                return
-            }
-            
-            let entries = documents.compactMap { document -> SiteReadyEntry? in
-                do {
-                    var decodedEntry = try document.data(as: SiteReadyEntry.self)
-                    decodedEntry.timestamp = dateFormatter.date(from: document["timestamp"] as? String ?? "")
-                    return decodedEntry
-                } catch {
-                    print("Error decoding document data: \(error)")
-                    return nil
+        db.collection("site_ready_entries")
+            .whereField("timestamp", isGreaterThanOrEqualTo: startDate)
+            .whereField("timestamp", isLessThanOrEqualTo: endDate)
+            .getDocuments { [weak self] querySnapshot, error in
+                guard let self = self else { return }
+
+                if let error = error {
+                    print("Error fetching site ready entries: \(error)")
+                    return
+                }
+
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents found.")
+                    return
+                }
+
+                let entries = documents.compactMap { document -> SiteReadyEntry? in
+                    do {
+                        var decodedEntry = try document.data(as: SiteReadyEntry.self)
+                        if let timestamp = document["timestamp"] as? Timestamp {
+                            decodedEntry.timestamp = timestamp.dateValue()
+                        } else {
+                            decodedEntry.timestamp = nil
+                        }
+                        return decodedEntry
+                    } catch {
+                        print("Error decoding document data: \(error)")
+                        return nil
+                    }
+                }
+
+                DispatchQueue.main.async {
+                    self.entries = entries
                 }
             }
-            
-            //printed decoded entries for debugging
-            for entry in entries {
-                print("Decoded Entry:")
-                print("ID: \(entry.id)")
-                print("BW Printer Count: \(entry.bwPrinterCount ?? -1)") // Use -1 as a placeholder if nil
-                print("Chair Count: \(entry.chairCount ?? -1)")
-                print("Color Printer Count: \(entry.colorPrinterCount ?? -1)")
-                
-                if let timestamp = entry.timestamp {
-                    print("Timestamp: \(dateFormatter.string(from: timestamp))")
-                } else {
-                    print("Timestamp: nil")
-                }
-                
-                print("User: \(entry.user ?? "Unknown")")
-                print("------------------------------------")
-            }
-            
-            DispatchQueue.main.async {
-                self.entries = entries
-            }
-        }
     }
 }
 
