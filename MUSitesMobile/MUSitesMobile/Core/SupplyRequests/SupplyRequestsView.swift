@@ -11,7 +11,7 @@ import SwiftUI
 final class SupplyRequestsViewModel: ObservableObject {
     
     @Published var supplyRequests: [SupplyRequest] = []
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -366, to: Date())!
     @Published var endDate = Date()
     @Published var isLoading = false
     @Published var hasLoadedOnce = false
@@ -27,13 +27,9 @@ final class SupplyRequestsViewModel: ObservableObject {
         }
     }
     
-        func fetchSupplyRequests() {
-                isLoading = true
-                getSupplyRequests {
-                    self.isLoading = false
-                    self.hasLoadedOnce = true
-                }
-            }
+        
+    
+
         
         func swapSupplyRequestsOrder() {
             supplyRequests.reverse()
@@ -46,6 +42,15 @@ struct SupplyRequestsView: View {
     // View Control
     @State private var searchText = ""
     @State private var selectedSortOption: SortOption? // Define selectedSortOption
+    @State private var hasLoadedOnce = false
+    // Track loading status
+    @State private var isLoading = true
+    // sort/filter option
+    let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M/d/yy"
+        return formatter
+    }()
     
     // Define SortOption enum if not defined already
     enum SortOption {
@@ -54,26 +59,34 @@ struct SupplyRequestsView: View {
     }
     
     var body: some View {
-            NavigationView { // Embed the view in a NavigationView
-                // Content
-                content
-                    .navigationTitle("Supply Requests")
-                    .navigationBarHidden(false) // Ensure navigation bar is visible
-                    .onAppear {
-                        // Fetch supply requests when view appears
-                        viewModel.getSupplyRequests {}
-                    }
+        // Content
+        content
+            .navigationTitle("Supply Requests")
+            .onAppear {
+                Task {
+                    // Fetch supply requests when view appears
+                    viewModel.getSupplyRequests {}
+                }
+            }
+    }
+        
+    
+    func fetchSupplyRequests() {
+            
+            viewModel.getSupplyRequests {
+                print("Got \(viewModel.supplyRequests.count) supply requests.")
+                isLoading = false
+                
             }
         }
     
+
+    
     private var content: some View {
-        ScrollView { // Wrap the content in a ScrollView
-            VStack(spacing: 20) { // Adjust the spacing between elements
-                datePickers
-                searchBar
-                supplyRequestList
-            }
-            .padding() // Add padding to the VStack
+        VStack {
+            datePickers
+            searchBar
+            supplyRequestList
         }
     }
     
@@ -149,7 +162,9 @@ struct SupplyRequestsView: View {
     
     private var fetchSupplyRequestsButton: some View {
         Button(action: {
-            self.viewModel.fetchSupplyRequests() // Use self.viewModel to access the view model
+            isLoading = true
+            fetchSupplyRequests()
+            hasLoadedOnce = true
         }) {
             Image(systemName: "arrow.clockwise")
                 .font(.system(size: 20))
@@ -171,13 +186,35 @@ struct SupplyRequestsView: View {
 
     
     private var supplyRequestList: some View {
-            List {
-                ForEach(filteredSupplyRequests(), id: \.id) { supplyRequest in
-                    supplyRequestCellView(supplyRequest: supplyRequest)
+        List {
+            // Check if the supply requests have been loaded at least once
+            if viewModel.hasLoadedOnce {
+                // Check if there are no supply requests for the selected date range
+                if viewModel.supplyRequests.isEmpty {
+                    Text("There are no supply requests for this date range.")
+                        .foregroundColor(.gray)
+                } else {
+                    // Display the list of supply requests
+                    ForEach(filteredSupplyRequests(), id: \.id) { supplyRequest in
+                        ScrollView(.horizontal) {
+                            supplyRequestCellView(supplyRequest: supplyRequest)
+                        }
+                        .contextMenu {
+                            // Add context menu actions here if needed
+                        }
+                    }
                 }
+            } else {
+                // Show a message prompting the user to choose a date range and reload
+                Text("Choose a date range and reload.")
+                    .foregroundColor(.gray)
             }
-            .listStyle(.insetGrouped)
         }
+        .listStyle(.insetGrouped)
+    }
+
+
+    
         
     private func filteredSupplyRequests() -> [SupplyRequest] {
         // Filter based on search text
@@ -204,11 +241,25 @@ struct SupplyRequestsView: View {
 
         
     private func supplyRequestCellView(supplyRequest: SupplyRequest) -> some View {
-        VStack(alignment: .leading) {
-            Text("Report Type: \(supplyRequest.reportType ?? "N/A")")
-            Text("Date Created: \(formattedDate(supplyRequest.dateCreated))")
-            Text("Resolved: \(supplyRequest.resolved ?? false ? "Yes" : "No")")
-            Text("Supply Type: \(supplyRequest.supplyType ?? "N/A")") // Use supplyType property here
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "calendar")
+                Text("Date Created: \(formattedDate(supplyRequest.dateCreated))")
+            }
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(supplyRequest.resolved ?? false ? .green : .red)
+                Text("Resolved: \(supplyRequest.resolved ?? false ? "Yes" : "No")")
+            }
+            HStack {
+                Image(systemName: "square.and.pencil")
+                Text("Report Type: \(supplyRequest.reportType ?? "N/A")")
+            }
+            HStack {
+                Image(systemName: "cube.box")
+                Text("Supply Type: \(supplyRequest.supplyType ?? "N/A")")
+            }
+            // Can add more information here as needed
         }
         .padding()
         .background(Color.gray.opacity(0.1))
@@ -216,6 +267,7 @@ struct SupplyRequestsView: View {
         .padding(.vertical, 5)
         .padding(.horizontal)
     }
+
 
 
 
