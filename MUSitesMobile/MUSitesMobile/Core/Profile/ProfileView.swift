@@ -74,13 +74,13 @@ struct ProfileView: View {
             Text("**ID:** \(viewModel.user?.studentId.map(String.init) ?? "N/A")")
             // EMAIL
             Text("**Email:** \(viewModel.user?.email ?? "N/A")")
-            Text("**Date:** \(viewModel.user?.lastLogin?.formatted(.dateTime) ?? "N/A")")
             // KEYS
             keysGroup
             // POSITIONS
             positionsSection()
             // CHAIR COUNT (for testing)
 //            chairCountsSection(user: user)
+            Text("**Last Login:** \(viewModel.user?.lastLogin?.formatted(.dateTime) ?? "N/A")")
         }
     }
     

@@ -236,48 +236,34 @@ struct AdminUserProfileView: View {
     }
     
     private func positionsSection(user: DBUser) -> some View {
-        // load the position names
-        if let positionIds = self.user.positionIds {
-            // for position in user's positionIds array
-            for positionId in positionIds {
-                // find position using positionId
-                guard let position = allPositions.first(where: { $0.id == positionId }) else { continue }
-                // add to position list
-                userPositions.append(position)
-                print("adding \(position.nickname ?? "?") position to userPos list")
-                // sort position list
-                userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
-            }
-        }
-        
         let view = Section ("Positions") {
             VStack {
-            Text("**Positions**: \((userPositions.map{$0.nickname ?? ""}).joined(separator: ", "))")
-                .frame(maxWidth: .infinity, alignment: .leading)
-            HStack {
-                // make a button for each position option above
-                // positionOptions conforms to hashable (using id: \.self)
-                ForEach(allPositions, id: \.self) { position in
-                    Button(position.nickname ?? "N/A") {
-                        // if user has the position
-                        if userHasPosition(positionId: position.id) {
-                            print("Button removing user position \(position.nickname ?? "?")")
-                            // delete the position in Firestore and update userPositions
-                            removeUserPosition(positionId: position.id)
-                        } else {
-                            print("Button adding user position \(position.nickname ?? "?")")
-                            // otherwise add the position in Firestore and update userPositions
-                            addUserPosition(positionId: position.id)
+                Text("**Positions**: \((userPositions.map{$0.nickname ?? ""}).joined(separator: ", "))")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack {
+                    // make a button for each position option above
+                    // positionOptions conforms to hashable (using id: \.self)
+                    ForEach(allPositions, id: \.self) { position in
+                        Button(position.nickname ?? "N/A") {
+                            // if user has the position
+                            if userHasPosition(positionId: position.id) {
+                                print("Button removing user position \(position.nickname ?? "?")")
+                                // delete the position in Firestore and update userPositions
+                                removeUserPosition(positionId: position.id)
+                            } else {
+                                print("Button adding user position \(position.nickname ?? "?")")
+                                // otherwise add the position in Firestore and update userPositions
+                                addUserPosition(positionId: position.id)
+                            }
                         }
+                        .buttonStyle(.borderedProminent)
+                        // green if user already has position, red otherwise
+                        .tint(userHasPosition(positionId: position.id) ? .green : .red)
                     }
-                    .buttonStyle(.borderedProminent)
-                    // green if user already has position, red otherwise
-                    .tint(userHasPosition(positionId: position.id) ? .green : .red)
+                    
+                    Spacer()
                 }
-                
-                Spacer()
             }
-        }
         }
         
         return AnyView(view)
@@ -351,6 +337,21 @@ struct AdminUserProfileView: View {
                 allPositions = try await PositionManager.shared.getAllPositions(descending: false)
             } catch {
                 print("Error getting all positions: \(error)")
+            }
+            
+            // load positions for the user
+            // load the position names
+            if let positionIds = self.user.positionIds {
+                // for position in user's positionIds array
+                for positionId in positionIds {
+                    // find position using positionId
+                    guard let position = allPositions.first(where: { $0.id == positionId }) else { continue }
+                    // add to position list
+                    userPositions.append(position)
+                    print("adding \(position.nickname ?? "?") position to userPos list \(userPositions.count)")
+                    // sort position list
+                    userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
+                }
             }
         }
     }
