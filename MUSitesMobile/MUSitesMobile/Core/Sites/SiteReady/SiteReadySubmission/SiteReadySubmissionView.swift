@@ -61,8 +61,9 @@ struct SiteReadySurveyView: View {
                     .frame(maxWidth: .infinity)
                     .background(Color.blue)
                     .cornerRadius(10)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 3)
             }
-            .padding(.vertical)
         }
         .navigationTitle("Site Ready Survey")
 //        .navigationBarItems(leading: Button(action: {
@@ -76,6 +77,13 @@ struct SiteReadySurveyView: View {
         .onAppear {
             Task {
                 self.user = try AuthenticationManager.shared.getAuthenticatedUser()
+            }
+        }
+        .toolbar { // this should work like it does on the other submission views, but ti doesn't here...
+            ToolbarItem(placement: .keyboard) {
+                Button("Done") { // for numpad
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
             }
         }
     }
@@ -734,21 +742,23 @@ extension SiteReadySurveyView {
 //}
 
 #Preview {
-    SiteReadySurveyView(site: Site(
-        id: "BezlCe1ospf57zMdop2z",
-        name: "Bluford",
-        buildingId: "SvK0cIKPNTGCReVCw7Ln",
-        nearestInventoryId: "345",
-        chairCounts: [ChairCount(count: 3, type: "physics_black")],
-        siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
-        hasClock: true,
-        hasInventory: true,
-        hasWhiteboard: true,
-        namePatternMac: "CLARK-MAC-##",
-        namePatternPc: "CLARK-PC-##",
-        namePatternPrinter: "Clark Printer ##",
-        calendarName: "cornell-hall-5-lab"
-    ))
+    NavigationView {
+        SiteReadySurveyView(site: Site(
+            id: "BezlCe1ospf57zMdop2z",
+            name: "Bluford",
+            buildingId: "SvK0cIKPNTGCReVCw7Ln",
+            nearestInventoryId: "345",
+            chairCounts: [ChairCount(count: 3, type: "physics_black")],
+            siteTypeId: "Y3GyB3xhDxKg2CuQcXAA",
+            hasClock: true,
+            hasInventory: true,
+            hasWhiteboard: true,
+            namePatternMac: "CLARK-MAC-##",
+            namePatternPc: "CLARK-PC-##",
+            namePatternPrinter: "Clark Printer ##",
+            calendarName: "cornell-hall-5-lab"
+        ))
+    }
 }
 
 // Errors

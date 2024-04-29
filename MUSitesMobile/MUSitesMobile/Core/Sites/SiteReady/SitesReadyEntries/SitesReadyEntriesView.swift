@@ -9,42 +9,40 @@ import SwiftUI
 
 struct SiteReadyEntriesView: View {
     @StateObject var viewModel = SitesReadyEntriesViewModel()
-
+    
     var body: some View {
-        NavigationView {
-            List(viewModel.entries) { entry in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("ID: \(entry.id)")
-                    Text("BW Printer Count: \(entry.bwPrinterCount ?? 0)")
-                    Text("Chair Count: \(entry.chairCount ?? 0)")
-                    Text("Color Printer Count: \(entry.colorPrinterCount ?? 0)")
-                    Text("MAC Count: \(entry.macCount ?? 0)")
-                    Text("Missing Chairs: \(entry.missingChairs ?? 0)")
-                    Text("PC Count: \(entry.pcCount ?? 0)")
-                    Text("Comments: \(entry.comments ?? "")")
-                    Text("Computing Site: \(entry.computingSite ?? "")")
-                    Text("Issues: \(entry.issues?.joined(separator: ", ") ?? "")")
-                    Text("Scanner Count: \(entry.scannerCount ?? 0)")
-                    Text("User: \(entry.user ?? "")")
-                    if let timestamp = entry.timestamp {
-                        Text("Timestamp: \(timestamp)")
-                    } else {
-                        Text("Timestamp: N/A")
-                    }
-                    // Add more Text views for other properties
+        List(viewModel.entries) { entry in
+            VStack(alignment: .leading, spacing: 8) {
+                Text("ID: \(entry.id)")
+                Text("BW Printer Count: \(entry.bwPrinterCount ?? 0)")
+                Text("Chair Count: \(entry.chairCount ?? 0)")
+                Text("Color Printer Count: \(entry.colorPrinterCount ?? 0)")
+                Text("MAC Count: \(entry.macCount ?? 0)")
+                Text("Missing Chairs: \(entry.missingChairs ?? 0)")
+                Text("PC Count: \(entry.pcCount ?? 0)")
+                Text("Comments: \(entry.comments ?? "")")
+                Text("Computing Site: \(entry.computingSite ?? "")")
+                Text("Issues: \(entry.issues?.joined(separator: ", ") ?? "")")
+                Text("Scanner Count: \(entry.scannerCount ?? 0)")
+                Text("User: \(entry.user ?? "")")
+                if let timestamp = entry.timestamp {
+                    Text("Timestamp: \(timestamp)")
+                } else {
+                    Text("Timestamp: N/A")
                 }
-                .padding(.vertical, 8)
+                // Add more Text views for other properties
             }
-            .navigationTitle("Site Ready Entries")
+            .padding(.vertical, 8)
         }
+        .navigationTitle("Site Ready Entries")
         .onAppear {
             viewModel.fetchSitesReadyEntries()
         }
     }
 }
 
-struct SiteReadyEntriesView_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview {
+    NavigationView {
         SiteReadyEntriesView()
     }
 }

@@ -11,9 +11,10 @@ struct TabBarView: View {
     
     @Binding var showSignInView: Bool
     @State private var isAdmin = false
+    @State private var selection = 5
     
     var body: some View {
-        TabView {
+        TabView(selection:$selection) {
             // Map View
             NavigationStack {
                 SitesMapView()
@@ -21,7 +22,7 @@ struct TabBarView: View {
             .tabItem {
                 Image(systemName: "map")
                 Text("Map")
-            }
+            }.tag(1)
             
             // Buildings View
             NavigationStack {
@@ -30,7 +31,7 @@ struct TabBarView: View {
             .tabItem {
                 Image(systemName: "building.2")
                 Text("Buildings")
-            }
+            }.tag(2)
             
             // Sites View
             NavigationStack {
@@ -39,7 +40,7 @@ struct TabBarView: View {
             .tabItem {
                 Image(systemName: "building.fill")
                 Text("Sites")
-            }
+            }.tag(3)
             
             // Inventory Sites View
             NavigationStack {
@@ -48,7 +49,7 @@ struct TabBarView: View {
             .tabItem {
                 Image(systemName: "cabinet.fill")
                 Text("Inventory")
-            }
+            }.tag(4)
             
             // Profile View
             NavigationStack {
@@ -57,7 +58,7 @@ struct TabBarView: View {
             .tabItem {
                 Image(systemName: "person.crop.circle")
                 Text(isAdmin ? "Admin" : "Profile")
-            }
+            }.tag(5)
         }
     }
 }

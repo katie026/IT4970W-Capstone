@@ -86,7 +86,7 @@ final class ProfileViewModel: ObservableObject {
                     userPositions.sort{ $0.positionLevel ?? 0 < $1.positionLevel ?? 0 }
                 }
             }
-            
+            print("Assigned \(userPositions.count) to user.")
             completion()
         }
     }
