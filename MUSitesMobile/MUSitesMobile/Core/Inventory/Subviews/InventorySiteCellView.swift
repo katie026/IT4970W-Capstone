@@ -13,24 +13,19 @@ struct InventorySiteCellView: View {
     @State private var building: Building? = nil
     @State private var inventoryTypes: [InventoryType] = []
     @State private var siteGroup: SiteGroup? = nil
+    @StateObject private var viewModel = DetailedSiteViewModel()
+
     
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             // IMAGE
             Group {
-                AsyncImage(url: URL(string: "https://picsum.photos/300")) {image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 50, height: 50)
-                        .cornerRadius(25)
-                } placeholder: {
-                    ProgressView()
-                }
+                //acts the same as SiteCellView
+                ProfileImageView(imageURL: viewModel.profilePicture.first)
             }
             .frame(width: 50, height: 50)
             .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
-            
+      
             // INFO BLOCK
             VStack(alignment: .leading) {
                 // site name
@@ -52,11 +47,9 @@ struct InventorySiteCellView: View {
         .onAppear {
             getSiteGroup(){}
             getInventoryTypes{}
-            //TODO: adjust this for InventorySites
-//            Task {
-//                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "", category: "ProfilePicture")
-//                getEquipmentInfo()
-//            }
+            Task {
+                await viewModel.fetchSiteSpecificImageURLs(siteName: inventorySite.name ?? "", category: "ProfilePicture")
+            }
         }
     }
     

@@ -137,6 +137,8 @@ struct SiteCellView: View {
         NavigationLink(destination: DetailedSiteView(site: site)) {
             HStack(alignment: .center, spacing: 10) {
                 ProfileImageView(imageURL: viewModel.profilePicture.first)
+                    .frame(width: 50, height: 50)
+                    .shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
                 
                 VStack(alignment: .leading) {
                     Text("\(site.name ?? "N/A")")
