@@ -249,7 +249,7 @@ struct SupplyRequestsView: View {
         return filtered
     }
 
-
+    
 
         
     private func supplyRequestCellView(supplyRequest: SupplyRequest) -> some View {
@@ -264,6 +264,21 @@ struct SupplyRequestsView: View {
                 }
             } else {
                 // If supply type ID is nil, handle error or return default value
+                return "N/A"
+            }
+        }()
+        
+        // Fetch site name asynchronously
+        let siteName: String = {
+            if let siteID = supplyRequest.siteId {
+                if let site = viewModel.sites.first(where: { $0.id == siteID }) {
+                    return site.name ?? "N/A"
+                } else {
+                    // If site not found, handle error or return default value
+                    return "N/A"
+                }
+            } else {
+                // If site ID is nil, handle error or return default value
                 return "N/A"
             }
         }()
@@ -288,6 +303,11 @@ struct SupplyRequestsView: View {
                 Text("Report Type: \(supplyRequest.reportType ?? "N/A")")
             }
             HStack {
+                // SITE
+                Image(systemName: "mappin.and.ellipse")
+                Text("Site: \(siteName)")
+            }
+            HStack {
                 // SUPPLY TYPE
                 Image(systemName: "cube.box")
                 Text("Supply Type: \(supplyTypeName)")
@@ -307,6 +327,7 @@ struct SupplyRequestsView: View {
         
         return AnyView(view)
     }
+
 
 
 
