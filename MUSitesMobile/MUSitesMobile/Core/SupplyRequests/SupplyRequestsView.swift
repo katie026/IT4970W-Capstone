@@ -7,14 +7,22 @@
 
 import SwiftUI
 
+
+
+
 @MainActor
 final class SupplyRequestsViewModel: ObservableObject {
     
     @Published var supplyRequests: [SupplyRequest] = []
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -366, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
     @Published var endDate = Date()
     @Published var isLoading = false
     @Published var hasLoadedOnce = false
+    
+    // for labels
+    var sites: [Site] = []
+    var users: [DBUser] = []
+    var supplyTypes: [SupplyType] = []
     
     func getSupplyRequests(completion: @escaping () -> Void) {
         Task {
@@ -27,59 +35,87 @@ final class SupplyRequestsViewModel: ObservableObject {
         }
     }
     
-        
+    func swapSupplyRequestsOrder() {
+        supplyRequests.reverse()
+    }
     
-
-        
-        func swapSupplyRequestsOrder() {
-            supplyRequests.reverse()
+    func getSites(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.sites = try await SitesManager.shared.getAllSites(descending: false)
+            } catch {
+                print("Error fetching sites: \(error)")
+            }
+            completion()
         }
+    }
+    
+    func getUsers() {
+        Task {
+            do {
+                self.users = try await UserManager.shared.getUsersList()
+            } catch  {
+                print("Error getting users: \(error)")
+            }
+        }
+    }
+    
+    func getSupplyTypes() {
+        Task {
+            do {
+                self.supplyTypes = try await SupplyTypeManager.shared.getAllSupplyTypes(descending: false)
+            } catch  {
+                print("Error getting supply types: \(error)")
+            }
+        }
+    }
 }
 
+
+
 struct SupplyRequestsView: View {
-    // View Model
     @StateObject private var viewModel = SupplyRequestsViewModel()
-    // View Control
     @State private var searchText = ""
-    @State private var selectedSortOption: SortOption? // Define selectedSortOption
+    @State private var isLoading = false
     @State private var hasLoadedOnce = false
-    // Track loading status
-    @State private var isLoading = true
-    // sort/filter option
+
+
+    
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "M/d/yy"
         return formatter
     }()
     
-    // Define SortOption enum if not defined already
-    enum SortOption {
-        case date
-        case status
-    }
-    
     var body: some View {
-        // Content
         content
             .navigationTitle("Supply Requests")
             .onAppear {
                 Task {
-                    // Fetch supply requests when view appears
-                    viewModel.getSupplyRequests {}
+                    await viewModel.getSites {
+                        // Empty completion handler
+                    }
+                    viewModel.getUsers()
+                    await viewModel.getSupplyTypes() // Ensure supply types are fetched before rendering cells
+                    fetchSupplyRequests() // Fetch supply requests after fetching supply types
                 }
             }
+
     }
-        
+
+
     
     func fetchSupplyRequests() {
-            
+        isLoading = true // Set isLoading to true when fetching
+        Task {
             viewModel.getSupplyRequests {
+                isLoading = false // Set isLoading to false after fetching
+                hasLoadedOnce = true // Update hasLoadedOnce after fetching
                 print("Got \(viewModel.supplyRequests.count) supply requests.")
-                isLoading = false
-                
             }
         }
-    
+    }
+
 
     
     private var content: some View {
@@ -88,15 +124,6 @@ struct SupplyRequestsView: View {
             searchBar
             supplyRequestList
         }
-    }
-    
-    private var sortPicker: some View {
-        Picker("Sort by", selection: $selectedSortOption) {
-            Text("Date").tag(SortOption.date)
-            Text("Status").tag(SortOption.status)
-        }
-        .pickerStyle(SegmentedPickerStyle())
-        .padding(.horizontal)
     }
 
 
@@ -175,43 +202,34 @@ struct SupplyRequestsView: View {
 
 
     private var sortButton: some View {
-        Button(action: {
-            viewModel.swapSupplyRequestsOrder()
-        }) {
-            Image(systemName: "arrow.up.arrow.down.circle")
-                .font(.system(size: 20))
-                .padding(.trailing, 10)
+            Button(action: {
+                viewModel.swapSupplyRequestsOrder() // Toggle the sorting order
+            }) {
+                Image(systemName: "arrow.up.arrow.down.circle")
+                    .font(.system(size: 20))
+                    .padding(.trailing, 10)
+            }
         }
-    }
-
+    
     
     private var supplyRequestList: some View {
         List {
-            // Check if the supply requests have been loaded at least once
-            if viewModel.hasLoadedOnce {
-                // Check if there are no supply requests for the selected date range
-                if viewModel.supplyRequests.isEmpty {
-                    Text("There are no supply requests for this date range.")
-                        .foregroundColor(.gray)
-                } else {
-                    // Display the list of supply requests
-                    ForEach(filteredSupplyRequests(), id: \.id) { supplyRequest in
-                        ScrollView(.horizontal) {
-                            supplyRequestCellView(supplyRequest: supplyRequest)
-                        }
+            if viewModel.supplyRequests.isEmpty {
+                Text("There are no supply requests for this date range.")
+                    .foregroundColor(.gray)
+            } else {
+                ForEach(viewModel.supplyRequests, id: \.id) { supplyRequest in
+                    supplyRequestCellView(supplyRequest: supplyRequest)
                         .contextMenu {
                             // Add context menu actions here if needed
                         }
-                    }
                 }
-            } else {
-                // Show a message prompting the user to choose a date range and reload
-                Text("Choose a date range and reload.")
-                    .foregroundColor(.gray)
             }
         }
         .listStyle(.insetGrouped)
     }
+
+
 
 
     
@@ -226,46 +244,68 @@ struct SupplyRequestsView: View {
             }
         }
         
-        // Sort based on selected option
-        switch selectedSortOption {
-        case .date:
-            return filtered.sorted(by: { ($0.dateCreated ?? Date()) < ($1.dateCreated ?? Date()) })
-        case .status:
-            return filtered.sorted(by: { ($0.resolved ?? false) == ($1.resolved ?? false) ? ($0.countNeeded ?? 0) < ($1.countNeeded ?? 0) : !($0.resolved ?? false) })
-        case nil:
-            return filtered // Handle the case when selectedSortOption is nil
-        }
+        // No sorting logic based on selectedSortOption anymore
+        
+        return filtered
     }
 
 
 
         
     private func supplyRequestCellView(supplyRequest: SupplyRequest) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        // Fetch supply type asynchronously
+        let supplyTypeName: String = {
+            if let supplyTypeID = supplyRequest.supplyType {
+                if let supplyType = viewModel.supplyTypes.first(where: { $0.id == supplyTypeID }) {
+                    return supplyType.name ?? "N/A"
+                } else {
+                    // If supply type not found, handle error or return default value
+                    return "N/A"
+                }
+            } else {
+                // If supply type ID is nil, handle error or return default value
+                return "N/A"
+            }
+        }()
+        
+        let countNeeded = supplyRequest.countNeeded ?? 0
+        
+        let view = VStack(alignment: .leading, spacing: 8) {
             HStack {
+                // DATE CREATED
                 Image(systemName: "calendar")
                 Text("Date Created: \(formattedDate(supplyRequest.dateCreated))")
             }
             HStack {
-                Image(systemName: "checkmark.circle.fill")
+                // RESOLVED STATUS
+                Image(systemName: supplyRequest.resolved ?? false ? "checkmark.circle.fill" : "xmark.circle.fill")
                     .foregroundColor(supplyRequest.resolved ?? false ? .green : .red)
                 Text("Resolved: \(supplyRequest.resolved ?? false ? "Yes" : "No")")
             }
             HStack {
+                // REPORT TYPE
                 Image(systemName: "square.and.pencil")
                 Text("Report Type: \(supplyRequest.reportType ?? "N/A")")
             }
             HStack {
+                // SUPPLY TYPE
                 Image(systemName: "cube.box")
-                Text("Supply Type: \(supplyRequest.supplyType ?? "N/A")")
+                Text("Supply Type: \(supplyTypeName)")
             }
-            // Can add more information here as needed
+            HStack {
+                // COUNT NEEDED
+                Image(systemName: "number.circle")
+                Text("Count Needed: \(countNeeded)")
+            }
+            // Add more information here as needed
         }
         .padding()
         .background(Color.gray.opacity(0.1))
         .cornerRadius(10)
         .padding(.vertical, 5)
         .padding(.horizontal)
+        
+        return AnyView(view)
     }
 
 
