@@ -12,24 +12,27 @@ import FirebaseStorage
 import SwiftUI
 import UIKit
 
-//view for picking category for the images currently theres only 3 but we can expand on this if we want to
-//struct CategoryPickerView: View {
-//    var selectedSiteName: String
-//
-//    var body: some View {
-//        List(["Posters", "Board", "Inventory", "ProfilePicture"], id: \.self) { category in
-//            NavigationLink(destination: ImageUploadView(siteName: selectedSiteName, category: category)) {
-//                Text(category)
-//            }
-//        }
-//        .navigationTitle("Select a Category")
-//    }
-//}
 struct CategoryPickerView: View {
     var selectedSiteName: String
     var selectedSiteId: String
+    //will contain the path for the images
+    var basePath: String
     @State private var isDeleteMode = false
 
+    //filter for Sites, inventory_sites, and buildings(changing up the naming will mess up the path)
+    private var categories: [String] {
+        switch basePath {
+        case "Sites":
+            return ["Posters", "Board", "ProfilePicture"]
+        case "inventory_sites":
+            return ["Inventory", "ProfilePicture"]
+        case "buildings":
+            return ["ProfilePicture"]
+        default:
+            return []
+        }
+    }
+    
     var body: some View {
         VStack {
             Picker("Mode", selection: $isDeleteMode) {
@@ -39,7 +42,7 @@ struct CategoryPickerView: View {
             .pickerStyle(SegmentedPickerStyle())
             .padding()
 
-            List(["Posters", "Board", "Inventory", "ProfilePicture"], id: \.self) { category in
+            List(categories, id: \.self) { category in
                 NavigationLink(destination: destinationView(for: category)) {
                     Text(category)
                 }
@@ -52,17 +55,17 @@ struct CategoryPickerView: View {
     private func destinationView(for category: String) -> some View {
         //if in delete mode it will link to the ImageDeleteView
         if category == "Posters" && isDeleteMode == false{
-            PostersSelectionView(siteId: selectedSiteId)
+            PostersSelectionView(siteId: selectedSiteId, basePath: "", siteName: "")
         }
         else if category == "Posters" && isDeleteMode == true{
-            ImageDeleteView(siteName: selectedSiteName, selectedSiteId: selectedSiteId, category: "Posters")
+            ImageDeleteView( siteName: selectedSiteName, selectedSiteId: selectedSiteId, category: "Posters", basePath: basePath)
         }
         else if isDeleteMode {
-            ImageDeleteView(siteName: selectedSiteName, selectedSiteId: selectedSiteId, category: category)
+            ImageDeleteView(siteName: selectedSiteName, selectedSiteId: selectedSiteId, category: category, basePath: basePath)
         }
         //otherwise it will link to the ImageUploadView
         else {
-            ImageUploadView(siteName: selectedSiteName, category: category)
+            ImageUploadView(siteName: selectedSiteName, category: category, basePath: basePath)
         }
     }
 }

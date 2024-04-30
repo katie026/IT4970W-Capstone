@@ -84,22 +84,24 @@ final class DetailedSiteViewModel: ObservableObject {
         }
     }
     
-    func fetchSiteSpecificImageURLs(siteName: String, category: String) async {
+    func fetchSiteSpecificImageURLs(siteName: String, basePath: String, category: String) async {
         Task {
-            // The reference should include the site name and the category (e.g., "Posters").
-            let siteCategoryImagesRef = Storage.storage().reference(withPath: "Sites/\(siteName)/\(category)")
-            print("Attempting to access image path: Sites/\(siteName)/\(category)")
+            let fullPath = "\(basePath)/\(siteName)/\(category)"
+            let siteCategoryImagesRef = Storage.storage().reference(withPath: fullPath)
+            
+            print("Attempting to access image path: \(fullPath)")
             
             do {
-                // List all images in the specific site's category folder
                 let result = try await siteCategoryImagesRef.listAll()
                 let siteSpecificImages = result.items
                 
+                var targetImageArray = [URL]()
+                
                 for item in siteSpecificImages {
-                    // Asynchronously get the download URL for each item
                     print("Accessing image: \(item.name)")
                     let downloadURL = try await item.downloadURL()
                     print("Fetched download URL: \(downloadURL)")
+//                    targetImageArray.append(downloadURL)
                     if category == "Posters" {
                         self.imageURLs.append(downloadURL)
                     } else if category == "Board" {
@@ -108,14 +110,24 @@ final class DetailedSiteViewModel: ObservableObject {
                         self.inventoryImageURLs.append(downloadURL)
                         print("Appending the downloadURL: \(downloadURL)")
                     } else if category == "ProfilePicture" {
-                        self.profilePicture.append(downloadURL)
+                        targetImageArray.append(downloadURL)
+                    }
+                }
+                
+                DispatchQueue.main.async {
+                    switch category {
+                    case "ProfilePicture":
+                        self.profilePicture = targetImageArray
+                    default:
+                        break // Add handling for other categories if necessary
                     }
                 }
             } catch {
-                print("Error listing images for site \(siteName) category \(category): \(error.localizedDescription)")
+                print("Error listing images for \(siteName) at \(fullPath): \(error.localizedDescription)")
             }
         }
     }
+    
     
     // Fetching URLs for images related to a specific site from the Posters category
      func fetchSiteSpecificPosters(siteId: String) async {

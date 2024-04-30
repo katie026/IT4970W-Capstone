@@ -7,6 +7,8 @@ import Firebase
 
 struct PostersSelectionView: View {
     var siteId: String
+    var basePath: String
+    var siteName: String
     @State private var posters: [String] = []
     @State private var isLoading = true
     
@@ -22,7 +24,7 @@ struct PostersSelectionView: View {
     }
     
     private func fetchPosters() {
-        StorageManager.shared.listImages(category: "Posters") { result in
+        StorageManager.shared.listImages(basePath: "\(basePath)/\(siteName)/", category: "Posters") { result in
             switch result {
             case .success(let images):
                 posters = images
