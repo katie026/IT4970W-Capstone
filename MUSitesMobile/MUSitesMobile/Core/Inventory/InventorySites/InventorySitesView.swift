@@ -11,6 +11,9 @@ import SwiftUI
 final class InventorySitesViewModel: ObservableObject {
     @Published private(set) var inventorySites: [InventorySite] = []
     @Published var selectedGroup: SiteGroup? = nil
+    @Published var siteName: String?
+    @Published var profilePictureURL: URL?
+    
     var allSiteGroups: [SiteGroup] = []
     var inventoryTypes: [InventoryType] = []
     var buildings: [Building] = []
@@ -43,6 +46,13 @@ final class InventorySitesViewModel: ObservableObject {
             completion()
         }
     }
+    
+    func updateProfilePictureURL() {
+         guard let siteName = siteName else { return }
+         let imageName = "\(siteName)_01.jpg" // Assume there's a method to get the right image number if needed
+         let path = "Inventory Sites/\(siteName)/profilePicture/\(imageName)"
+         profilePictureURL = URL(string: "https://storage.googleapis.com/path/to/firebase/storage/\(path)")
+     }
 }
 
 struct InventorySitesView: View {

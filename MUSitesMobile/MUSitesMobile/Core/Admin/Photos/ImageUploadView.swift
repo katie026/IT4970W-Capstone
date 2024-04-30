@@ -10,6 +10,7 @@ import FirebaseStorage
 struct ImageUploadView: View {
     var siteName: String
     var category: String
+    var basePath: String
     @State private var imageData: Data?
     @State private var showImagePicker = false
 
@@ -30,7 +31,7 @@ struct ImageUploadView: View {
         }
 
         //passing to the uploadImage function in the StorageManager file
-        StorageManager.shared.uploadImage(data: imageData, siteName: siteName, category: category) { result in
+        StorageManager.shared.uploadImage(data: imageData, basePath: basePath, siteName: siteName, category: category) { result in
             switch result {
             case .success(_):
                 print("Image uploaded successfully")

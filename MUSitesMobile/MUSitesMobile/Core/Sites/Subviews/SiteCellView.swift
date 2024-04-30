@@ -162,7 +162,7 @@ struct SiteCellView: View {
                     getSiteGroup {}
                 }
                 Task {
-                    await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "", category: "ProfilePicture")
+                    await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "", basePath: "Sites", category: "ProfilePicture")
                     getEquipmentInfo()
                 }
             }

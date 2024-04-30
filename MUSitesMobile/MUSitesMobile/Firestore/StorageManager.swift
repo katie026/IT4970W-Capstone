@@ -21,13 +21,12 @@ final class StorageManager {
         storage.child("sites")
         return storage.child("Posters")
     }
-    
-    
-    func uploadImage(data: Data, siteName: String, category: String, completion: @escaping (Result<URL, Error>) -> Void) {
-        // Reference to the storage location for the site's category
-        let siteCategoryRef = Storage.storage().reference().child("Sites/\(siteName)/\(category)")
+
+    func uploadImage(data: Data, basePath: String, siteName: String, category: String, completion: @escaping (Result<URL, Error>) -> Void) {
+        // Construct the full path by combining the base path, site name, and category
+        let fullPath = "\(basePath)/\(siteName)/\(category)"
+        let siteCategoryRef = Storage.storage().reference().child(fullPath)
         
-            
         // List all items in the category to determine the next image number
         siteCategoryRef.listAll { (result: StorageListResult?, error: Error?) in
             if let error = error {
@@ -38,21 +37,21 @@ final class StorageManager {
                 completion(.failure(URLError(.badServerResponse)))
                 return
             }
-                
+            
             // Determine the next image name based on existing items
             let existingNames = result.items.map { $0.name }
             let nextImageName = self.determineNextImageName(from: existingNames, siteName: siteName)
-                
+            
             // Reference for the new image
             let imageRef = siteCategoryRef.child(nextImageName)
-                
+            
             // Upload the image
             imageRef.putData(data, metadata: nil) { metadata, error in
                 if let error = error {
                     completion(.failure(error))
                     return
                 }
-                    
+                
                 // Retrieve the download URL
                 imageRef.downloadURL { url, error in
                     if let error = error {
@@ -66,10 +65,10 @@ final class StorageManager {
             }
         }
     }
-    
-    func deleteImage(siteName: String, category: String, imageName: String, completion: @escaping (Result<Void, Error>) -> Void) {
+
+    func deleteImage(basePath: String, imageName: String, completion: @escaping (Result<Void, Error>) -> Void) {
         // Reference to the specific image in the storage
-        let imageRef = Storage.storage().reference().child("Sites/\(siteName)/\(category)/\(imageName)")
+        let imageRef = Storage.storage().reference().child("\(basePath)/\(imageName)")
 
         // Perform the deletion
         imageRef.delete { error in
@@ -80,27 +79,11 @@ final class StorageManager {
             }
         }
     }
-    
-//    func listImages(siteName: String, category: String, completion: @escaping (Result<[String], Error>) -> Void) {
-//        let ref = Storage.storage().reference().child("Sites/\(siteName)/\(category)")
-//        ref.listAll { (result, error) in
-//            if let error = error {
-//                completion(.failure(error))
-//                return
-//            }
-//
-//            // Safely unwrap the result
-//            guard let result = result else {
-//                completion(.failure(URLError(.cannotParseResponse))) // Provide a more specific error as needed
-//                return
-//            }
-//
-//            let fileNames = result.items.map { $0.name }
-//            completion(.success(fileNames))
-//        }
-//    }
-    func listImages(category: String, completion: @escaping (Result<[String], Error>) -> Void) {
-        let ref = storage.child(category)
+
+    func listImages(basePath: String, category: String, completion: @escaping (Result<[String], Error>) -> Void) {
+        // Construct the full path by appending the category to the basePath
+        let ref = Storage.storage().reference().child("\(basePath)/\(category)")
+        
         ref.listAll { (result, error) in
             if let error = error {
                 completion(.failure(error))
@@ -115,7 +98,6 @@ final class StorageManager {
         }
     }
 
-
     private func determineNextImageName(from existingNames: [String], siteName: String) -> String {
         let siteImageNumbers = existingNames.compactMap { name -> Int? in
             guard name.hasPrefix(siteName) else { return nil }
@@ -129,3 +111,4 @@ final class StorageManager {
         }
     }
 }
+

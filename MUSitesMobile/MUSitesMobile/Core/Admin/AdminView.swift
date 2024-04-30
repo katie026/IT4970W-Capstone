@@ -62,7 +62,7 @@ struct AdminView: View {
                     Label{Text("Issues")} icon: {Image(systemName: "wrench.and.screwdriver.fill")
                         .foregroundColor(.red)}
                 }
-                NavigationLink(destination: IssuesView()) {
+                NavigationLink(destination: SupplyRequestsView()) {
                     Label{Text("Supply Requests")} icon: {Image(systemName: "shippingbox.fill")
                         .foregroundColor(.red)}
                 }

@@ -99,7 +99,7 @@ struct DetailedInventorySiteView: View {
             Task {
                 viewModel.loadSiteGroup(buildingId: inventorySite.buildingId ?? "") {}
                 viewModel.loadInventoryTypes(inventoryTypeIds: inventorySite.inventoryTypeIds ?? [])
-                await siteViewModel.fetchSiteSpecificImageURLs(siteName: inventorySite.name ?? "Clark", category: "Inventory")
+                await siteViewModel.fetchSiteSpecificImageURLs(siteName: inventorySite.name ?? "Clark", basePath: "inventory_sites", category: "Inventory")
             }
         }
     }

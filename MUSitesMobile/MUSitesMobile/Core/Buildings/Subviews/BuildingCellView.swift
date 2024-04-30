@@ -38,7 +38,7 @@ struct BuildingCellView: View {
             .onAppear {
                 Task {
                     // Ensure viewModel has the function fetchSiteSpecificImageURLs defined as async
-                    await viewModel.fetchSiteSpecificImageURLs(siteName: building.name ?? "", category: "ProfilePicture")
+                    await viewModel.fetchSiteSpecificImageURLs(siteName: building.name ?? "", basePath: "buildings", category: "ProfilePicture")
                     getSiteGroup(){}
                     checkIfSitesInBuilding()
                 }

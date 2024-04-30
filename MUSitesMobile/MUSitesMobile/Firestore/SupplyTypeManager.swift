@@ -28,6 +28,9 @@ struct SupplyType: Codable, Hashable {
         case notes = "notes"
         case collectLevel = "collect_level"
     }
+    
+    
+
 }
 
 class SupplyTypeManager {
