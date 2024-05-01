@@ -253,6 +253,15 @@ final class IssueManager {
         try await updateIssue(issue)
     }
     
+    func updateUserAssigned(issue: Issue, userId: String) async throws {
+        var issue = issue
+        
+        issue.userAssigned = userId
+        
+        // update issue in Firestore
+        try await updateIssue(issue)
+    }
+    
     func updateIssue(_ issue: Issue) async throws {
         // Get the reference to the document
         let documentRef = issueDocument(issueId: issue.id)

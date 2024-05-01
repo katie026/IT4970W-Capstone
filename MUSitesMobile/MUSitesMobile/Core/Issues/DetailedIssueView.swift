@@ -175,11 +175,13 @@ struct DetailedIssueView: View {
                 },
                 set: { toggledOn in
                     if toggledOn {
+                        //TODO: update Firetstore
+                        //toggleResolutionStatus()
                         self.resolved = true
-                        //TODO: update Firetstore
                     } else {
-                        self.resolved = false
                         //TODO: update Firetstore
+                        //toggleResolutionStatus()
+                        self.resolved = false
                     }
                 }
             ))
@@ -201,10 +203,16 @@ struct DetailedIssueView: View {
                     Spacer()
                     
                     Button {
-                        //TODO: assign user in Firestore
-                        // update in view
-                        userAssignedId = userSelected?.id ?? ""
-                        print("Assigned \(userSelected?.fullName ?? "N/A") to the ticket.")
+                        if let newUserId = userSelected?.id {
+                            //TODO: assign user in Firestore
+                            // update in Firestore
+                            //updateAssignedUser(userId: newUserId)
+                            // update in view
+                            userAssignedId = newUserId
+                            print("Assigned \(userSelected?.fullName ?? "N/A") to the ticket.")
+                        } else {
+                            print("No userSelected")
+                        }
                     } label: {
                         Text("Assign **\(userSelected?.fullName ?? "N/A")** to the ticket.")
                     }
@@ -214,6 +222,26 @@ struct DetailedIssueView: View {
                     
                     Spacer()
                 }
+            }
+        }
+    }
+    
+    private func toggleResolutionStatus() {
+        Task {
+            do {
+                try await IssueManager.shared.toggleIssueResolution(issue: self.issue)
+            } catch {
+                print("Error toggling issue resolution: \(error)")
+            }
+        }
+    }
+    
+    private func updateAssignedUser(userId: String) {
+        Task {
+            do {
+                try await IssueManager.shared.updateUserAssigned(issue: self.issue, userId: userId)
+            } catch {
+                print("Error assigning new user to issue: \(error)")
             }
         }
     }
