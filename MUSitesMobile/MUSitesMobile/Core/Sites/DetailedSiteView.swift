@@ -118,13 +118,20 @@ struct DetailedSiteView: View {
                 }
                 
                 //this will take the current site the user is on(site.name) and then pass it to the fetchSiteSpecificImageURLs to get the specific images
-                await viewModel.fetchSiteSpecificPosters(siteId: site.id)
-                await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", basePath: "Sites", category: "Board")
+                if viewModel.imageURLs.isEmpty && viewModel.boardImageURLs.isEmpty
+                {
+                    await viewModel.fetchSiteSpecificPosters(siteId: site.id)
+                    await viewModel.fetchSiteSpecificImageURLs(siteName: site.name ?? "Clark", basePath: "Sites", category: "Board")
+                }
                 //for computers it takes the siteID to link it to the related site, it will then get the siteName so it can list all the computers
                 viewModel.fetchComputers(forSite: site.id, withName: site.name ?? "")
                 //printers just need siteID since it already has the B&W or color type
                 viewModel.fetchPrinters(forSite: site.id)
             }
+        }
+        .onDisappear {
+            viewModel.imageURLs.removeAll()
+            viewModel.boardImageURLs.removeAll()
         }
     }
     

@@ -490,9 +490,9 @@
 		6EA65F6B2B98EEF3000766C7 /* Inventory */ = {
 			isa = PBXGroup;
 			children = (
+				F63F46B52BBAA26A00ADEB9D /* InventorySubmission */,
 				F68E1B0A2BBD2C4800EBE6AC /* InventoryEntries */,
 				F63F46B82BBAA29F00ADEB9D /* InventorySites */,
-				F63F46B52BBAA26A00ADEB9D /* InventorySubmission */,
 				6EA65F742B9902AA000766C7 /* Subviews */,
 			);
 			path = Inventory;
