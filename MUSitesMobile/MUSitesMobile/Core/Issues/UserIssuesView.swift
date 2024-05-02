@@ -31,7 +31,7 @@ struct UserIssuesView: View {
     }
     
     var body: some View {
-        content
+        issueListSection
             .onAppear {
                 Task {
                     fetchIssues()
@@ -50,10 +50,11 @@ struct UserIssuesView: View {
     }
     
     private var issueListSection: some View {
-        Section("Issues") {
+        Section("Issues: \(viewModel.userIssues.filter { $0.resolved == false }.count)") {
             HStack(alignment: .center) {
                 filterByResolutionMenu
                 Spacer()
+                sortButton
                 refreshButton
             }.padding(.vertical, 5)
             

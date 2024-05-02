@@ -35,9 +35,18 @@ final class IssuesViewModel: ObservableObject {
     func getUserIssues(userId: String, completion: @escaping () -> Void) {
         Task {
             do {
+                // get user issues
                 self.userIssues = try await IssueManager.shared.getUserIssues(userId: userId)
             } catch {
                 print("Error getting user issues: \(error)")
+            }
+            // sort oldest to newest
+            self.userIssues = self.userIssues.sorted { issue1, issue2 in
+                guard let date1 = self.userIssues.first(where: { $0.id == issue1.id })?.dateCreated, let date2 = self.userIssues.first(where: { $0.id == issue2.id })?.dateCreated else {
+                    print("Error sorting issues: cannot find dateCreated for either \(issue1.id) or \(issue2.id).")
+                    return false
+                }
+                return date1 < date2
             }
             completion()
         }

@@ -84,26 +84,6 @@ struct UserProductivityView: View {
     }
     
     private var content: some View {
-//        ScrollView {
-//            if issuesLoading {
-//                ProgressView()
-//            } else {
-//                // Subtitle
-//                if let currentPosition = positions.max(by: { $0.positionLevel ?? 0 < $1.positionLevel ?? 0 })?.name {
-//                    HStack {
-//                        Text(currentPosition)
-//                            .font(.title2)
-//                            .fontWeight(.medium)
-//                            .padding(.horizontal)
-//                        Spacer()
-//                    }
-//                }
-//                
-//                // ISSUES
-//                IssuesSection.frame(height: 400)
-//                IssuesSection.frame(height: 400)
-//            }
-//        }.background(Color(UIColor.systemGray6))
         VStack {
             // Subtitle
             if let currentPosition = positions.max(by: { $0.positionLevel ?? 0 < $1.positionLevel ?? 0 })?.name {
@@ -119,22 +99,20 @@ struct UserProductivityView: View {
             if issuesLoading {
                 ProgressView()
             } else {
-                ScrollView {
+                List {
                     // ISSUES
-                    IssuesSection.frame(height: 400)
-                    IssuesSection.frame(height: 400)
+                    if let user = user {
+                        IssuesSection(user: user)
+                        IssuesSection(user: user)
+                    }
                 }
             }
         }.background(Color(UIColor.systemGray6))
 
     }
     
-    private var IssuesSection: some View {
-        Section {
-            if let user = user {
-                UserIssuesView(currentUser: user, sites: issuesViewModel.sites, users: issuesViewModel.users, issueTypes: issuesViewModel.issueTypes)
-            }
-        }//.frame(height: 400)
+    private func IssuesSection(user: DBUser) -> some View {
+        UserIssuesView(currentUser: user, sites: issuesViewModel.sites, users: issuesViewModel.users, issueTypes: issuesViewModel.issueTypes)
     }
     
     private func loadCurrentUser(completion: @escaping () -> Void) async throws {
