@@ -161,6 +161,11 @@ final class IssueManager {
         try issueDocument(issueId: issue.id).setData(from: issue, merge: false)
     }
     
+    // delete an issue from Firestore
+    func deleteIssue(issueId: String) async throws {
+        try await issueDocument(issueId: issueId).delete()
+    }
+    
     // fetch issue collection onto local device
     private func getAllIssuesQuery() -> Query {
         issuesCollection
@@ -253,10 +258,14 @@ final class IssueManager {
         try await updateIssue(issue)
     }
     
-    func updateUserAssigned(issue: Issue, userId: String) async throws {
+    func updateUserAssigned(issue: Issue, userId: String?) async throws {
         var issue = issue
         
-        issue.userAssigned = userId
+        if userId != nil && userId != "" {
+            issue.userAssigned = userId
+        } else {
+            issue.userAssigned = nil
+        }
         
         // update issue in Firestore
         try await updateIssue(issue)
@@ -293,6 +302,24 @@ final class IssueManager {
             
             // Set the data for the document in the batch
             batch.setData(data, forDocument: documentRef)
+        }
+        
+        // Commit the batched write operation
+        try await batch.commit()
+    }
+    
+    // Delete a batch of issues from Firestore
+    func deleteIssues(issueIds: [String]) async throws {
+        // Create a new batched write operation
+        let batch = Firestore.firestore().batch()
+        
+        // Iterate over the issue IDs array and delete each document in the batch
+        for issueId in issueIds {
+            // Get the reference to the document
+            let documentRef = issueDocument(issueId: issueId)
+            
+            // Delete the document in the batch
+            batch.deleteDocument(documentRef)
         }
         
         // Commit the batched write operation

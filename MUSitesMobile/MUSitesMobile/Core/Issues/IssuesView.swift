@@ -12,7 +12,7 @@ final class IssuesViewModel: ObservableObject {
     
     @Published var issues: [Issue] = []
     @Published var selectedSort = SortOption.descending
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -366, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
     @Published var endDate = Date()
     
     // for labels
@@ -75,20 +75,51 @@ final class IssuesViewModel: ObservableObject {
             }
         }
     }
+    
+    func deleteIssue(issueId: String) {
+        Task {
+            do {
+                try await IssueManager.shared.deleteIssue(issueId: issueId)
+            } catch {
+                print("Error deleting issue: \(error)")
+            }
+        }
+    }
+    
+    func deleteIssues(issueIds: [String]) {
+        Task {
+            do {
+                try await IssueManager.shared.deleteIssues(issueIds: issueIds)
+            } catch {
+                print("Error deleting \(issueIds.count) issues: \(error)")
+            }
+        }
+    }
 }
 
 struct IssuesView: View {
     // View Model
     @StateObject private var viewModel = IssuesViewModel()
     // View Control
-    @State private var searchText = ""
-    @State private var hasLoadedOnce = false
     // Track loading status
     @State private var isLoading = true
-    // sort/filter option
+    @State private var hasLoadedOnce = false
+    // https://sarunw.com/posts/swiftui-list-multiple-selection/
+    @State private var multiSelection = Set<String>()
+    // Sort/Filter option
+    @State private var searchText = ""
     @State private var searchOption: IssueSearchOption = .description
     @State private var optionResolved: Bool = false
     @State private var optionIssueType: IssueType? = nil
+    // Alerts
+    @State private var showAlert = false
+    @State private var activateAlert: AlertType = .none
+    enum AlertType {
+        case deleteIssue, deleteIssues, none
+    }
+    @State private var selectedIssue: Issue? = nil
+    @State private var selectedIssueIds: [String] = []
+    
     // Date Formatter
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -225,6 +256,28 @@ struct IssuesView: View {
                     viewModel.getIssueTypes()
                 }
             }
+            .alert(isPresented: $showAlert) {
+                switch activateAlert {
+                case .deleteIssue:
+                    return Alert(title: Text("Confirm Deletion"), message: Text("Are you sure you wish to delete this issue? You cannot undo this action."), primaryButton: .default(Text("Cancel")) {
+                        // dismiss alert
+                        showAlert = false
+                    }, secondaryButton: .destructive(Text("Delete")) {
+                        if let issue = selectedIssue {
+                            deleteIssue(issue: issue)
+                        }
+                    })
+                case .deleteIssues:
+                    return Alert(title: Text("Confirm Deletion"), message: Text("Are you sure you wish to delete \(selectedIssueIds.count) issues? You cannot undo this action."), primaryButton: .default(Text("Cancel")) {
+                        // dismiss alert
+                        showAlert = false
+                    }, secondaryButton: .destructive(Text("Delete")) {
+                        deleteSelectedIssues()
+                    })
+                case .none:
+                    return Alert(title: Text("Error"), message: Text("Unexpected alert type"))
+                }
+            }
     }
     
     func fetchIssues() {
@@ -329,7 +382,7 @@ struct IssuesView: View {
     }
     
     private var issueList: some View {
-        List {
+        List(selection: $multiSelection) {
             // if user hasn't loaded issues yet
             if !hasLoadedOnce {
                 Text("Choose a date range and reload.")
@@ -342,29 +395,52 @@ struct IssuesView: View {
             
             ForEach(sortedIssues, id: \.id) { issue in
                 ScrollView(.horizontal) {
+                    NavigationLink(destination: DetailedIssueView(issue: issue, sites: viewModel.sites, users: viewModel.users, issueTypes: viewModel.issueTypes)) {
                         issueCellView(issue: issue)
+                    }.buttonStyle(PlainButtonStyle())
                 }
                 .contextMenu {
                     // toggle reoslution status
                     Button (issue.resolved ?? false ? "Unresolve" : "Resolve") {
-                        // toggle resolution status in Firestore
-                        viewModel.toggleResolutionStatus(issue: issue)
-                        // toggle resolution status in view (locally)
-                        if let index = viewModel.issues.firstIndex(where: { $0.id == issue.id }) {
-                            if issue.resolved != nil {
-                                if issue.resolved == true {
-                                    viewModel.issues[index].resolved = false
-                                } else {
-                                    viewModel.issues[index].resolved = true
-                                }
-                            } else {
-                                viewModel.issues[index].resolved = false
-                            }
-                        }
+                        toggleIssueResolution(issue: issue)
+                    }
+                    // delete issue
+                    Button("Delete", role: .destructive) {
+                        // update selected Issue to delete
+                        selectedIssue = issue
+                        // activate alert
+                        activateAlert = .deleteIssue
+                        showAlert = true
                     }
                 }
             }
-        }.listStyle(.insetGrouped)
+        }
+        .listStyle(.insetGrouped)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                EditButton()
+            }
+            if multiSelection.count > 0 {
+                ToolbarItemGroup(placement: .bottomBar) {
+                    Spacer()
+                    
+                    Text("\(multiSelection.count) selections")
+                    
+                    Spacer()
+                    
+                    Button("Delete", role: .destructive) {
+                        // define which issues to delete
+                        selectedIssueIds = Array(multiSelection)
+                        // activate alert
+                        activateAlert = .deleteIssues
+                        showAlert = true
+                    }
+                }
+            }
+        }
+        .onChange(of: multiSelection) { oldValue, newValue in
+            print(newValue)
+        }
     }
     
     private var refreshButton: some View {
@@ -421,13 +497,16 @@ struct IssuesView: View {
             //TODO: consider shortening description if it's a certain amount of characters and redirect to a detailed view (or trigger pop up/long hold etc.)
             // if description is not nil
             if let description = issue.description {
-                // and is not empty
-                if description != "" {
-                    // show description section
-                    HStack {
-                        Image(systemName: "bubble")
-                        Text("\(userSubmittedName): \(description)")
-                    }
+                // show description section
+                HStack {
+                    Image(systemName: "bubble")
+                    Text("\(userSubmittedName): \(description)")
+                }
+            } else {
+                // show user submitted if no description
+                HStack {
+                    Image(systemName: "bubble")
+                    Text("\(userSubmittedName):")
                 }
             }
         }
@@ -500,7 +579,7 @@ struct IssuesView: View {
                 .foregroundColor(resolvedAccentColor)
                 .padding(.leading, 15)
             if let resolved = issue.resolved {
-                Text(resolved ? "Resolved" : "Unresolved")
+                Text(resolved ? "Resolved" : "Not Resolved")
                     .padding(.vertical, 3)
                     .padding(.horizontal, 5)
             } else {
@@ -509,6 +588,43 @@ struct IssuesView: View {
                     .padding(.horizontal, 5)
             }
         }
+    }
+    
+    func deleteIssue(issue: Issue) {
+        // delete in Firestore
+        viewModel.deleteIssue(issueId: issue.id)
+        // delete in view (locally)
+        if let index = viewModel.issues.firstIndex(where: { $0.id == issue.id }) {
+            viewModel.issues.remove(at:index)
+        }
+    }
+    
+    func toggleIssueResolution(issue: Issue) {
+        // toggle resolution status in Firestore
+        viewModel.toggleResolutionStatus(issue: issue)
+        // toggle resolution status in view (locally)
+        if let index = viewModel.issues.firstIndex(where: { $0.id == issue.id }) {
+            if issue.resolved != nil {
+                if issue.resolved == true {
+                    viewModel.issues[index].resolved = false
+                } else {
+                    viewModel.issues[index].resolved = true
+                }
+            } else {
+                viewModel.issues[index].resolved = false
+            }
+        }
+    }
+    
+    func deleteSelectedIssues() {
+        // delete in view (locally)
+        for issueId in selectedIssueIds {
+            if let index = viewModel.issues.firstIndex(where: { $0.id == issueId }) {
+                viewModel.issues.remove(at:index)
+            }
+        }
+        // delete in Firestore
+        viewModel.deleteIssues(issueIds: selectedIssueIds)
     }
 }
 

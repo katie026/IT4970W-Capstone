@@ -8,14 +8,18 @@
 import SwiftUI
 
 struct DetailedIssueView: View {
+    // Init
     let issue: Issue
     let sites: [Site]
     let users: [DBUser]
     let issueTypes: [IssueType]
-    
+    // State Variables
     @State private var resolved = false
     @State private var userAssignedId: String? = nil
     @State private var userSelected: DBUser? = nil
+    // View Control
+    @Environment(\.presentationMode) var presentationMode
+    @State private var showDeletionAlert = false
     
     // Date Formatter
     let dateFormatter: DateFormatter = {
@@ -103,7 +107,11 @@ struct DetailedIssueView: View {
                 Image(systemName: "bubble")
                 Text("**Description:** \(description)")
             }
-            Text("ID: \(issue.id)")
+            // ID
+            ScrollView(.horizontal) {
+                Text("ID: \(issue.id)")
+                    .foregroundColor(.secondary)
+            }
         }
         
         return AnyView(view)
@@ -168,20 +176,20 @@ struct DetailedIssueView: View {
         return HStack {
             Image(systemName: resolvedImageName)
                 .foregroundColor(resolvedAccentColor)
-            Text(resolved ? "Resolved" : "Unresolved")
+            Text(resolved ? "Resolved" : "Not Resolved")
             Toggle("", isOn: Binding(
                 get: {
                     self.resolved
                 },
                 set: { toggledOn in
                     if toggledOn {
-                        //TODO: update Firetstore
-                        //toggleResolutionStatus()
+                        // update in View
                         self.resolved = true
+                        toggleResolutionStatus()
                     } else {
-                        //TODO: update Firetstore
-                        //toggleResolutionStatus()
+                        // update in View
                         self.resolved = false
+                        toggleResolutionStatus()
                     }
                 }
             ))
@@ -190,23 +198,26 @@ struct DetailedIssueView: View {
     }
     
     private var ActionSection: some View {
-        Section("Assign a User") {
+        let userAssignedName = users.first { $0.userId == userAssignedId }?.fullName ?? "N/A"
+        
+        return Section("Assign a User") {
             HStack {
                 Picker("Selected User", selection: $userSelected) {
+                    Text("N/A").tag(nil as DBUser?)
                     ForEach(users, id: \.self) { user in
-                        Text(user.fullName ?? "N/A").tag(user as DBUser?)
+                        Text(user.fullName ?? "No Name").tag(user as DBUser?)
                     }
                 }.multilineTextAlignment(.leading)
             }
-            if (userAssignedId != userSelected?.id ?? "") {
+            // if they selected a NEW user
+            if (userAssignedId != userSelected?.id ?? "") && (userSelected != nil) {
                 HStack(alignment:.center) {
                     Spacer()
-                    
+                    // show button to assign it to the new user
                     Button {
                         if let newUserId = userSelected?.id {
-                            //TODO: assign user in Firestore
                             // update in Firestore
-                            //updateAssignedUser(userId: newUserId)
+                            updateAssignedUser(userId: newUserId)
                             // update in view
                             userAssignedId = newUserId
                             print("Assigned \(userSelected?.fullName ?? "N/A") to the ticket.")
@@ -214,14 +225,57 @@ struct DetailedIssueView: View {
                             print("No userSelected")
                         }
                     } label: {
-                        Text("Assign **\(userSelected?.fullName ?? "N/A")** to the ticket.")
+                        Text("Assign **\(userSelected?.fullName ?? "No Name")** to the ticket.")
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.green)
-                    .padding(.vertical)
+                    .padding(.vertical, 5)
                     
                     Spacer()
                 }
+            }
+            // if there is an existing user AND they selected N/A as the new user
+            if (userAssignedId != nil) && (userSelected == nil) {
+                HStack(alignment:.center) {
+                    Spacer()
+                    // show button to unassign existing user
+                    Button {
+                        // update in Firestore
+                        updateAssignedUser(userId: nil)
+                        // update in view
+                        userAssignedId = nil
+                        print("Unassigned \(userAssignedName) from the ticket.")
+                    } label: {
+                        Text("Unassign **\(userAssignedName)** from the ticket.")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
+                    .padding(.vertical, 5)
+                    
+                    Spacer()
+                }
+            }
+            
+            Button(role: .destructive) {
+                // activate alert
+                showDeletionAlert = true
+            } label: {
+                Text("Delete Issue")
+            }
+            .alert(isPresented: $showDeletionAlert) {
+                Alert(
+                    title: Text("Confirm Deletion"),
+                    message: Text("Are you sure you wish to delete this issue? You cannot undo this action."),
+                    primaryButton: .default(Text("Cancel")) {
+                        // dismiss alert
+                        showDeletionAlert = false
+                    },
+                    secondaryButton: .destructive(Text("Delete")) {
+                        // return to IssuesView
+                        deleteIssue()
+                        dismissView()
+                    }
+                )
             }
         }
     }
@@ -229,21 +283,42 @@ struct DetailedIssueView: View {
     private func toggleResolutionStatus() {
         Task {
             do {
-                try await IssueManager.shared.toggleIssueResolution(issue: self.issue)
+                var newIssue = self.issue
+                newIssue.resolved = !resolved
+                newIssue.userAssigned = userSelected?.id ?? nil
+                try await IssueManager.shared.toggleIssueResolution(issue: newIssue)
             } catch {
                 print("Error toggling issue resolution: \(error)")
             }
         }
     }
     
-    private func updateAssignedUser(userId: String) {
+    private func updateAssignedUser(userId: String?) {
         Task {
             do {
-                try await IssueManager.shared.updateUserAssigned(issue: self.issue, userId: userId)
+                var newIssue = self.issue
+                newIssue.resolved = resolved
+                newIssue.userAssigned = userSelected?.id ?? nil
+                try await IssueManager.shared.updateUserAssigned(issue: newIssue, userId: userId)
             } catch {
                 print("Error assigning new user to issue: \(error)")
             }
         }
+    }
+    
+    private func deleteIssue() {
+        Task {
+            do {
+                try await IssueManager.shared.deleteIssue(issueId: self.issue.id)
+            } catch {
+                print("Error deleting issue: \(error)")
+            }
+            dismissView()
+        }
+    }
+    
+    private func dismissView() {
+        presentationMode.wrappedValue.dismiss()
     }
 }
 
@@ -256,13 +331,13 @@ struct DetailedIssueView: View {
                 dateCreated: Date(),
                 dateResolved: Date(),
                 issueTypeId: "zpavvVHHgI3S3qujebnW",
-                resolved: true,
+                resolved: false,
                 ticket: 9999999,
                 reportId: "AbhGSSoDgn0K1d29SUw6",
                 reportType: "site_captain",
                 siteId: "BezlCe1ospf57zMdop2z",
                 userSubmitted: "oeWvTMrqMza2nebC8mImsFOaNVL2",
-                userAssigned: "UP4qMGuLhCP3qHvT5tfNnZlzH4h1"
+                userAssigned: nil//"UP4qMGuLhCP3qHvT5tfNnZlzH4h1"
             ),
             sites: [Site(
                 id: "BezlCe1ospf57zMdop2z", //ncgvyP2RI3wNvTfSwjM2
