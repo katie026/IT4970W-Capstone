@@ -179,7 +179,7 @@ final class IssueManager {
         return document.documentID
     }
     
-    // get hourlyCleanings sorted by Date
+    // get issues sorted by Date
     private func getIssuesSortedByDateQuery(descending: Bool) -> Query {
         issuesCollection
             .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
@@ -202,10 +202,10 @@ final class IssueManager {
             .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
     }
     
-    // get issues sorted by date
+    // get issues sorted by typeId
     private func getAllIssuesSortedByNameQuery(descending: Bool) -> Query {
         issuesCollection
-            .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
+            .order(by: Issue.CodingKeys.issueTypeId.rawValue, descending: descending)
     }
     
     // get issues by name
@@ -229,6 +229,15 @@ final class IssueManager {
         print("Trying to query issues collection.")
         return try await query
             .getDocuments(as: Issue.self) // query Issues collection
+    }
+    
+    // get issues filtered by userAssigned & sorted by date
+    func getUserIssues(userId: String) async throws -> [Issue] {
+        let query = issuesCollection
+            // filter by user
+            .whereField(Issue.CodingKeys.userAssigned.rawValue, isEqualTo: userId)
+        return try await query
+            .getDocuments(as: Issue.self)
     }
     
     // get count of all issues

@@ -11,6 +11,7 @@ import SwiftUI
 final class IssuesViewModel: ObservableObject {
     
     @Published var issues: [Issue] = []
+    @Published var userIssues: [Issue] = [] // could put this in an extension
     @Published var selectedSort = SortOption.descending
     @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
     @Published var endDate = Date()
@@ -26,6 +27,17 @@ final class IssuesViewModel: ObservableObject {
                 self.issues = try await IssueManager.shared.getAllIssues(descending: selectedSort.sortDescending, startDate: startDate, endDate: endDate)
             } catch {
                 print("Error getting issues: \(error)")
+            }
+            completion()
+        }
+    }
+    // could put this in an extension
+    func getUserIssues(userId: String, completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.userIssues = try await IssueManager.shared.getUserIssues(userId: userId)
+            } catch {
+                print("Error getting user issues: \(error)")
             }
             completion()
         }
