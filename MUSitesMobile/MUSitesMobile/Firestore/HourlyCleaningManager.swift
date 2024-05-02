@@ -198,6 +198,19 @@ final class HourlyCleaningManager {
             .getDocuments(as: HourlyCleaning.self) // query HourlyCleanings collection
     }
     
+    // get hourlyCleanings filtered between dates, filtered by user
+    func getHourlyCleaningsSortedBetweenDatesByUser(userId: String, startDate: Date, endDate: Date) async throws -> [HourlyCleaning] {
+        // Error fetching hourlyCleanings: Error Domain=FIRFirestoreErrorDomain Code=9 "The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/sitesmobile-4970/firestore/indexes?create_composite=Cllwcm9qZWN0cy9zaXRlc21vYmlsZS00OTcwL2RhdGFiYXNlcy8oZGVmYXVsdCkvY29sbGVjdGlvbkdyb3Vwcy9ob3VybHlfY2xlYW5pbmdzL2luZGV4ZXMvXxABGggKBHVzZXIQARoNCgl0aW1lc3RhbXAQARoMCghfX25hbWVfXxAB" 
+        let query = hourlyCleaningsCollection
+            // filter for dates
+            .whereField(HourlyCleaning.CodingKeys.timestamp.rawValue, isGreaterThanOrEqualTo: startDate)
+            .whereField(HourlyCleaning.CodingKeys.timestamp.rawValue, isLessThanOrEqualTo: endDate)
+            // filter by site
+            .whereField(HourlyCleaning.CodingKeys.userId.rawValue, isEqualTo: userId)
+        return try await query
+            .getDocuments(as: HourlyCleaning.self)
+    }
+    
     // get count of all hourlyCleanings
     // we can use this to determine if we need to use pagination
     func allHourlyCleaningsCount() async throws -> Int {

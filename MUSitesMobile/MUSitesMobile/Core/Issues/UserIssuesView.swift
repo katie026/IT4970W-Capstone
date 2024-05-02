@@ -36,10 +36,6 @@ struct UserIssuesView: View {
                 Task {
                     fetchIssues()
                 }
-                print("Have \(currentUser.id) user.")
-                print("Have \(sites.count) sites.")
-                print("Have \(users.count) users.")
-                print("Have \(issueTypes.count) issueTypes.")
             }
     }
     

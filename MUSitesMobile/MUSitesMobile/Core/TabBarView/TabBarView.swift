@@ -42,13 +42,13 @@ struct TabBarView: View {
                 Text("Sites")
             }.tag(3)
             
-            // Inventory Sites View
+            // Productivity View
             NavigationStack {
-                InventorySitesView()
+                UserProductivityView()
             }
             .tabItem {
-                Image(systemName: "cabinet.fill")
-                Text("Inventory")
+                Image(systemName: "list.bullet")
+                Text("Tasks")
             }.tag(4)
             
             // Profile View
