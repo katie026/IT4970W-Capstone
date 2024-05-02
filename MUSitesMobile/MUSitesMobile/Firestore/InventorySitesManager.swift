@@ -106,13 +106,13 @@ final class InventorySitesManager {
     
     // get inventory sites by name
     func getAllInventorySites(descending: Bool?) async throws -> [InventorySite] {
-        let query: Query = getAllInventorySitesQuery()
+        var query: Query = getAllInventorySitesQuery()
         
 //        // if given sort
-//        if let descending {
-//            // sort whole collection
-//            query = getAllSitesSortedByNameQuery(descending: descending)
-//        }
+        if let descending {
+            // sort whole collection
+            query = getAllInventorySitesSortedByNameQuery(descending: descending)
+        }
         print("Querying all inventory sites.")
         return try await query
             .getDocuments(as: InventorySite.self) // query inventory_site collection

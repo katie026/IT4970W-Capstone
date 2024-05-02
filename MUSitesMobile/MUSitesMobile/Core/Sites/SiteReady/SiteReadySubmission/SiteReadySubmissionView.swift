@@ -1,3 +1,5 @@
+
+
 //
 //  SiteReadySurveyView.swift
 //  MUSitesMobile
@@ -6,7 +8,6 @@
 //
 import SwiftUI
 import Firebase
-
 struct SiteReadySurveyView: View {
     @Environment(\.presentationMode) var presentationMode
     let site: Site
@@ -14,7 +15,6 @@ struct SiteReadySurveyView: View {
     @State var user: AuthDataResultModel? = nil
     @StateObject var viewModel = ViewModel()
     @State private var showAlert = false
-
     var body: some View {
         VStack {
             Form {
@@ -38,7 +38,7 @@ struct SiteReadySurveyView: View {
                                 Task {
                                     let printerLabelIssuesUUIDs = await submitPrinterLabelIssues(db: db, userId: user.uid)
                                     // Submitting site ready survey data with reported and printer label issues' UUIDs
-                                    try await submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs)
+                                    try await submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs, otherIssues: viewModel.otherIssues)
                                 }
                             }
                             // Submitting label issues
@@ -88,39 +88,32 @@ struct SiteReadySurveyView: View {
         }
     }
     
-
-    private func submitSiteReadySurvey(db: Firestore, reportedIssuesUUIDs: [String], printerLabelIssuesUUIDs: [String]) async throws {
+    private func submitSiteReadySurvey(db: Firestore,
+                                       reportedIssuesUUIDs: [String],
+                                       printerLabelIssuesUUIDs: [String],
+                                       otherIssues: [String]) async throws {
         do {
             if let user = user {
                 let documentId = try await SiteReadyManager.shared.getNewSiteReadyId()
                 let docRef = db.collection("site_ready_entries").document(documentId)
                 let timestamp = Timestamp(date: Date())
                 
+                // Combine reported issues and printer label issues' UUIDs into a single array
+                let allIssues = reportedIssuesUUIDs + printerLabelIssuesUUIDs
+                
                 var data: [String: Any] = [
-                    SiteReady.CodingKeys.bwPrinterCount.rawValue: viewModel.bwPrinterCount,
-                    SiteReady.CodingKeys.chairCount.rawValue: viewModel.chairCount,
-                    // Include reported and printer label issues' UUIDs in the "issues" array
-                    SiteReady.CodingKeys.issues.rawValue: reportedIssuesUUIDs + printerLabelIssuesUUIDs,
+                    // Include all issues UUIDs in the "issues" array
+                    SiteReady.CodingKeys.issues.rawValue: allIssues,
                     // Other fields...
-                    // "computing_site": site.id,
                     SiteReady.CodingKeys.comments.rawValue: viewModel.additionalComments,
-                    // "id": documentId,
-                    // "mac_count": viewModel.macCount,
-                    // "missing_chairs": viewModel.missingChairs,
-                    // "pc_count": viewModel.pcCount,
-                    // "user": userId,
-                    // "timestamp": timestamp
+                    "computing_site": site.id,
+                    "id": documentId,
+                    "mac_count": viewModel.macCount,
+                    "missing_chairs": viewModel.missingChairs,
+                    "pc_count": viewModel.pcCount,
+                    "user": user.uid,
+                    "timestamp": timestamp
                 ]
-                
-                // Add other data to the dictionary if needed
-                
-                data["computing_site"] = site.id
-                data["id"] = documentId
-                data["mac_count"] = viewModel.macCount
-                data["missing_chairs"] = viewModel.missingChairs
-                data["pc_count"] = viewModel.pcCount
-                data["user"] = user.uid
-                data["timestamp"] = timestamp
                 
                 // Write data to Firestore
                 docRef.setData(data) { error in
@@ -132,36 +125,37 @@ struct SiteReadySurveyView: View {
                         showAlert = true
                     }
                 }
+                
+                // Print otherIssues for debugging
+                print("Other Issues: \(otherIssues)")
+                
+                // Submit other issues to reported_issues
+                try await submitOtherIssues(db: db, userId: user.uid, otherIssues: otherIssues)
             }
         } catch {
             print("Error submitting site ready: \(error)")
         }
     }
-
-    private func submitReportedIssues(db: Firestore, userId: String, completion: @escaping ([String]) -> Void) async {
+    private func submitOtherIssues(db: Firestore, userId: String, otherIssues: [String]) async throws {
         do {
-            var reportedIssuesUUIDs: [String] = []
-            
             let group = DispatchGroup()
             
-            for index in 0..<viewModel.failedToLoginCount {
+            for index in 0..<otherIssues.count {
                 group.enter()
                 let documentId = try await IssueManager.shared.getNewIssueId()
                 let docRef = db.collection("reported_issues").document(documentId)
                 let timestamp = Timestamp(date: Date())
                 
                 let data: [String: Any] = [
-                    Issue.CodingKeys.description.rawValue: viewModel.computerFailures[index],
-                    Issue.CodingKeys.id.rawValue: documentId,
-                    Issue.CodingKeys.issueTypeId.rawValue: "GxFGSkbDySZmdkCFExt9",
-                    Issue.CodingKeys.reportId.rawValue: viewModel.reportId,
-                    Issue.CodingKeys.reportType.rawValue: "site_ready",
-                    Issue.CodingKeys.resolved.rawValue: false,
-                    Issue.CodingKeys.siteId.rawValue: site.id,
-                    Issue.CodingKeys.ticket.rawValue: viewModel.failedLoginTicketNumbers[index],
-                    Issue.CodingKeys.dateCreated.rawValue: timestamp,
-                    Issue.CodingKeys.userAssigned.rawValue: "",
-                    Issue.CodingKeys.userSubmitted.rawValue: userId
+                    "description": otherIssues[index], // Include the description field
+                    "id": documentId,
+                    "issue_type": "GxFGSkbDySZmdkCFExt9", // Adjust as needed
+                    "report_type": "site_ready",
+                    "resolved": false,
+                    "site": site.id,
+                    "ticket": viewModel.otherIssueTicketNumbers[index],
+                    "date_created": timestamp,
+                    "user_submitted": userId
                 ]
                 
                 // Write data to Firestore
@@ -169,9 +163,95 @@ struct SiteReadySurveyView: View {
                     if let error = error {
                         print("Error writing document: \(error)")
                     } else {
-                        print("Reported issue \(index + 1) successfully written!")
-                        reportedIssuesUUIDs.append(documentId)
+                        print("Reported other issue \(index + 1) successfully written!")
                     }
+                    group.leave()
+                }
+            }
+            
+            group.notify(queue: .main) {
+                print("All other issues submitted successfully")
+            }
+        } catch {
+            print("Error submitting other issues: \(error)")
+        }
+    }
+    private func submitReportedIssues(db: Firestore, userId: String, completion: @escaping ([String]) -> Void) async {
+        do {
+            var reportedIssuesUUIDs: [String] = []
+            
+            let group = DispatchGroup()
+            
+            // Write issues from computerFailures
+            for index in 0..<viewModel.failedToLoginCount {
+                group.enter()
+                do {
+                    let documentId = try await IssueManager.shared.getNewIssueId()
+                    let docRef = db.collection("reported_issues").document(documentId)
+                    let timestamp = Timestamp(date: Date())
+                    
+                    let data: [String: Any] = [
+                        Issue.CodingKeys.id.rawValue: documentId,
+                        Issue.CodingKeys.issueTypeId.rawValue: "GxFGSkbDySZmdkCFExt9",
+                        Issue.CodingKeys.reportId.rawValue: viewModel.reportId,
+                        Issue.CodingKeys.reportType.rawValue: "site_ready",
+                        Issue.CodingKeys.resolved.rawValue: false,
+                        Issue.CodingKeys.siteId.rawValue: site.id,
+                        Issue.CodingKeys.ticket.rawValue: viewModel.failedLoginTicketNumbers[index],
+                        Issue.CodingKeys.dateCreated.rawValue: timestamp,
+                        Issue.CodingKeys.userSubmitted.rawValue: userId
+                    ]
+                    
+                    // Write data to Firestore
+                    docRef.setData(data) { error in
+                        if let error = error {
+                            print("Error writing document: \(error)")
+                        } else {
+                            print("Reported issue \(index + 1) successfully written!")
+                            reportedIssuesUUIDs.append(documentId)
+                        }
+                        group.leave()
+                    }
+                } catch {
+                    print("Error getting new issue ID: \(error)")
+                    group.leave()
+                }
+            }
+            
+            // Write issues from otherIssues
+            for index in 0..<viewModel.otherIssuesCount {
+                group.enter()
+                do {
+                    let documentId = try await IssueManager.shared.getNewIssueId()
+                    let docRef = db.collection("reported_issues").document(documentId)
+                    let timestamp = Timestamp(date: Date())
+                    
+                    let data: [String: Any] = [
+                        Issue.CodingKeys.id.rawValue: documentId,
+                        
+                        Issue.CodingKeys.issueTypeId.rawValue: "",
+                        Issue.CodingKeys.reportId.rawValue: viewModel.reportId,
+                        Issue.CodingKeys.reportType.rawValue: "site_ready",
+                        Issue.CodingKeys.resolved.rawValue: false,
+                        Issue.CodingKeys.siteId.rawValue: site.id,
+                        Issue.CodingKeys.description.rawValue: viewModel.otherIssues[index],
+                        Issue.CodingKeys.ticket.rawValue: viewModel.otherIssueTicketNumbers[index],
+                        Issue.CodingKeys.dateCreated.rawValue: timestamp,
+                        Issue.CodingKeys.userSubmitted.rawValue: userId
+                    ]
+                    
+                    // Write data to Firestore
+                    docRef.setData(data) { error in
+                        if let error = error {
+                            print("Error writing document: \(error)")
+                        } else {
+                            print("Reported other issue successfully written!")
+                            reportedIssuesUUIDs.append(documentId)
+                        }
+                        group.leave()
+                    }
+                } catch {
+                    print("Error getting new issue ID: \(error)")
                     group.leave()
                 }
             }
@@ -230,7 +310,6 @@ struct SiteReadySurveyView: View {
             return []
         }
     }
-
     private func submitLabelIssues(db: Firestore) async {
         // Assuming you have access to viewModel.labelIssues array
         for labelIssue in viewModel.labelIssues {
@@ -243,7 +322,6 @@ struct SiteReadySurveyView: View {
         }
     }
 }
-
 struct ComputersSection: View {
     @ObservedObject var viewModel: SiteReadySurveyView.ViewModel
     
@@ -333,7 +411,6 @@ struct ComputersSection: View {
         }
     }
 }
-
 struct PrintersSection: View {
     @ObservedObject var viewModel: SiteReadySurveyView.ViewModel
     
@@ -396,8 +473,6 @@ struct PrintersSection: View {
         }
     }
 }
-
-
 struct PostersSection: View {
     @ObservedObject var viewModel: SiteReadySurveyView.ViewModel
     
@@ -543,11 +618,9 @@ struct RoomSection: View {
             Toggle(isOn: $viewModel.cleanedWhiteboard) {
                 Text("Cleaned whiteboard?")
             }
-
             Toggle(isOn: $viewModel.updatedInventory) {
                 Text("Updated Inventory")
             }
-
             Toggle(isOn: $viewModel.tookOutRecycling) {
                 Text("Took out recycling?")
             }
@@ -558,17 +631,59 @@ struct RoomSection: View {
             }
             
             // Issues dropdown
-            if viewModel.otherIssuesCount > 0 {
+            Section(header: Text("Other Issues")) {
                 ForEach(0..<viewModel.otherIssuesCount, id: \.self) { index in
-                    HStack {
-                        TextField("Enter issue", text: $viewModel.otherIssues[index])
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                        TextField("Enter ticket number", text: $viewModel.otherIssueTicketNumbers[index])
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    if index < viewModel.otherIssueTypes.count {
+                        IssueRow(issueType: $viewModel.otherIssueTypes[index],
+                                 issueDescription: $viewModel.otherIssues[index],
+                                 ticketNumber: $viewModel.otherIssueTicketNumbers[index])
                     }
                 }
             }
         }
+    }
+}
+struct IssueRow: View {
+    @Binding var issueType: String
+    @Binding var issueDescription: String
+    @Binding var ticketNumber: String
+    
+    let issueTypesNoTickets = ["FldaGVfpPdQ57H7XsGOO" /*chair*/,
+                               "GxFGSkbDySZmdkCFExt9" /*label*/,
+                               "wYJWtaj33rx4EIh6v9RY" /*poster*/]
+    
+    var requiresTicketNumber: Bool {
+        // Check if the selected issue type requires a ticket number
+        // If the issue type is in issueTypesNoTickets, then ticket number is not required
+        return !issueTypesNoTickets.contains(issueType)
+    }
+    
+    var body: some View {
+        HStack {
+            // Issue Type Picker
+            Picker("Issue Type", selection: $issueType) {
+                ForEach(IssueTypeManager.shared.issueTypes, id: \.id) { issueType in
+                    Text(issueType.name).tag(issueType.id)
+                }
+            }
+            .pickerStyle(DefaultPickerStyle())
+            
+            // VStack for Issue Description and Ticket Number
+            VStack(alignment: .leading, spacing: 8) {
+                // Issue Description
+                TextField("Enter issue description", text: $issueDescription)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                // Conditionally show the Ticket Number field based on the requirement
+                if requiresTicketNumber {
+                    // Ticket Number
+                    TextField("Enter ticket number", text: $ticketNumber)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+            }
+            .padding(.leading, 8)
+        }
+        .padding(.vertical, 8)
     }
 }
 struct AdditionalCommentsSection: View {
@@ -583,7 +698,6 @@ struct AdditionalCommentsSection: View {
         }
     }
 }
-
 struct ComputerFailureView: View {
     @Binding var computerFailure: String
     
@@ -592,7 +706,6 @@ struct ComputerFailureView: View {
             .textFieldStyle(RoundedBorderTextFieldStyle())
     }
 }
-
 // Subview for displaying computer labels replacement
 struct ComputerLabelReplacementView: View {
     var labelIndex: Int
@@ -603,7 +716,6 @@ struct ComputerLabelReplacementView: View {
             .textFieldStyle(RoundedBorderTextFieldStyle())
     }
 }
-
 // Subview for displaying printer labels replacement
 struct PrinterLabelReplacementView: View {
     var labelIndex: Int
@@ -614,11 +726,9 @@ struct PrinterLabelReplacementView: View {
             .textFieldStyle(RoundedBorderTextFieldStyle())
     }
 }
-
-// ViewModel for managing state
 extension SiteReadySurveyView {
     class ViewModel: ObservableObject {
-        // Add @Published properties here to track survey data
+        // Survey Data
         @Published var pcCount: Int = 0
         @Published var macCount: Int = 0
         @Published var scannerCount: Int = 0
@@ -627,15 +737,11 @@ extension SiteReadySurveyView {
         @Published var loggedIntoAllComputers: Bool = false
         @Published var failedToLoginCount: Int = 0 {
             didSet {
-                // Ensure that the computerFailures array matches the count
-                while computerFailures.count < failedToLoginCount {
-                    computerFailures.append("")
-                }
-                // Ensure that the failedLoginTicketNumbers array matches the count
-                while failedLoginTicketNumbers.count < failedToLoginCount {
-                    failedLoginTicketNumbers.append(0)
-                }
+                ensureArraysMatchCount()
             }
+        }
+        init() {
+            fetchIssueTypes()
         }
         @Published var failedLoginTicketNumbers: [Int] = []
         @Published var computerFailures: [String] = []
@@ -644,43 +750,37 @@ extension SiteReadySurveyView {
         @Published var needLabelReplacement: Bool = false
         @Published var labelsToReplace: Int = 0 {
             didSet {
-                // Ensure that the computerLabels array matches the count
-                while computerLabels.count < labelsToReplace {
-                    computerLabels.append("")
-                }
+                ensureArraysMatchCount()
             }
         }
         @Published var computerLabels: [String] = []
         @Published var needPrinterLabelReplacement: Bool = false
         @Published var printerLabelsToReplace: Int = 0 {
             didSet {
-                // Ensure that the printerLabels array matches the count
-                while printerLabels.count < printerLabelsToReplace {
-                    printerLabels.append("")
-                }
+                ensureArraysMatchCount()
             }
         }
         @Published var printerLabels: [String] = []
         @Published var bwPrinterCount: Int = 0 {
             didSet {
-                // Update the computed property value
                 updateShowPrinterRelatedSections()
             }
         }
         @Published var colorPrinterCount: Int = 0 {
             didSet {
-                // Update the computed property value
                 updateShowPrinterRelatedSections()
             }
         }
         @Published var topOffPrintersWithPaper: Bool = false
         @Published var testPrintedForPrinters: Bool = false
         @Published var wipedDownPrinters: Bool = false
+        @Published var issues: [Issue] = []
+        @Published var labelIssues: [Issue] = []
         
-        // Computed property to determine if printer-related sections should be shown
+        // Printer-related Sections
         @Published var showPrinterRelatedSections: Bool = false
         
-        // Add more @Published properties here as needed
+        // Posters & Notices
         @Published var missionStatementBanner: Bool? = nil
         @Published var reservedBoardNotification: Bool? = nil
         @Published var cyberSecurityPoster: Bool? = nil
@@ -697,42 +797,59 @@ extension SiteReadySurveyView {
         @Published var signHolders11x17GoodCondition: Bool = true
         @Published var signHolders11x17IssueDescription: String = ""
         @Published var removedOldCalendars: Bool = false
-        var missingChairs: Int = 0
         
+        func fetchIssueTypes() {
+            IssueTypeManager.shared.fetchIssueTypes()
+        }
+        
+        // Miscellaneous
+        var missingChairs: Int = 0
         @Published var projectorWorkingProperly: String = "Yes"
         @Published var clockWorking: String = "Yes"
-
         @Published var cleanedWhiteboard: Bool = false
         @Published var updatedInventory: Bool = false
         @Published var tookOutRecycling: Bool = false
-        @Published var otherIssuesCount: Int = 0 {
-            didSet {
-                // Ensure that the otherIssues and otherIssueTicketNumbers arrays match the count
-                while otherIssues.count < otherIssuesCount {
-                    otherIssues.append("")
-                    otherIssueTicketNumbers.append("")
-                }
-            }
-        }
-        @Published var otherIssues: [String] = []
-        @Published var otherIssueTicketNumbers: [String] = []
-        @Published var labelIssues: [Issue] = []
-        @Published var reportId: String = ""
         
-
-
+        @Published var otherIssuesCount: Int = 0 {
+                    didSet {
+                        ensureArraysMatchCount()
+                    }
+                }
+                @Published var otherIssues: [String] = Array(repeating: "", count: 100)
+                @Published var otherIssueTicketNumbers: [String] = Array(repeating: "", count: 100)
+                @Published var otherIssueTypes: [String] = Array(repeating: "", count: 100)
+        @Published var reportId: String = ""
         @Published var additionalComments: String = ""
-
-        // Scanner computers
-        @Published var scannerComputers: [String: [String]] = [:] // Scanner ID: [Computer Names]
+        
+        // Scanner Computers
+        @Published var scannerComputers: [String: [String]] = [:]
         
         // Function to update the showPrinterRelatedSections flag
         private func updateShowPrinterRelatedSections() {
             showPrinterRelatedSections = bwPrinterCount > 0 || colorPrinterCount > 0
         }
+        
+        // Ensure arrays match the count when otherIssuesCount or labelsToReplace changes
+        private func ensureArraysMatchCount() {
+            while computerFailures.count < failedToLoginCount {
+                computerFailures.append("")
+            }
+            while failedLoginTicketNumbers.count < failedToLoginCount {
+                failedLoginTicketNumbers.append(0)
+            }
+            while computerLabels.count < labelsToReplace {
+                computerLabels.append("")
+            }
+            while printerLabels.count < printerLabelsToReplace {
+                printerLabels.append("")
+            }
+            while otherIssues.count < otherIssuesCount {
+                otherIssues.append("")
+                otherIssueTicketNumbers.append("")
+            }
+        }
     }
 }
-
 //struct SiteReadySurveyView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        // Provide a placeholder site.id for preview purposes
@@ -740,7 +857,6 @@ extension SiteReadySurveyView {
 //        return SiteReadySurveyView(siteId: placeholderSiteId, userId: "UP4qMGuLhCP3qHvT5tfNnZlzH4h1")
 //    }
 //}
-
 #Preview {
     NavigationView {
         SiteReadySurveyView(site: Site(
@@ -760,8 +876,9 @@ extension SiteReadySurveyView {
         ))
     }
 }
-
 // Errors
 enum SiteReadyError: Error {
     case userNotAuth
 }
+
+

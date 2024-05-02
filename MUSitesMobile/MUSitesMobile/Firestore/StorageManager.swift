@@ -99,10 +99,15 @@ final class StorageManager {
     }
 
     private func determineNextImageName(from existingNames: [String], siteName: String) -> String {
+//        let siteImageNumbers = existingNames.compactMap { name -> Int? in
+//            guard name.hasPrefix(siteName) else { return nil }
+//            return Int(name.trimmingCharacters(in: CharacterSet(charactersIn: "\(siteName)_").union(.letters)))
+//        }
         let siteImageNumbers = existingNames.compactMap { name -> Int? in
-            guard name.hasPrefix(siteName) else { return nil }
-            return Int(name.trimmingCharacters(in: CharacterSet(charactersIn: "\(siteName)_").union(.letters)))
+            let nameComponents = name.components(separatedBy: CharacterSet.decimalDigits.inverted)
+            return nameComponents.compactMap { Int($0) }.last
         }
+
             
         if let maxNumber = siteImageNumbers.max() {
             return "\(siteName)_\(String(format: "%02d", maxNumber + 1)).jpg"

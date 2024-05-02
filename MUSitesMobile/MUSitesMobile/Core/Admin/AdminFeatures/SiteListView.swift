@@ -96,14 +96,14 @@ struct SiteListView: View {
         do {
             switch filter {
             case .sites:
-                sites = try await SitesManager.shared.getAllSites(descending: true)
+                sites = try await SitesManager.shared.getAllSites(descending: false)
                 print("Fetched sites: \(sites.count)")
                 isLoading = false
             case .inventory:
-                InventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: true)
+                InventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: false)
                 print("Fetched inventory sites: \(InventorySites.count)")
             case .buildings:
-                Buildings = try await BuildingsManager.shared.getAllBuildings(descending: true, group: nil )
+                Buildings = try await BuildingsManager.shared.getAllBuildings(descending: false, group: nil )
                 print("Fetched buildings: \(Buildings.count)")
             }
         } catch let fetchError {

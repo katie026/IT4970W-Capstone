@@ -166,9 +166,9 @@ final class DetailedSiteViewModel: ObservableObject {
         let capitalizedSiteName = siteName.uppercased()
         //fetch PCs
         db.collection("computers")
-            .whereField("computing_site", isEqualTo: siteID)
-            .whereField("computer_name", isGreaterThanOrEqualTo: "\(capitalizedSiteName)-PC-")
-            .whereField("computer_name", isLessThanOrEqualTo: "\(capitalizedSiteName)-PC-~")
+            .whereField(Computer.CodingKeys.siteId.rawValue, isEqualTo: siteID)
+            .whereField(Computer.CodingKeys.os.rawValue, isEqualTo: "Windows")
+            
             .addSnapshotListener { querySnapshot, error in
                 guard let documents = querySnapshot?.documents else {
                     print("Error fetching documents: \(error?.localizedDescription ?? "Unknown error")")
@@ -185,9 +185,8 @@ final class DetailedSiteViewModel: ObservableObject {
             }
         //fetch Macs
         db.collection("computers")
-            .whereField("computing_site", isEqualTo: siteID)
-            .whereField("computer_name", isGreaterThanOrEqualTo: "\(capitalizedSiteName)-MAC-")
-            .whereField("computer_name", isLessThanOrEqualTo: "\(capitalizedSiteName)-MAC-~")
+            .whereField(Computer.CodingKeys.siteId.rawValue, isEqualTo: siteID)
+            .whereField(Computer.CodingKeys.os.rawValue, isEqualTo: "macOS")
             .addSnapshotListener { querySnapshot, error in
                 guard let documents = querySnapshot?.documents else {
                     print("Error fetching documents: \(error?.localizedDescription ?? "Unknown error")")
@@ -220,8 +219,8 @@ final class DetailedSiteViewModel: ObservableObject {
         let printerCollection = db.collection("printers")
         //B&W printers
         printerCollection
-            .whereField("computing_site", isEqualTo: siteID)
-            .whereField("type", isEqualTo: "B&W")
+            .whereField(Printer.CodingKeys.siteId.rawValue, isEqualTo: siteID)
+            .whereField(Printer.CodingKeys.type.rawValue, isEqualTo: "B&W")
             .addSnapshotListener { querySnapshot, error in
                 //creating an array of Printer objects
                 self.bwPrinters = querySnapshot?.documents.compactMap { doc -> Printer? in
@@ -234,8 +233,8 @@ final class DetailedSiteViewModel: ObservableObject {
         
         //Color printers
         printerCollection
-            .whereField("computing_site", isEqualTo: siteID)
-            .whereField("type", isEqualTo: "Color")
+            .whereField(Printer.CodingKeys.siteId.rawValue, isEqualTo: siteID)
+            .whereField(Printer.CodingKeys.type.rawValue, isEqualTo: "Color")
             .addSnapshotListener { querySnapshot, error in
                 //creating an array of Printer objects
                 self.colorPrinters = querySnapshot?.documents.compactMap { doc -> Printer? in

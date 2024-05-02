@@ -11,7 +11,7 @@ import FirebaseFirestoreSwift
 class SitesReadyEntriesViewModel: ObservableObject {
     @Published var entries: [SiteReadyEntry] = []
     private let db = Firestore.firestore()
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
     @Published var endDate = Date()
 
     func fetchSitesReadyEntries() {

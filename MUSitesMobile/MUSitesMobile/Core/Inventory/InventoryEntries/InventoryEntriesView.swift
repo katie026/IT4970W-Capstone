@@ -26,7 +26,7 @@ final class InventoryEntriesViewModel: ObservableObject {
     var supplyTypes: [SupplyType] = []
     @Published var supplyEntries: [SupplyEntry] = []
     @Published var selectedSort = SortOption.descending
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
     @Published var endDate = Date()
     
     // for labels
