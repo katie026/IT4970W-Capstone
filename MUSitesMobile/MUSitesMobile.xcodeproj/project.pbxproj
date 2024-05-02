@@ -90,6 +90,7 @@
 		F63F46C22BBAFEB000ADEB9D /* InventoryChangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63F46C12BBAFEB000ADEB9D /* InventoryChangeView.swift */; };
 		F63F46C42BBB01DB00ADEB9D /* InventorySubmissionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63F46C32BBB01DB00ADEB9D /* InventorySubmissionViewModel.swift */; };
 		F64038CF2BE3A40600CB2FA0 /* UserIssuesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F64038CE2BE3A40500CB2FA0 /* UserIssuesView.swift */; };
+		F64038D22BE3B9C100CB2FA0 /* UserProductivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F64038D12BE3B9C100CB2FA0 /* UserProductivityView.swift */; };
 		F668B1E32B9AB392000B2886 /* KeySetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E22B9AB392000B2886 /* KeySetManager.swift */; };
 		F668B1E62B9AB688000B2886 /* KeySetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E52B9AB688000B2886 /* KeySetsView.swift */; };
 		F668B1E82B9AB79C000B2886 /* KeySetCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */; };
@@ -205,6 +206,7 @@
 		F63F46C12BBAFEB000ADEB9D /* InventoryChangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryChangeView.swift; sourceTree = "<group>"; };
 		F63F46C32BBB01DB00ADEB9D /* InventorySubmissionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventorySubmissionViewModel.swift; sourceTree = "<group>"; };
 		F64038CE2BE3A40500CB2FA0 /* UserIssuesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIssuesView.swift; sourceTree = "<group>"; };
+		F64038D12BE3B9C100CB2FA0 /* UserProductivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProductivityView.swift; sourceTree = "<group>"; };
 		F668B1E22B9AB392000B2886 /* KeySetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetManager.swift; sourceTree = "<group>"; };
 		F668B1E52B9AB688000B2886 /* KeySetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetsView.swift; sourceTree = "<group>"; };
 		F668B1E72B9AB79C000B2886 /* KeySetCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySetCellView.swift; sourceTree = "<group>"; };
@@ -311,6 +313,7 @@
 				F6A23E382BDDF6C70065BF78 /* SupplyRequests */,
 				6EA65F4A2B8710DC000766C7 /* TabBarView */,
 				6EA65F4F2B8714D6000766C7 /* UserBuildings */,
+				F64038D02BE3B99900CB2FA0 /* UserProductivity */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -662,6 +665,14 @@
 			path = InventorySites;
 			sourceTree = "<group>";
 		};
+		F64038D02BE3B99900CB2FA0 /* UserProductivity */ = {
+			isa = PBXGroup;
+			children = (
+				F64038D12BE3B9C100CB2FA0 /* UserProductivityView.swift */,
+			);
+			path = UserProductivity;
+			sourceTree = "<group>";
+		};
 		F668B1E42B9AB638000B2886 /* Keys */ = {
 			isa = PBXGroup;
 			children = (
@@ -834,6 +845,7 @@
 				D5225A6B2BC8758C007F14E2 /* AdminUserProfileView.swift in Sources */,
 				6EE110712B7B57F700747F04 /* ContentView.swift in Sources */,
 				F6B8872F2BD540ED00E4A7C8 /* IssuesView.swift in Sources */,
+				F64038D22BE3B9C100CB2FA0 /* UserProductivityView.swift in Sources */,
 				F6A23E3E2BE09FDB0065BF78 /* IssueCellView.swift in Sources */,
 				D5B5E07B2BB35DFB00AFCE3C /* ImageUploadView.swift in Sources */,
 				F1A0BA402BBF09C400BBC9CB /* BuildingDetailView.swift in Sources */,

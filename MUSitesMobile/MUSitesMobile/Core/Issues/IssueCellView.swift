@@ -132,7 +132,7 @@ struct IssueCellView: View {
                 .foregroundColor(resolvedAccentColor)
                 .padding(.leading, 15)
             if let resolved = issue.resolved {
-                Text(resolved ? "Resolved" : "Unresolved")
+                Text(resolved ? "Resolved" : "Not Resolved")
                     .padding(.vertical, 3)
                     .padding(.horizontal, 5)
             } else {

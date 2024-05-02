@@ -47,6 +47,10 @@ final class IssuesViewModel: ObservableObject {
         issues.reverse()
     }
     
+    func swapUserIssuesOrder() {
+        userIssues.reverse()
+    }
+    
     func getSites(completion: @escaping () -> Void) {
         Task {
             do {
@@ -58,23 +62,25 @@ final class IssuesViewModel: ObservableObject {
         }
     }
     
-    func getUsers() {
+    func getUsers(completion: @escaping () -> Void) {
         Task {
             do {
                 self.users = try await UserManager.shared.getUsersList()
             } catch  {
                 print("Error getting users: \(error)")
             }
+            completion()
         }
     }
     
-    func getIssueTypes() {
+    func getIssueTypes(completion: @escaping () -> Void) {
         Task {
             do {
                 self.issueTypes = try await IssueTypeManager.shared.getAllIssueTypes(descending: false)
             } catch  {
                 print("Error getting issue types: \(error)")
             }
+            completion()
         }
     }
     
@@ -264,8 +270,8 @@ struct IssuesView: View {
                 Task {
                     //only really need to load these once per view session
                     viewModel.getSites{}
-                    viewModel.getUsers()
-                    viewModel.getIssueTypes()
+                    viewModel.getUsers(){}
+                    viewModel.getIssueTypes(){}
                 }
             }
             .alert(isPresented: $showAlert) {
@@ -412,17 +418,21 @@ struct IssuesView: View {
                     }.buttonStyle(PlainButtonStyle())
                 }
                 .contextMenu {
-                    // toggle reoslution status
-                    Button (issue.resolved ?? false ? "Unresolve" : "Resolve") {
+                    // toggle resolution status
+                    Button () {
                         toggleIssueResolution(issue: issue)
+                    } label: {
+                        Label(issue.resolved ?? false ? "Unresolve" : "Resolve", systemImage: issue.resolved ?? false ? "xmark.square" : "checkmark.square")
                     }
                     // delete issue
-                    Button("Delete", role: .destructive) {
+                    Button(role: .destructive) {
                         // update selected Issue to delete
                         selectedIssue = issue
                         // activate alert
                         activateAlert = .deleteIssue
                         showAlert = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
                     }
                 }
             }
