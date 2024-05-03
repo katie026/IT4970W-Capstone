@@ -99,6 +99,7 @@
 		F66FCE8B2BDB804B008251F9 /* SiteCaptainsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FCE8A2BDB804B008251F9 /* SiteCaptainsView.swift */; };
 		F66FCE8D2BDB87C6008251F9 /* SiteCaptainCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FCE8C2BDB87C5008251F9 /* SiteCaptainCellView.swift */; };
 		F67778642BE47BB5007D4FB1 /* ReportTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67778632BE47BB5007D4FB1 /* ReportTypeManager.swift */; };
+		F67778662BE49B8B007D4FB1 /* InventorySuppliesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67778652BE49B8B007D4FB1 /* InventorySuppliesView.swift */; };
 		F67CCB522BDC5ED1002AF86B /* AuthorizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67CCB512BDC5ED1002AF86B /* AuthorizationManager.swift */; };
 		F68E1B052BBBE4B300EBE6AC /* TempChangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */; };
 		F68E1B072BBC2CE600EBE6AC /* SheetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B062BBC2CE500EBE6AC /* SheetManager.swift */; };
@@ -217,6 +218,7 @@
 		F66FCE8A2BDB804B008251F9 /* SiteCaptainsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainsView.swift; sourceTree = "<group>"; };
 		F66FCE8C2BDB87C5008251F9 /* SiteCaptainCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainCellView.swift; sourceTree = "<group>"; };
 		F67778632BE47BB5007D4FB1 /* ReportTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportTypeManager.swift; sourceTree = "<group>"; };
+		F67778652BE49B8B007D4FB1 /* InventorySuppliesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventorySuppliesView.swift; sourceTree = "<group>"; };
 		F67CCB512BDC5ED1002AF86B /* AuthorizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationManager.swift; sourceTree = "<group>"; };
 		F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempChangeView.swift; sourceTree = "<group>"; };
 		F68E1B062BBC2CE500EBE6AC /* SheetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetManager.swift; sourceTree = "<group>"; };
@@ -509,6 +511,7 @@
 				F68E1B0A2BBD2C4800EBE6AC /* InventoryEntries */,
 				F63F46B82BBAA29F00ADEB9D /* InventorySites */,
 				6EA65F742B9902AA000766C7 /* Subviews */,
+				F67778652BE49B8B007D4FB1 /* InventorySuppliesView.swift */,
 			);
 			path = Inventory;
 			sourceTree = "<group>";
@@ -942,6 +945,7 @@
 				E553CD822BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift in Sources */,
 				6EA65F4E2B871156000766C7 /* TabBarView.swift in Sources */,
 				6EA65F582B8E7564000766C7 /* Query+EXT.swift in Sources */,
+				F67778662BE49B8B007D4FB1 /* InventorySuppliesView.swift in Sources */,
 				6E6858382B84470600896B16 /* ProfileViewModel.swift in Sources */,
 				F668B1E82B9AB79C000B2886 /* KeySetCellView.swift in Sources */,
 				6E8C573B2B7F068600B5BF59 /* SignInAppleHelper.swift in Sources */,

@@ -19,7 +19,7 @@ struct AdminView: View {
                 }
             }
             
-            // INVENTORY SECTION
+            // LISTS SECTION
             Section("Lists") {
                 NavigationLink(destination: BuildingsView()) {
                     Label{Text("View Buildings")} icon: {Image(systemName: "building.2.fill")
@@ -39,6 +39,10 @@ struct AdminView: View {
                 }
                 NavigationLink(destination: PrintersView()) {
                     Label{Text("All Printers")} icon: {Image(systemName: "printer.fill")
+                        .foregroundColor(.purple)}
+                }
+                NavigationLink(destination: InventorySuppliesView()) {
+                    Label{Text("All Supplies")} icon: {Image(systemName: "archivebox")
                         .foregroundColor(.purple)}
                 }
             }
