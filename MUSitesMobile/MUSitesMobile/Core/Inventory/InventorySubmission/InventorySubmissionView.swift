@@ -516,7 +516,7 @@ struct InventorySubmissionView: View {
             confirm()
         }) {
             // Button display
-            Text("Confirm & Exit")
+            Text("No Supplies Used")
                 .foregroundColor(.white)
                 .padding()
                 .background(Color.blue)
@@ -533,7 +533,7 @@ struct InventorySubmissionView: View {
             confirm()
         }) {
             // Button display
-            Text("Confirm & Continue")
+            Text("Supplies Used")
                 .foregroundColor(.white)
                 .padding()
                 .background(Color.yellow)

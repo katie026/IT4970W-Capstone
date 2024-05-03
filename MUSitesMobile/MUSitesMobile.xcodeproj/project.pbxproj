@@ -98,6 +98,7 @@
 		F66FCE892BDB5181008251F9 /* PositionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FCE882BDB5180008251F9 /* PositionManager.swift */; };
 		F66FCE8B2BDB804B008251F9 /* SiteCaptainsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FCE8A2BDB804B008251F9 /* SiteCaptainsView.swift */; };
 		F66FCE8D2BDB87C6008251F9 /* SiteCaptainCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FCE8C2BDB87C5008251F9 /* SiteCaptainCellView.swift */; };
+		F67778642BE47BB5007D4FB1 /* ReportTypeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67778632BE47BB5007D4FB1 /* ReportTypeManager.swift */; };
 		F67CCB522BDC5ED1002AF86B /* AuthorizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67CCB512BDC5ED1002AF86B /* AuthorizationManager.swift */; };
 		F68E1B052BBBE4B300EBE6AC /* TempChangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */; };
 		F68E1B072BBC2CE600EBE6AC /* SheetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E1B062BBC2CE500EBE6AC /* SheetManager.swift */; };
@@ -215,6 +216,7 @@
 		F66FCE882BDB5180008251F9 /* PositionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionManager.swift; sourceTree = "<group>"; };
 		F66FCE8A2BDB804B008251F9 /* SiteCaptainsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainsView.swift; sourceTree = "<group>"; };
 		F66FCE8C2BDB87C5008251F9 /* SiteCaptainCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteCaptainCellView.swift; sourceTree = "<group>"; };
+		F67778632BE47BB5007D4FB1 /* ReportTypeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportTypeManager.swift; sourceTree = "<group>"; };
 		F67CCB512BDC5ED1002AF86B /* AuthorizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationManager.swift; sourceTree = "<group>"; };
 		F68E1B042BBBE4B300EBE6AC /* TempChangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempChangeView.swift; sourceTree = "<group>"; };
 		F68E1B062BBC2CE500EBE6AC /* SheetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetManager.swift; sourceTree = "<group>"; };
@@ -375,6 +377,7 @@
 				6EA65F722B98FF34000766C7 /* KeyTypeManager.swift */,
 				F66FCE882BDB5180008251F9 /* PositionManager.swift */,
 				F69A9C352BD98912006EAE22 /* PrinterManager.swift */,
+				F67778632BE47BB5007D4FB1 /* ReportTypeManager.swift */,
 				E553CD7B2BCD937E00B9D63B /* SiteCaptainManager.swift */,
 				F6A23E362BDD58E80065BF78 /* SiteReadyManager.swift */,
 				F6AB560F2BC4D9EE005727D2 /* SiteGroupsManager.swift */,
@@ -881,6 +884,7 @@
 				F6246A7F2BA3BC6A00828DAE /* SimpleMapView.swift in Sources */,
 				D5B5E06D2BB32C0000AFCE3C /* AdminView.swift in Sources */,
 				6EA65F5C2B8E75E5000766C7 /* OnFirstAppearViewModifier.swift in Sources */,
+				F67778642BE47BB5007D4FB1 /* ReportTypeManager.swift in Sources */,
 				D5225A842BDD98DA007F14E2 /* PostersSelectionView.swift in Sources */,
 				F69A9C362BD98914006EAE22 /* PrinterManager.swift in Sources */,
 				6E33297A2B7F640D009FCD14 /* SignInEmailViewModel.swift in Sources */,

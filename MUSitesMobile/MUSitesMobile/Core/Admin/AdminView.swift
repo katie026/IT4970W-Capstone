@@ -35,18 +35,18 @@ struct AdminView: View {
                 }
                 NavigationLink(destination: ComputersView()) {
                     Label{Text("All Computers")} icon: {Image(systemName: "desktopcomputer")
-                        .foregroundColor(.blue)}
+                        .foregroundColor(.purple)}
                 }
                 NavigationLink(destination: PrintersView()) {
                     Label{Text("All Printers")} icon: {Image(systemName: "printer.fill")
-                        .foregroundColor(.blue)}
+                        .foregroundColor(.purple)}
                 }
             }
             
             Section("Images") {
                 NavigationLink(destination: SiteListView()) { // we should rename this
                     Label{Text("Images")} icon: {Image(systemName: "photo.fill")
-                        .foregroundColor(.purple)}
+                        .foregroundColor(.pink)}
                 }
             }
             Section(header: Text("Submission Data")) {

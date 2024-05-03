@@ -46,11 +46,11 @@ struct UserIssuesView: View {
     }
     
     private var issueListSection: some View {
-        Section("Issues: \(viewModel.userIssues.filter { $0.resolved == false }.count)") {
+        Section("Assigned Issues: \(viewModel.userIssues.filter { $0.resolved == false }.count)") {
             HStack(alignment: .center) {
                 filterByResolutionMenu
                 Spacer()
-                sortButton
+//                sortButton // this doesn't work when Section is put inside a List
                 refreshButton
             }.padding(.vertical, 5)
             

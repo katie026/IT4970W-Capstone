@@ -20,7 +20,12 @@ final class InventorySitesViewModel: ObservableObject {
     
     func getInventorySites() {
         Task {
-            self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: false)
+            do {
+                self.inventorySites = try await InventorySitesManager.shared.getAllInventorySites(descending: false)
+                self.inventorySites.sort { $0.name ?? "" < $1.name ?? "" }
+            } catch {
+                print("Error fetching inventory sites: \(error)")
+            }
         }
     }
     

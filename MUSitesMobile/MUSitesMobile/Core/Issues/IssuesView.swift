@@ -642,7 +642,7 @@ struct IssuesView: View {
                     viewModel.issues[index].resolved = true
                 }
             } else {
-                viewModel.issues[index].resolved = false
+                viewModel.issues[index].resolved = true
             }
         }
     }

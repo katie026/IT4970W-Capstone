@@ -157,10 +157,6 @@ struct UserProductivityView: View {
 
     }
     
-    private func IssuesSection(user: DBUser) -> some View {
-        UserIssuesView(currentUser: user, sites: issuesViewModel.sites, users: issuesViewModel.users, issueTypes: issuesViewModel.issueTypes)
-    }
-    
     private func InfoSection() -> some View {
         return Section("Basic Info") {
             DisclosureGroup(isExpanded: $siteCaptainsExpanded) {
@@ -173,6 +169,10 @@ struct UserProductivityView: View {
                 Text("**Site Captains:** \(siteCaptainSites.count)")
             }
         }
+    }
+    
+    private func IssuesSection(user: DBUser) -> some View {
+        UserIssuesView(currentUser: user, sites: issuesViewModel.sites, users: issuesViewModel.users, issueTypes: issuesViewModel.issueTypes)
     }
     
     private func HourlyCleaningSection() -> some View {
