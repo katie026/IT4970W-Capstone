@@ -218,6 +218,15 @@ final class SitesManager {
             .getDocuments(as: Site.self)
     }
     
+    // get sites by SiteCaptain user
+    func getSitesBySiteCaptain(userId: String) async throws -> [Site] {
+        let query = sitesCollection
+            .whereField(Site.CodingKeys.siteCaptain.rawValue, isEqualTo: userId)
+        
+        return try await query
+            .getDocuments(as: Site.self)
+    }
+    
     // check if sites in Building
     func checkIfSitesInBuilding(buildingId: String, completion: @escaping (Bool) -> Void) {
         let query = sitesCollection

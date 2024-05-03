@@ -10,100 +10,140 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Combine
 
+struct PosterReport: Codable {
+    var posterId: String
+    var status: String
+}
+
+struct EquipmentStatus: Codable {
+    var equipment: String
+    var status: String
+}
+
 struct SiteReady: Codable, Identifiable {
     let id: String
-    let siteId: String?
-    let issues: [String]?
-    let supplyRequests: [String]?
     let timestamp: Date?
-    let updatedInventory: Bool?
     let user: String?
-    let bwPrinterCount: Int?
+    let siteId: String?
     let macCount: Int?
     let pcCount: Int?
+    let scannerCount: Int?
+    let scanerComputers: [String]?
+    let bwPrinterCount: Int?
+    let colorPrinterCount: Int?
     let chairCount: Int?
     let missingChairs: Int?
+    let updatedInventory: Bool?
+    let posters: [PosterReport]?
+    let supplyRequests: [String]?
+    let equipmentStatuses: [EquipmentStatus]?
+    let issues: [String]?
     let comments: String?
     
     init(
         id: String,
-        siteId:String? = nil,
-        issues: [String]? = nil,
-        supplyRequests:[String]? = nil,
-        timestamp : Date? = nil,
-        updatedInventory: Bool? = nil,
-        user : String? = nil,
-        bwPrinterCount: Int? = nil,
+        timestamp: Date? = nil,
+        user: String? = nil,
+        siteId: String? = nil,
         macCount: Int? = nil,
         pcCount: Int? = nil,
+        scannerCount: Int? = nil,
+        scanerComputers: [String]? = nil,
+        bwPrinterCount: Int? = nil,
+        colorPrinterCount: Int? = nil,
         chairCount: Int? = nil,
         missingChairs: Int? = nil,
+        updatedInventory: Bool? = nil,
+        posters: [PosterReport]? = nil,
+        supplyRequests: [String]? = nil,
+        equipmentStatuses: [EquipmentStatus]? = nil,
+        issues: [String]? = nil,
         comments: String? = nil
     ) {
+        
         self.id = id
-        self.siteId = siteId
-        self.issues = issues
-        self.supplyRequests = supplyRequests
         self.timestamp = timestamp
-        self.updatedInventory = updatedInventory
         self.user = user
-        self.bwPrinterCount = bwPrinterCount
+        self.siteId = siteId
         self.macCount = macCount
         self.pcCount = pcCount
+        self.scannerCount = scannerCount
+        self.scanerComputers = scanerComputers
+        self.bwPrinterCount = bwPrinterCount
+        self.colorPrinterCount = colorPrinterCount
         self.chairCount = chairCount
         self.missingChairs = missingChairs
+        self.updatedInventory = updatedInventory
+        self.posters = posters
+        self.supplyRequests = supplyRequests
+        self.equipmentStatuses = equipmentStatuses
+        self.issues = issues
         self.comments = comments
     }
     
     enum CodingKeys: String, CodingKey {
         case id = "id"
-        case siteId = "site_id"
-        case issues = "issues"
-        case supplyRequests = "supply_requests"
         case timestamp = "timestamp"
-        case updatedInventory = "updated_inventory"
         case user = "user"
-        case bwPrinterCount = "bw_printer_count"
+        case siteId = "computing_site"
         case macCount = "mac_count"
         case pcCount = "pc_count"
+        case scannerCount = "scanner_count"
+        case scanerComputers = "scaner_computers"
+        case bwPrinterCount = "bw_printer_count"
+        case colorPrinterCount = "color_printer_count"
         case chairCount = "chair_count"
         case missingChairs = "missing_chairs"
+        case updatedInventory = "updated_inventory"
+        case posters = "posters"
+        case supplyRequests = "supply_requests"
+        case equipmentStatuses = "equipment_status"
+        case issues = "issues"
         case comments = "comments"
-    }
-    
-    init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(String.self, forKey: .id)
-        self.siteId = try container.decodeIfPresent(String.self, forKey: .siteId)
-        self.issues = try container.decodeIfPresent([String].self, forKey: .issues)
-        self.supplyRequests = try container.decodeIfPresent([String].self, forKey: .supplyRequests)
-        self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp)
-        self.updatedInventory = try container.decodeIfPresent(Bool.self, forKey: .updatedInventory)
-        self.user = try container.decodeIfPresent(String.self, forKey: .user)
-        self.bwPrinterCount = try container.decodeIfPresent(Int.self, forKey: .bwPrinterCount)
-        self.macCount = try container.decodeIfPresent(Int.self, forKey: .macCount)
-        self.pcCount = try container.decodeIfPresent(Int.self, forKey: .pcCount)
-        self.chairCount = try container.decodeIfPresent(Int.self, forKey: .chairCount)
-        self.missingChairs = try container.decodeIfPresent(Int.self, forKey: .missingChairs)
-        self.comments = try container.decodeIfPresent(String.self, forKey: .comments)
-        
     }
     
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.id, forKey: .id)
-        try container.encodeIfPresent(self.siteId, forKey: .siteId)
-        try container.encodeIfPresent(self.issues, forKey: .issues)
-        try container.encodeIfPresent(self.supplyRequests, forKey: .supplyRequests)
         try container.encodeIfPresent(self.timestamp, forKey: .timestamp)
-        try container.encodeIfPresent(self.updatedInventory, forKey: .updatedInventory)
         try container.encodeIfPresent(self.user, forKey: .user)
-        try container.encodeIfPresent(self.bwPrinterCount, forKey: .bwPrinterCount)
+        try container.encodeIfPresent(self.siteId, forKey: .siteId)
         try container.encodeIfPresent(self.macCount, forKey: .macCount)
         try container.encodeIfPresent(self.pcCount, forKey: .pcCount)
+        try container.encodeIfPresent(self.scannerCount, forKey: .scannerCount)
+        try container.encodeIfPresent(self.scanerComputers, forKey: .scanerComputers)
+        try container.encodeIfPresent(self.bwPrinterCount, forKey: .bwPrinterCount)
+        try container.encodeIfPresent(self.colorPrinterCount, forKey: .colorPrinterCount)
         try container.encodeIfPresent(self.chairCount, forKey: .chairCount)
         try container.encodeIfPresent(self.missingChairs, forKey: .missingChairs)
+        try container.encodeIfPresent(self.updatedInventory, forKey: .updatedInventory)
+        try container.encodeIfPresent(self.posters, forKey: .posters)
+        try container.encodeIfPresent(self.supplyRequests, forKey: .supplyRequests)
+        try container.encodeIfPresent(self.equipmentStatuses, forKey: .equipmentStatuses)
+        try container.encodeIfPresent(self.issues, forKey: .issues)
         try container.encodeIfPresent(self.comments, forKey: .comments)
+    }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.timestamp = try container.decodeIfPresent(Date.self, forKey: .timestamp)
+        self.user = try container.decodeIfPresent(String.self, forKey: .user)
+        self.siteId = try container.decodeIfPresent(String.self, forKey: .siteId)
+        self.macCount = try container.decodeIfPresent(Int.self, forKey: .macCount)
+        self.pcCount = try container.decodeIfPresent(Int.self, forKey: .pcCount)
+        self.scannerCount = try container.decodeIfPresent(Int.self, forKey: .scannerCount)
+        self.scanerComputers = try container.decodeIfPresent([String].self, forKey: .scanerComputers)
+        self.bwPrinterCount = try container.decodeIfPresent(Int.self, forKey: .bwPrinterCount)
+        self.colorPrinterCount = try container.decodeIfPresent(Int.self, forKey: .colorPrinterCount)
+        self.chairCount = try container.decodeIfPresent(Int.self, forKey: .chairCount)
+        self.missingChairs = try container.decodeIfPresent(Int.self, forKey: .missingChairs)
+        self.updatedInventory = try container.decodeIfPresent(Bool.self, forKey: .updatedInventory)
+        self.posters = try container.decodeIfPresent([PosterReport].self, forKey: .posters)
+        self.supplyRequests = try container.decodeIfPresent([String].self, forKey: .supplyRequests)
+        self.equipmentStatuses = try container.decodeIfPresent([EquipmentStatus].self, forKey: .equipmentStatuses)
+        self.issues = try container.decodeIfPresent([String].self, forKey: .issues)
+        self.comments = try container.decodeIfPresent(String.self, forKey: .comments)
     }
 }
 

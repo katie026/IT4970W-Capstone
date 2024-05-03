@@ -19,8 +19,8 @@ struct AdminView: View {
                 }
             }
             
-            // INVENTORY SECTION
-            Section("Location Lists") {
+            // LISTS SECTION
+            Section("Lists") {
                 NavigationLink(destination: BuildingsView()) {
                     Label{Text("View Buildings")} icon: {Image(systemName: "building.2.fill")
                         .foregroundColor(.blue)}
@@ -33,12 +33,24 @@ struct AdminView: View {
                     Label{Text("View Inventory Sites")} icon: {Image(systemName: "cabinet.fill")
                         .foregroundColor(.blue)}
                 }
+                NavigationLink(destination: ComputersView()) {
+                    Label{Text("All Computers")} icon: {Image(systemName: "desktopcomputer")
+                        .foregroundColor(.purple)}
+                }
+                NavigationLink(destination: PrintersView()) {
+                    Label{Text("All Printers")} icon: {Image(systemName: "printer.fill")
+                        .foregroundColor(.purple)}
+                }
+                NavigationLink(destination: InventorySuppliesView()) {
+                    Label{Text("All Supplies")} icon: {Image(systemName: "archivebox")
+                        .foregroundColor(.purple)}
+                }
             }
             
             Section("Images") {
                 NavigationLink(destination: SiteListView()) { // we should rename this
                     Label{Text("Images")} icon: {Image(systemName: "photo.fill")
-                        .foregroundColor(.purple)}
+                        .foregroundColor(.pink)}
                 }
             }
             Section(header: Text("Submission Data")) {

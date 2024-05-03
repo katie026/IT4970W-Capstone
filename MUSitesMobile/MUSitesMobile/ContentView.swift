@@ -10,6 +10,7 @@ import SwiftUI
 @MainActor
 final class ContentViewModel: ObservableObject {
     var structList: [Site] = []
+    
     func getStructsFromFirestore(completion: @escaping () -> Void) {
         Task {
             do {
@@ -26,6 +27,7 @@ final class ContentViewModel: ObservableObject {
 struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
     @State private var isLoading = true
+    @State private var multiSelection = Set<String>()
     
     var body: some View {
         VStack {
@@ -35,13 +37,18 @@ struct ContentView: View {
             if isLoading {
                 ProgressView()
             } else {
-                List {
-                    ForEach(viewModel.structList) { item in
-                        Text(item.name ?? "N/A")
-                        Text(item.siteCaptain ?? "N/A")
-                    }
+                List(viewModel.structList, selection: $multiSelection) { item in
+                    Text("\(item.name ?? "N/A")")
+                }
+                .listStyle(.insetGrouped)
+                .toolbar {
+                    EditButton()
+                }
+                .onChange(of: multiSelection) { oldValue, newValue in
+                    print(newValue)
                 }
             }
+            Text("\(multiSelection.count) selections")
         }
         .padding()
         .onAppear {
@@ -53,5 +60,7 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    NavigationView {
+        ContentView()
+    }
 }

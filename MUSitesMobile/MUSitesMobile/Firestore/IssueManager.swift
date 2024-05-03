@@ -161,6 +161,11 @@ final class IssueManager {
         try issueDocument(issueId: issue.id).setData(from: issue, merge: false)
     }
     
+    // delete an issue from Firestore
+    func deleteIssue(issueId: String) async throws {
+        try await issueDocument(issueId: issueId).delete()
+    }
+    
     // fetch issue collection onto local device
     private func getAllIssuesQuery() -> Query {
         issuesCollection
@@ -174,7 +179,7 @@ final class IssueManager {
         return document.documentID
     }
     
-    // get hourlyCleanings sorted by Date
+    // get issues sorted by Date
     private func getIssuesSortedByDateQuery(descending: Bool) -> Query {
         issuesCollection
             .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
@@ -197,10 +202,10 @@ final class IssueManager {
             .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
     }
     
-    // get issues sorted by date
+    // get issues sorted by typeId
     private func getAllIssuesSortedByNameQuery(descending: Bool) -> Query {
         issuesCollection
-            .order(by: Issue.CodingKeys.dateCreated.rawValue, descending: descending)
+            .order(by: Issue.CodingKeys.issueTypeId.rawValue, descending: descending)
     }
     
     // get issues by name
@@ -226,6 +231,15 @@ final class IssueManager {
             .getDocuments(as: Issue.self) // query Issues collection
     }
     
+    // get issues filtered by userAssigned & sorted by date
+    func getUserIssues(userId: String) async throws -> [Issue] {
+        let query = issuesCollection
+            // filter by user
+            .whereField(Issue.CodingKeys.userAssigned.rawValue, isEqualTo: userId)
+        return try await query
+            .getDocuments(as: Issue.self)
+    }
+    
     // get count of all issues
     // we can use this to determine if we need to use pagination
     func allIssuesCount() async throws -> Int {
@@ -247,6 +261,19 @@ final class IssueManager {
             issue.resolved = true
             // update dateResolved
             issue.dateResolved = Date()
+        }
+        
+        // update issue in Firestore
+        try await updateIssue(issue)
+    }
+    
+    func updateUserAssigned(issue: Issue, userId: String?) async throws {
+        var issue = issue
+        
+        if userId != nil && userId != "" {
+            issue.userAssigned = userId
+        } else {
+            issue.userAssigned = nil
         }
         
         // update issue in Firestore
@@ -284,6 +311,24 @@ final class IssueManager {
             
             // Set the data for the document in the batch
             batch.setData(data, forDocument: documentRef)
+        }
+        
+        // Commit the batched write operation
+        try await batch.commit()
+    }
+    
+    // Delete a batch of issues from Firestore
+    func deleteIssues(issueIds: [String]) async throws {
+        // Create a new batched write operation
+        let batch = Firestore.firestore().batch()
+        
+        // Iterate over the issue IDs array and delete each document in the batch
+        for issueId in issueIds {
+            // Get the reference to the document
+            let documentRef = issueDocument(issueId: issueId)
+            
+            // Delete the document in the batch
+            batch.deleteDocument(documentRef)
         }
         
         // Commit the batched write operation

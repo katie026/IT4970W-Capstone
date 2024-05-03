@@ -9,18 +9,17 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct SupplyRequest: Codable {
+struct SupplyRequest: Identifiable, Codable, Equatable {
     var id: String
     let siteId: String?
     var supplyTypeId: String?
     var countNeeded: Int?
     var reportId: String?
     let reportType: String?
-    let resolved: Bool?
+    var resolved: Bool?
     let dateCreated: Date?
-    let dateResolved: Date?
-    let supplyType: String?
-    
+    var dateResolved: Date?
+    var userAssigned: String?
 
     init(
         id: String,
@@ -32,7 +31,7 @@ struct SupplyRequest: Codable {
         resolved: Bool? = nil,
         dateCreated: Date? = nil,
         dateResolved: Date? = nil,
-        supplyType: String? = nil // Added supplyType initialization
+        userAssigned: String? = nil
     )
     {
         self.id = id
@@ -44,7 +43,7 @@ struct SupplyRequest: Codable {
         self.resolved = resolved
         self.dateResolved = dateResolved
         self.dateCreated = dateCreated
-        self.supplyType = supplyType
+        self.userAssigned = userAssigned
     }
     
     enum CodingKeys: String, CodingKey {
@@ -57,7 +56,7 @@ struct SupplyRequest: Codable {
         case resolved = "resolved"
         case dateCreated = "date_created"
         case dateResolved = "date_resolved"
-        case supplyType = "supplyType" // Corrected supplyType key
+        case userAssigned = "user_assigned"
     }
     
     init(from decoder: Decoder) throws {
@@ -71,7 +70,7 @@ struct SupplyRequest: Codable {
         self.resolved = try container.decodeIfPresent(Bool.self, forKey: .resolved)
         self.dateCreated = try container.decodeIfPresent(Date.self, forKey: .dateCreated)
         self.dateResolved = try container.decodeIfPresent(Date.self, forKey: .dateResolved)
-        self.supplyType = try container.decodeIfPresent(String.self, forKey: .supplyType) // Corrected decoding for supplyType
+        self.userAssigned = try container.decodeIfPresent(String.self, forKey: .userAssigned)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -85,7 +84,12 @@ struct SupplyRequest: Codable {
         try container.encodeIfPresent(self.resolved, forKey: .resolved)
         try container.encodeIfPresent(self.dateCreated, forKey: .dateCreated)
         try container.encodeIfPresent(self.dateResolved, forKey: .dateResolved)
-        try container.encodeIfPresent(self.supplyType, forKey: .supplyType) // Corrected encoding for supplyType
+        try container.encodeIfPresent(self.userAssigned, forKey: .userAssigned)
+    }
+    
+    static func == (lhs:SupplyRequest, rhs: SupplyRequest) -> Bool {
+        // if two issues have the same ID, we're going to say they're equal to eachother
+        return lhs.id == rhs.id
     }
 }
 
@@ -117,6 +121,11 @@ final class SupplyRequestManager {
     func createSupplyRequest(supplyRequest: SupplyRequest) async throws {
         // connect to Firestore and create a new document from codable struct
         try supplyRequestDocument(supplyRequestId: supplyRequest.id).setData(from: supplyRequest, merge: false)
+    }
+    
+    // delete an supplyRequest from Firestore
+    func deleteSupplyRequest(supplyRequestId: String) async throws {
+        try await supplyRequestDocument(supplyRequestId: supplyRequestId).delete()
     }
     
     // fetch supplyRequest collection onto local device
@@ -190,6 +199,20 @@ final class SupplyRequestManager {
         try await supplyRequestsCollection.aggregateCount()
     }
     
+    func updateSupplyRequest(_ supplyRequest: SupplyRequest) async throws {
+        // Get the reference to the document
+        let documentRef = supplyRequestDocument(supplyRequestId: supplyRequest.id)
+        
+        // Encode the updated SiteCapatin object
+        guard let data = try? encoder.encode(supplyRequest) else {
+            // Handle encoding error
+            throw SupplyRequestManagerError.encodingError
+        }
+            
+        // Set the data for the document
+        try await documentRef.setData(data)
+    }
+    
     func updateSupplyRequests(_ supplyRequests: [SupplyRequest]) async throws {
         // Create a new batched write operation
         let batch = Firestore.firestore().batch()
@@ -213,13 +236,44 @@ final class SupplyRequestManager {
         try await batch.commit()
     }
     
-    func toggleSupplyRequestResolution(request: SupplyRequest) async throws {
-        // Update the resolved status of the supply request in Firestore
-        try await supplyRequestDocument(supplyRequestId: request.id).updateData([
-            "resolved": !(request.resolved ?? false) // Toggle the resolved status
-        ])
+    func toggleResolution(supplyRequest: SupplyRequest) async throws {
+        var supplyRequest = supplyRequest
+        
+        // if supplyRequest is resolved (if .resolved is nil, assume it's not resolved
+        if supplyRequest.resolved ?? false {
+            // mark supplyRequest as unresolved
+            supplyRequest.resolved = false
+            // erase dateResolved
+            supplyRequest.dateResolved = nil
+        // if supplyRequest is not resolved
+        } else {
+            // mark supplyRequest as resolved
+            supplyRequest.resolved = true
+            // update dateResolved
+            supplyRequest.dateResolved = Date()
+        }
+        
+        // update issue in Firestore
+        try await updateSupplyRequest(supplyRequest)
     }
-
+    
+    // Delete a batch of issues from Firestore
+    func deleteSupplyRequests(supplyRequestIds: [String]) async throws {
+        // Create a new batched write operation
+        let batch = Firestore.firestore().batch()
+        
+        // Iterate over the issue IDs array and delete each document in the batch
+        for supplyRequestId in supplyRequestIds {
+            // Get the reference to the document
+            let documentRef = supplyRequestDocument(supplyRequestId: supplyRequestId)
+            
+            // Delete the document in the batch
+            batch.deleteDocument(documentRef)
+        }
+        
+        // Commit the batched write operation
+        try await batch.commit()
+    }
 }
 
 // Errors
