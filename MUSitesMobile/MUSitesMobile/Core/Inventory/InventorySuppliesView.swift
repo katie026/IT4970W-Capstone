@@ -64,16 +64,18 @@ struct InventorySuppliesView: View {
     }
     
     var content: some View {
-        List {
-            sitePicker
-            if selectedSite != nil {
-                suppliesSection
-                supplyLevelSection()
-            } else {
-                Text("Please select an inventory site to view.")
-                    .foregroundColor(.secondary)
+        VStack {
+            List {
+                sitePicker
+                if selectedSite != nil {
+                    suppliesSection
+                    supplyLevelSection()
+                } else {
+                    Text("Please select an inventory site to view.")
+                        .foregroundColor(.secondary)
+                }
             }
-        }.padding(.top, 10)
+        }
     }
     
     private var suppliesSection: some View {

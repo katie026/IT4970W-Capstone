@@ -25,52 +25,9 @@ struct SiteReadySurveyView: View {
                 AdditionalCommentsSection(viewModel: viewModel)
             }
             Spacer()
-            Button(action: {
-                if let user = user {
-                    // Attempt to get the authenticated user and submit the site ready survey data
-                    Task {
-                        do {
-                            let db = Firestore.firestore()
-                            
-                            // Submitting reported issues
-                            await submitReportedIssues(db: db, userId: user.uid) { reportedIssuesUUIDs in
-                                // Submitting printer label issues
-                                Task {
-                                    let printerLabelIssuesUUIDs = await submitPrinterLabelIssues(db: db, userId: user.uid)
-                                    // Submitting site ready survey data with reported and printer label issues' UUIDs
-                                    try await submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs, otherIssues: viewModel.otherIssues)
-                                }
-                            }
-                            // Submitting label issues
-                            Task {
-                                await submitLabelIssues(db: db)
-                            }
-                        } catch {
-                            print("Error submitting site ready survey data: \(error)")
-                        }
-                    }
-                } else {
-                    print("User is not logged in/authenticated.")
-                }
-            }) {
-                // Button content
-                Text("Submit")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(10)
-                    .padding(.horizontal, 8)
-                    .padding(.top, 3)
-            }
+            submitButton
         }
         .navigationTitle("Site Ready Survey")
-//        .navigationBarItems(leading: Button(action: {
-//            self.presentationMode.wrappedValue.dismiss()
-//        }) {
-//            Text("Back")
-//        })
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Submission Successful"), message: Text("Your survey has been successfully submitted."), dismissButton: .default(Text("OK")))
         }
@@ -79,12 +36,96 @@ struct SiteReadySurveyView: View {
                 self.user = try AuthenticationManager.shared.getAuthenticatedUser()
             }
         }
-        .toolbar { // this should work like it does on the other submission views, but ti doesn't here...
+        .toolbar {
             ToolbarItem(placement: .keyboard) {
                 Button("Done") { // for numpad
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
             }
+        }
+    }
+    
+    private var submitButton: some View {
+        Button(action: {
+            if let user = user {
+                submitForm()
+//                // Attempt to get the authenticated user and submit the site ready survey data
+//                Task {
+//                    let db = Firestore.firestore()
+//                    
+//                    // Submitting reported issues
+//                    await submitReportedIssues(db: db, userId: user.uid) { reportedIssuesUUIDs in
+//                        // Submitting printer label issues
+//                        Task {
+//                            let printerLabelIssuesUUIDs = await submitPrinterLabelIssues(db: db, userId: user.uid)
+//                            // Submitting site ready survey data with reported and printer label issues' UUIDs
+//                            try await submitSiteReadySurvey(db: db, reportedIssuesUUIDs: reportedIssuesUUIDs, printerLabelIssuesUUIDs: printerLabelIssuesUUIDs, otherIssues: viewModel.otherIssues)
+//                        }
+//                    }
+//                    // Submitting label issues
+//                    Task {
+//                        await submitLabelIssues(db: db)
+//                    }
+//                }
+            } else {
+                print("User is not logged in/authenticated.")
+            }
+        }) {
+            // Button content
+            Text("Submit")
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color.blue)
+                .cornerRadius(10)
+                .padding(.horizontal, 8)
+                .padding(.top, 3)
+        }
+    }
+    
+    private func submitForm() {
+        if let user = user {
+            print("User: \(user.uid)")
+            print("SiteId: \(site.id)")
+            print("MacCount: \(viewModel.macCount)")
+            print("PcCount: \(viewModel.pcCount)")
+            print("ScannerCount: \(viewModel.scannerCount)")
+            print("ScannerComputers: \(viewModel.scannerComputers)")
+            print("bwPrinterCount: \(viewModel.bwPrinterCount)")
+            print("colorPrinterCount: \(viewModel.colorPrinterCount)")
+            print("ChairCount: \(viewModel.chairCount)")
+            print("MissingChairs: \(viewModel.missingChairs)")
+            print("UpdatedInventory: \(viewModel.updatedInventory)")
+            
+            print("Posters:")
+            print("missionStatementBanner = \(viewModel.missionStatementBanner)")
+            print("reservedBoardNotification = \(viewModel.reservedBoardNotification)")
+            print("cyberSecurityPoster = \(viewModel.cyberSecurityPoster)")
+            print("adaptiveComputingPoster = \(viewModel.adaptiveComputingPoster)")
+            print("printSmartPrintingInfoPoster = \(viewModel.printSmartPrintingInfoPoster)")
+            print("needHelpPoster = \(viewModel.needHelpPoster)")
+            print("activeShooterPoster = \(viewModel.activeShooterPoster)")
+            print("emergencyProceduresPoster = \(viewModel.emergencyProceduresPoster)")
+            print("copyRightWrongPoster = \(viewModel.copyRightWrongPoster)")
+            print("sasSpssPoster = \(viewModel.sasSpssPoster)")
+            print("newAdobeCcLoginPoster = \(viewModel.newAdobeCcLoginPoster)")
+            print("signHoldersGoodCondition = \(viewModel.signHoldersGoodCondition)")
+            print("signHolders11x17GoodCondition = \(viewModel.signHolders11x17GoodCondition)")
+            
+            
+            
+            print("Tickets:")
+            print("signHoldersIssueDescription = \(viewModel.signHoldersIssueDescription)")
+            print("signHolders11x17IssueDescription = \(viewModel.signHolders11x17IssueDescription)")
+            print("Failed Login Tickets: \(viewModel.failedLoginTicketNumbers)")
+            print("Failed Login Descriptions: \(viewModel.computerFailures)")
+            print("ComputerLabels: \(viewModel.computerLabels)")
+            print("PrinterLabels: \(viewModel.printerLabels)")
+            print("Other Issue Tickets: \(viewModel.otherIssueTicketNumbers)")
+            print("Other Issue Types: \(viewModel.otherIssueTypes)")
+            print("Other Issue Descrips: \(viewModel.otherIssues)")
+            print("Comments: \(viewModel.additionalComments)")
         }
     }
     
@@ -280,7 +321,7 @@ struct SiteReadySurveyView: View {
                     Issue.CodingKeys.description.rawValue: viewModel.printerLabels[index],
                     Issue.CodingKeys.id.rawValue: documentId,
                     Issue.CodingKeys.issueTypeId.rawValue: "PrinterLabelIssue", // Assuming a constant issue type for printer label issues
-                    Issue.CodingKeys.reportId.rawValue: viewModel.reportId ?? "", // Ensure reportId is available in the ViewModel
+                    Issue.CodingKeys.reportId.rawValue: viewModel.reportId,
                     Issue.CodingKeys.reportType.rawValue: "site_ready",
                     Issue.CodingKeys.resolved.rawValue: false,
                     Issue.CodingKeys.siteId.rawValue: site.id,
@@ -327,86 +368,118 @@ struct ComputersSection: View {
     
     var body: some View {
         Section(header: Text("Computers")) {
-            // Text prompt section for entering counts
-            Text("Enter PC count:")
-            
-            // PC Count TextField
-            TextField("Enter PC count", value: $viewModel.pcCount, formatter: NumberFormatter())
-                .keyboardType(.numberPad)
-            
-            // Text prompt section for MAC count
-            Text("Enter MAC count:")
-            
-            // MAC Count TextField
-            TextField("Enter MAC count", value: $viewModel.macCount, formatter: NumberFormatter())
-                .keyboardType(.numberPad)
-            
-            // Text prompt section for scanner count
-            Text("Enter Scanner count:")
-            
-            // Scanner Count TextField
-            TextField("Enter Scanner count", value: $viewModel.scannerCount, formatter: NumberFormatter())
-                .keyboardType(.numberPad)
-            
-            // Text prompt section for chair count
-            Text("Enter Chair count:")
-            
-            // Chair Count TextField
-            TextField("Enter Chair count", value: $viewModel.chairCount, formatter: NumberFormatter())
-                .keyboardType(.numberPad)
-            
-            // What computers are the scanners attached to?
-            if viewModel.scannerCount > 0 {
-                Section(header: Text("What computers are the scanners attached to?")) {
-                    // Implement dropdown of all computers in the site
-                    // Allow the user to select multiple computers for each scanner
+            HStack {
+                // Text prompt section for entering counts
+                Text("Enter PC count:").frame(width: 200, alignment: .leading)
+                Spacer()
+                // PC Count TextField
+                TextField("PC count", value: $viewModel.pcCount, formatter: NumberFormatter())
+                    .multilineTextAlignment(.center)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 50)
+                    .keyboardType(.numberPad)
+            }
+            HStack {
+                // Text prompt section for MAC count
+                Text("Enter MAC count:").frame(width: 200, alignment: .leading)
+                Spacer()
+                // MAC Count TextField
+                TextField("MAC count", value: $viewModel.macCount, formatter: NumberFormatter())
+                    .multilineTextAlignment(.center)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 50)
+                    .keyboardType(.numberPad)
+            }
+            VStack {
+                HStack {
+                    // Text prompt section for scanner count
+                    Text("Enter Scanner count:").frame(width: 200, alignment: .leading)
+                    Spacer()
+                    // Scanner Count TextField
+                    TextField("Scanner count", value: $viewModel.scannerCount, formatter: NumberFormatter())
+                        .multilineTextAlignment(.center)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(width: 50)
+                        .keyboardType(.numberPad)
+                }
+                // What computers are the scanners attached to?
+                if viewModel.scannerCount > 0 {
+                    HStack {
+                        Text("What computers are the scanners attached to?").frame( alignment: .leading)
+                        Spacer()
+                    }
+                    //TODO: Implement dropdown of all computers in the site
+                    ForEach(0..<viewModel.scannerCount, id: \.self) { index in
+                        TextField("Computer Name", text: $viewModel.scannerComputers[index])
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
                 }
             }
-            
-            // Number of computers that failed to login
-            Stepper(value: $viewModel.failedToLoginCount, in: 0...100, step: 1) {
-                Text("How many computers failed to login? \(viewModel.failedToLoginCount)")
+            HStack {
+                // Text prompt section for chair count
+                Text("Enter Chair count:").frame(width: 200, alignment: .leading)
+                Spacer()
+                // Chair Count TextField
+                TextField("Chair count", value: $viewModel.chairCount, formatter: NumberFormatter())
+                    .multilineTextAlignment(.center)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 50)
+                    .keyboardType(.numberPad)
             }
             
-            // Details for each computer that failed to login
-            if viewModel.failedToLoginCount > 0 {
-                ForEach(0..<viewModel.failedToLoginCount, id: \.self) { index in
-                    VStack {
-                        TextField("Enter computer failure description", text: $viewModel.computerFailures[index])
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                        
-                        TextField("Enter ticket number", text: Binding(
-                            get: {
-                                return viewModel.failedLoginTicketNumbers[index] == 0 ? "" : "\(viewModel.failedLoginTicketNumbers[index])"
-                            },
-                            set: { newValue in
-                                viewModel.failedLoginTicketNumbers[index] = Int(newValue) ?? 0
+            // Logged Into All Computers Section
+            HStack {
+                Text("Logged into all computers:").frame(width: 205, alignment: .leading)
+                Spacer()
+                Text(viewModel.loggedIntoAllComputers ? "Yes" : "No").frame(alignment: .trailing)
+                Toggle(isOn: $viewModel.loggedIntoAllComputers){}.labelsHidden()
+            }
+            // Number of computers that failed to login
+            if (viewModel.loggedIntoAllComputers == false) {
+                VStack {
+                    
+                    Stepper(value: $viewModel.failedToLoginCount, in: 0...100, step: 1) {
+                        Text("How many computers failed to login?")
+                    }
+                    // Details for each computer that failed to login
+                    if (viewModel.failedToLoginCount > 0) {
+                        ForEach(0..<viewModel.failedToLoginCount, id: \.self) { index in
+                            ScrollView(.horizontal) {
+                                HStack {
+                                    TextField("Ticket", text: Binding(
+                                        get: {
+                                            return viewModel.failedLoginTicketNumbers[index] == 0 ? "" : "\(viewModel.failedLoginTicketNumbers[index])"
+                                        },
+                                        set: { newValue in
+                                            viewModel.failedLoginTicketNumbers[index] = Int(newValue) ?? 0
+                                        }
+                                    ))
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    
+                                    TextField("Computer failure description", text: $viewModel.computerFailures[index])
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                }
                             }
-                        ))
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
                     }
                 }
             }
             
-            // Logged Into All Computers Section
-            Section(header: Text("Logged Into All Computers")) {
-                Toggle(isOn: $viewModel.loggedIntoAllComputers) {
-                    Text(viewModel.loggedIntoAllComputers ? "Yes" : "No")
-                }
-            }
-            
             // Cleaned All Computers Section
-            Section(header: Text("Cleaned All Computers")) {
-                Toggle(isOn: $viewModel.cleanedAllComputers) {
-                    Text(viewModel.cleanedAllComputers ? "Yes" : "No")
-                }
+            HStack {
+                Text("Cleaned all computers:").frame(width: 205, alignment: .leading)
+                Spacer()
+                Text(viewModel.cleanedAllComputers ? "Yes" : "No").frame(alignment: .trailing)
+                Toggle(isOn: $viewModel.cleanedAllComputers){}.labelsHidden()
             }
             
             // Cleaned All Stations Section
-            Section(header: Text("Cleaned All Stations")) {
-                Toggle(isOn: $viewModel.cleanedAllStations) {
-                    Text(viewModel.cleanedAllStations ? "Yes" : "No")
-                }
+            HStack {
+                Text("Cleaned all stations:").frame(width: 205, alignment: .leading)
+                Spacer()
+                Text(viewModel.cleanedAllStations ? "Yes" : "No").frame(alignment: .trailing)
+                Toggle(isOn: $viewModel.cleanedAllStations){}.labelsHidden()
             }
         }
     }
@@ -417,56 +490,74 @@ struct PrintersSection: View {
     var body: some View {
         Section(header: Text("Printers")) {
             // How many B&W printers are there?
-            Section(header: Text("How many B&W printers are there?")) {
-                TextField("Enter B&W printer count", value: $viewModel.bwPrinterCount, formatter: NumberFormatter())
+            HStack {
+                // Text prompt section for scanner count
+                Text("How many B&W printers are there?").frame(width: 270, alignment: .leading)
+                Spacer()
+                // Count TextField
+                TextField("B&W Printer Count", value: $viewModel.bwPrinterCount, formatter: NumberFormatter())
+                    .multilineTextAlignment(.center)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 50)
                     .keyboardType(.numberPad)
             }
             
             // How many color printers are there?
-            Section(header: Text("How many color printers are there?")) {
-                TextField("Enter color printer count", value: $viewModel.colorPrinterCount, formatter: NumberFormatter())
+            HStack {
+                // Text prompt section for scanner count
+                Text("How many Color printers are there?").frame(width: 270, alignment: .leading)
+                Spacer()
+                // Count TextField
+                TextField("Color Printer Count", value: $viewModel.colorPrinterCount, formatter: NumberFormatter())
+                    .multilineTextAlignment(.center)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 50)
                     .keyboardType(.numberPad)
             }
             
             // Top off all printers with paper
             if viewModel.bwPrinterCount > 0 || viewModel.colorPrinterCount > 0 {
-                Section(header: Text("Top off all printers with paper")) {
-                    Toggle(isOn: $viewModel.topOffPrintersWithPaper) {
-                        Text(viewModel.topOffPrintersWithPaper ? "Yes" : "No")
-                    }
-                }
-                
-                // Do any printer labels need replacement?
-                Section(header: Text("Do any printer labels need replacement?")) {
-                    Toggle(isOn: $viewModel.needPrinterLabelReplacement) {
-                        Text(viewModel.needPrinterLabelReplacement ? "Yes" : "No")
-                    }
-                    if viewModel.needPrinterLabelReplacement {
-                        VStack {
-                            Stepper(value: $viewModel.printerLabelsToReplace, in: 0...100, step: 1) {
-                                Text("How many printer labels need to be replaced? \(viewModel.printerLabelsToReplace)")
-                            }
-                            
-                            if viewModel.printerLabelsToReplace > 0 {
-                                ForEach(0..<viewModel.printerLabelsToReplace, id: \.self) { index in
-                                    PrinterLabelReplacementView(labelIndex: index, printerLabel: $viewModel.printerLabels[index])
-                                }
-                            }
-                        }
-                    }
+                Text("")
+                HStack {
+                    Text("Top off all printers with paper:").frame(width: 230, alignment: .leading)
+                    Spacer()
+                    Text(viewModel.topOffPrintersWithPaper ? "Yes" : "No").frame(alignment: .trailing)
+                    Toggle(isOn: $viewModel.topOffPrintersWithPaper){}.labelsHidden()
                 }
                 
                 // Did you test print a page for each printer?
-                Section(header: Text("Did you test print a page for each printer?")) {
-                    Toggle(isOn: $viewModel.testPrintedForPrinters) {
-                        Text(viewModel.testPrintedForPrinters ? "Yes" : "No")
-                    }
+                HStack {
+                    Text("Did you test print a page for each printer?").frame(width: 230, alignment: .leading)
+                    Spacer()
+                    Text(viewModel.testPrintedForPrinters ? "Yes" : "No").frame(alignment: .trailing)
+                    Toggle(isOn: $viewModel.testPrintedForPrinters){}.labelsHidden()
                 }
                 
                 // Did you wipe down each printer?
-                Section(header: Text("Did you wipe down each printer?")) {
-                    Toggle(isOn: $viewModel.wipedDownPrinters) {
-                        Text(viewModel.wipedDownPrinters ? "Yes" : "No")
+                HStack {
+                    Text("Did you wipe down each printer?").frame(width: 230, alignment: .leading)
+                    Spacer()
+                    Text(viewModel.wipedDownPrinters ? "Yes" : "No").frame(alignment: .trailing)
+                    Toggle(isOn: $viewModel.wipedDownPrinters){}.labelsHidden()
+                }
+                
+                // Do any printer labels need replacement?
+                HStack {
+                    Text("Do any printer labels need replacement?").frame(width: 230, alignment: .leading)
+                    Spacer()
+                    Text(viewModel.needPrinterLabelReplacement ? "Yes" : "No").frame(alignment: .trailing)
+                    Toggle(isOn: $viewModel.needPrinterLabelReplacement){}.labelsHidden()
+                }
+                if viewModel.needPrinterLabelReplacement {
+                    VStack {
+                        Stepper(value: $viewModel.printerLabelsToReplace, in: 0...100, step: 1) {
+                            Text("How many printer labels need to be replaced?")
+                        }
+                        if viewModel.printerLabelsToReplace > 0 {
+                            ForEach(0..<viewModel.printerLabelsToReplace, id: \.self) { index in
+                                PrinterLabelReplacementView(labelIndex: index, printerLabel: $viewModel.printerLabels[index])
+                            }
+                        }
                     }
                 }
             }
@@ -565,30 +656,41 @@ struct PostersSection: View {
                         .tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
-            Section(header: Text("Sign Holders Outside Room in Good Condition?")) {
-                Toggle(isOn: $viewModel.signHoldersGoodCondition) {
-                    Text(viewModel.signHoldersGoodCondition ? "Yes" : "No")
+            
+            // 8.5x11" Sign Holders
+            VStack {
+                HStack {
+                    Text("Are the 8.5x11\" Sign Holders in Good Condition?").frame(width: 230, alignment: .leading)
+                    Spacer()
+                    Text(viewModel.signHoldersGoodCondition ? "Yes" : "No").frame(alignment: .trailing)
+                    Toggle(isOn: $viewModel.signHoldersGoodCondition){}.labelsHidden()
                 }
                 if !viewModel.signHoldersGoodCondition {
-                    Text("Description of Issue:")
-                    TextField("Enter description", text: $viewModel.signHoldersIssueDescription)
+                    TextField("Description of Issue", text: $viewModel.signHoldersIssueDescription)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
             }
-            Section(header: Text("Is the 11x17\" Sign Holder Outside Room in Good Condition?")) {
-                Toggle(isOn: $viewModel.signHolders11x17GoodCondition) {
-                    Text(viewModel.signHolders11x17GoodCondition ? "Yes" : "No")
+            
+            // 11x17" Sign Holders
+            VStack {
+                HStack {
+                    Text("Is the 11x17\" Sign Holder in Good Condition?").frame(width: 230, alignment: .leading)
+                    Spacer()
+                    Text(viewModel.signHolders11x17GoodCondition ? "Yes" : "No").frame(alignment: .trailing)
+                    Toggle(isOn: $viewModel.signHolders11x17GoodCondition){}.labelsHidden()
                 }
                 if !viewModel.signHolders11x17GoodCondition {
-                    Text("Description of Issue:")
-                    TextField("Enter description", text: $viewModel.signHolders11x17IssueDescription)
+                    TextField("Description of Issue", text: $viewModel.signHolders11x17IssueDescription)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
             }
-            Section(header: Text("Have you removed all old weekly calendars?")) {
-                Toggle(isOn: $viewModel.removedOldCalendars) {
-                    Text(viewModel.removedOldCalendars ? "Yes" : "No")
-                }
+            
+            // Removed old calendars
+            HStack {
+                Text("Have you removed all old weekly calendars?").frame(width: 230, alignment: .leading)
+                Spacer()
+                Text(viewModel.removedOldCalendars ? "Yes" : "No").frame(alignment: .trailing)
+                Toggle(isOn: $viewModel.removedOldCalendars){}.labelsHidden()
             }
         }
     }
@@ -626,66 +728,129 @@ struct RoomSection: View {
             }
             
             // Any other issues?
-            Stepper(value: $viewModel.otherIssuesCount, in: 0...100, step: 1) {
-                Text("How many other issues? \(viewModel.otherIssuesCount)")
-            }
-            
-            // Issues dropdown
-            Section(header: Text("Other Issues")) {
-                ForEach(0..<viewModel.otherIssuesCount, id: \.self) { index in
-                    if index < viewModel.otherIssueTypes.count {
-                        IssueRow(issueType: $viewModel.otherIssueTypes[index],
-                                 issueDescription: $viewModel.otherIssues[index],
-                                 ticketNumber: $viewModel.otherIssueTicketNumbers[index])
+            VStack {
+                Stepper(value: $viewModel.otherIssuesCount, in: 0...100, step: 1) {
+                    Text("How many other issues?")
+                }
+                // Issues dropdown
+//                ForEach(0..<viewModel.otherIssuesCount, id: \.self) { index in
+//                    if index < viewModel.otherIssueTypes.count {
+//                        IssueRow(issueType: $viewModel.otherIssueTypes[index],
+//                                 issueDescription: $viewModel.otherIssues[index],
+//                                 ticketNumber: $viewModel.otherIssueTicketNumbers[index])
+//                    }
+//                }
+                // Details for each computer that failed to login
+                if (viewModel.otherIssuesCount > 0) {
+                    ForEach(0..<viewModel.otherIssuesCount, id: \.self) { index in
+                        issueRow(index: index)
                     }
                 }
             }
         }
     }
-}
-struct IssueRow: View {
-    @Binding var issueType: String
-    @Binding var issueDescription: String
-    @Binding var ticketNumber: String
     
-    let issueTypesNoTickets = ["FldaGVfpPdQ57H7XsGOO" /*chair*/,
-                               "GxFGSkbDySZmdkCFExt9" /*label*/,
-                               "wYJWtaj33rx4EIh6v9RY" /*poster*/]
-    
-    var requiresTicketNumber: Bool {
-        // Check if the selected issue type requires a ticket number
-        // If the issue type is in issueTypesNoTickets, then ticket number is not required
-        return !issueTypesNoTickets.contains(issueType)
-    }
-    
-    var body: some View {
-        HStack {
-            // Issue Type Picker
-            Picker("Issue Type", selection: $issueType) {
-                ForEach(IssueTypeManager.shared.issueTypes, id: \.id) { issueType in
-                    Text(issueType.name).tag(issueType.id)
+    private func issueRow(index: Int) -> some View {
+        let issueTypesNoTickets = ["FldaGVfpPdQ57H7XsGOO" /*chair*/,
+                                   "GxFGSkbDySZmdkCFExt9" /*label*/,
+                                   "wYJWtaj33rx4EIh6v9RY" /*poster*/]
+        
+        var requiresTicketNumber: Bool {
+            // Check if the selected issue type requires a ticket number
+            // If the issue type is in issueTypesNoTickets, then ticket number is not required
+            return !issueTypesNoTickets.contains(viewModel.otherIssueTypes[index])
+        }
+        
+        return VStack {
+            HStack {
+                // Issue Type Picker
+                Picker("Issue Type", selection: $viewModel.otherIssueTypes[index]) {
+                    ForEach(IssueTypeManager.shared.issueTypes, id: \.id) { issueType in
+                        Text(issueType.name).tag(issueType.id)
+                    }
                 }
-            }
-            .pickerStyle(DefaultPickerStyle())
-            
-            // VStack for Issue Description and Ticket Number
-            VStack(alignment: .leading, spacing: 8) {
-                // Issue Description
-                TextField("Enter issue description", text: $issueDescription)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                .multilineTextAlignment(.leading)
+                .pickerStyle(DefaultPickerStyle())
+                .labelsHidden()
                 
                 // Conditionally show the Ticket Number field based on the requirement
                 if requiresTicketNumber {
                     // Ticket Number
-                    TextField("Enter ticket number", text: $ticketNumber)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    TextField("Ticket", text: Binding(
+                        get: {
+                            return viewModel.otherIssueTicketNumbers[index] == 0 ? "" : "\(viewModel.otherIssueTicketNumbers[index])"
+                        },
+                        set: { newValue in
+                            viewModel.otherIssueTicketNumbers[index] = Int(newValue) ?? 0
+                        }
+                    ))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.numberPad)
                 }
+                Spacer()
             }
-            .padding(.leading, 8)
+            
+            // Issue Description
+            TextField("Description", text: $viewModel.otherIssues[index])
+                .textFieldStyle(RoundedBorderTextFieldStyle())
         }
-        .padding(.vertical, 8)
     }
 }
+//struct IssueRow: View {
+//    @Binding var issueType: String
+//    @Binding var issueDescription: String
+//    @Binding var ticketNumber: String
+//    
+//    let issueTypesNoTickets = ["FldaGVfpPdQ57H7XsGOO" /*chair*/,
+//                               "GxFGSkbDySZmdkCFExt9" /*label*/,
+//                               "wYJWtaj33rx4EIh6v9RY" /*poster*/]
+//    
+//    var requiresTicketNumber: Bool {
+//        // Check if the selected issue type requires a ticket number
+//        // If the issue type is in issueTypesNoTickets, then ticket number is not required
+//        return !issueTypesNoTickets.contains(issueType)
+//    }
+//    
+//    var body: some View {
+//        VStack {
+//            HStack {
+//                // Issue Type Picker
+//                Picker("Issue Type", selection: $issueType) {
+//                    ForEach(IssueTypeManager.shared.issueTypes, id: \.id) { issueType in
+//                        Text(issueType.name).tag(issueType.id)
+//                    }
+//                }
+//                .multilineTextAlignment(.leading)
+//                .pickerStyle(DefaultPickerStyle())
+//                .labelsHidden()
+//                
+//                // Conditionally show the Ticket Number field based on the requirement
+//                if requiresTicketNumber {
+//                    // Ticket Number
+////                    TextField("Ticket", text: $ticketNumber)
+////                        .textFieldStyle(RoundedBorderTextFieldStyle())
+////                        .keyboardType(.numberPad)
+//                    TextField("Ticket", text: Binding(
+//                        get: {
+//                            return ticketNumber == 0 ? "" : "\(ticketNumber)"
+//                        },
+//                        set: { newValue in
+//                            ticketNumber = Int(newValue) ?? 0
+//                        }
+//                    ))
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//                    .keyboardType(.numberPad)
+//                }
+//                Spacer()
+//            }
+//            
+//            // Issue Description
+//            TextField("Description", text: $issueDescription)
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
+//        }.padding(.leading, 8)
+//    }
+//}
+
 struct AdditionalCommentsSection: View {
     @ObservedObject var viewModel: SiteReadySurveyView.ViewModel
     
@@ -722,7 +887,7 @@ struct PrinterLabelReplacementView: View {
     @Binding var printerLabel: String
     
     var body: some View {
-        TextField("Enter printer label replacement description", text: $printerLabel)
+        TextField("Printer label name", text: $printerLabel)
             .textFieldStyle(RoundedBorderTextFieldStyle())
     }
 }
@@ -731,7 +896,11 @@ extension SiteReadySurveyView {
         // Survey Data
         @Published var pcCount: Int = 0
         @Published var macCount: Int = 0
-        @Published var scannerCount: Int = 0
+        @Published var scannerCount: Int = 0 {
+            didSet {
+                ensureArraysMatchCount()
+            }
+        }
         
         @Published var chairCount: Int = 0
         @Published var loggedIntoAllComputers: Bool = false
@@ -743,6 +912,7 @@ extension SiteReadySurveyView {
         init() {
             fetchIssueTypes()
         }
+        @Published var scannerComputers: [String] = []
         @Published var failedLoginTicketNumbers: [Int] = []
         @Published var computerFailures: [String] = []
         @Published var cleanedAllComputers: Bool = false
@@ -811,18 +981,15 @@ extension SiteReadySurveyView {
         @Published var tookOutRecycling: Bool = false
         
         @Published var otherIssuesCount: Int = 0 {
-                    didSet {
-                        ensureArraysMatchCount()
-                    }
-                }
-                @Published var otherIssues: [String] = Array(repeating: "", count: 100)
-                @Published var otherIssueTicketNumbers: [String] = Array(repeating: "", count: 100)
-                @Published var otherIssueTypes: [String] = Array(repeating: "", count: 100)
+            didSet {
+                ensureArraysMatchCount()
+            }
+        }
+        @Published var otherIssues: [String] = []
+        @Published var otherIssueTicketNumbers: [Int] = []
+        @Published var otherIssueTypes: [String] = []
         @Published var reportId: String = ""
         @Published var additionalComments: String = ""
-        
-        // Scanner Computers
-        @Published var scannerComputers: [String: [String]] = [:]
         
         // Function to update the showPrinterRelatedSections flag
         private func updateShowPrinterRelatedSections() {
@@ -831,6 +998,9 @@ extension SiteReadySurveyView {
         
         // Ensure arrays match the count when otherIssuesCount or labelsToReplace changes
         private func ensureArraysMatchCount() {
+            while scannerComputers.count < scannerCount {
+                scannerComputers.append("")
+            }
             while computerFailures.count < failedToLoginCount {
                 computerFailures.append("")
             }
@@ -845,18 +1015,12 @@ extension SiteReadySurveyView {
             }
             while otherIssues.count < otherIssuesCount {
                 otherIssues.append("")
-                otherIssueTicketNumbers.append("")
+                otherIssueTicketNumbers.append(0)
             }
         }
     }
 }
-//struct SiteReadySurveyView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        // Provide a placeholder site.id for preview purposes
-//        let placeholderSiteId = "6tYFeMv41IXzfXkwbbh6"
-//        return SiteReadySurveyView(siteId: placeholderSiteId, userId: "UP4qMGuLhCP3qHvT5tfNnZlzH4h1")
-//    }
-//}
+
 #Preview {
     NavigationView {
         SiteReadySurveyView(site: Site(
