@@ -23,6 +23,7 @@ final class HourlyCleaningSubmissionViewModel: ObservableObject {
             } catch {
                 print("Error fetching computers: \(error)")
             }
+            sortComputersByDate()
             print("Got \(computers.count) computers.")
             completion()
         }

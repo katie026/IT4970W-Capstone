@@ -342,9 +342,11 @@ struct SiteCaptainSubmissionView: View {
                         // set minimum issues
                         if viewModel.issueCount > 0 {
                             viewModel.issueCount -= 1
-                        } else {
-                            // define issue count
-                            viewModel.issueCount = 0
+                            // if 0 issues
+                            if viewModel.issueCount == 0 {
+                                // empty the array
+                                viewModel.issues = []
+                            }
                         }
                         createEmptyIssues()
                     })
@@ -481,11 +483,14 @@ struct SiteCaptainSubmissionView: View {
                         createEmptyLabelIssues()
                     }, onDecrement: {
                         // set minimum issues
+                        // define issue count
                         if viewModel.labelIssueCount > 0 {
                             viewModel.labelIssueCount -= 1
-                        } else {
-                            // define issue count
-                            viewModel.labelIssueCount = 0
+                            // if 0 issues
+                            if viewModel.labelIssueCount == 0 {
+                                // empty the array
+                                viewModel.labelIssues = []
+                            }
                         }
                         createEmptyLabelIssues()
                     })
@@ -642,12 +647,15 @@ struct SiteCaptainSubmissionView: View {
                         }
                         createEmptySupplyRequests()
                     }, onDecrement: {
-                        // set minimum issues
+                        // set minimum supplyRequests
+                        // define supplyRequest count
                         if viewModel.supplyRequestCount > 0 {
                             viewModel.supplyRequestCount -= 1
                         } else {
-                            // define supplyRequest count
+                            // if 0 supplyRequests
                             viewModel.supplyRequestCount = 0
+                            // empty the array
+                            viewModel.supplyRequests = []
                         }
                         createEmptySupplyRequests()
                     })
@@ -690,6 +698,7 @@ struct SiteCaptainSubmissionView: View {
                     
                     // Supply Count input
                     Picker("Count", selection: $viewModel.supplyRequests[index].countNeeded) {
+                        Text("\(0)").tag(nil as Int?)
                         ForEach(1...10, id: \.self) { count in
                             Text("\(count)").tag(count as Int?)
                         }

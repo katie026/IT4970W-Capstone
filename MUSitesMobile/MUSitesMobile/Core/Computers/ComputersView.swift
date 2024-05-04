@@ -185,12 +185,10 @@ struct ComputersView: View {
                 Text("Last Cleaned: \(dateFormatter.string(from: lastCleaned))")
                     .font(.system(size: 12))
                     .foregroundColor(textColor)
-                    .padding(.top, 1)
             } else {
                 Text("Last Cleaned: N/A")
                     .font(.system(size: 12))
                     .foregroundColor(textColor)
-                    .padding(.top, 1)
             }
         }.padding(.vertical, 1)
         

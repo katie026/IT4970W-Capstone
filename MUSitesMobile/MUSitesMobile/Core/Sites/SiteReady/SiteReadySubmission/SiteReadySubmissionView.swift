@@ -15,8 +15,10 @@ struct SiteReadySurveyView: View {
     @State var user: AuthDataResultModel? = nil
     @StateObject var viewModel = ViewModel()
     @State private var showAlert = false
+    
     var body: some View {
         VStack {
+            header
             Form {
                 ComputersSection(viewModel: viewModel)
                 PrintersSection(viewModel: viewModel)
@@ -45,9 +47,22 @@ struct SiteReadySurveyView: View {
         }
     }
     
+    private var header: some View {
+        // Subtitle
+        HStack {
+            Text("\(site.name ?? "N/A")")
+                .font(.title2)
+                .fontWeight(.medium)
+            Spacer()
+        }
+        .padding(.top, 10)
+        .padding(.horizontal, 20)
+    }
+    
     private var submitButton: some View {
         Button(action: {
-            if let user = user {
+            if user != nil {
+//                printFormData()
                 submitForm()
 //                // Attempt to get the authenticated user and submit the site ready survey data
 //                Task {
@@ -85,6 +100,112 @@ struct SiteReadySurveyView: View {
     }
     
     private func submitForm() {
+        printFormData()
+        Task {
+            do {
+                if let user = user {
+                    //TODO: update all computers .lastCleaned
+                    
+                    // create empty SiteCaptain document and get id
+                    let siteReadyId = try await SiteReadyManager.shared.getNewSiteReadyId()
+                    
+                    // POSTERS
+                    var posterReports: [PosterReport] = []
+                    posterReports.append(PosterReport(posterId: "missionStatementBanner", status: viewModel.missionStatementBanner))
+                    posterReports.append(PosterReport(posterId: "reservedBoardNotification", status: viewModel.reservedBoardNotification))
+                    posterReports.append(PosterReport(posterId: "cyberSecurityPoster", status: viewModel.cyberSecurityPoster))
+                    posterReports.append(PosterReport(posterId: "adaptiveComputingPoster", status: viewModel.adaptiveComputingPoster))
+                    posterReports.append(PosterReport(posterId: "printSmartPrintingInfoPoster", status: viewModel.printSmartPrintingInfoPoster))
+                    posterReports.append(PosterReport(posterId: "needHelpPoster", status: viewModel.needHelpPoster))
+                    posterReports.append(PosterReport(posterId: "activeShooterPoster", status: viewModel.activeShooterPoster))
+                    posterReports.append(PosterReport(posterId: "emergencyProceduresPoster", status: viewModel.emergencyProceduresPoster))
+                    posterReports.append(PosterReport(posterId: "copyRightWrongPoster", status: viewModel.copyRightWrongPoster))
+                    posterReports.append(PosterReport(posterId: "sasSpssPoster", status: viewModel.sasSpssPoster))
+                    posterReports.append(PosterReport(posterId: "newAdobeCcLoginPoster", status: viewModel.newAdobeCcLoginPoster))
+                    
+                    // ISSUES
+                    var issues: [Issue] = []
+                    // sign holder issues
+                    if !viewModel.signHoldersGoodCondition {
+                        // get an ID from Firestore
+                        let issueId = try await IssueManager.shared.getNewIssueId()
+                        issues.append(Issue(id: issueId, description: viewModel.signHoldersIssueDescription, dateCreated: Date(), dateResolved: nil, issueTypeId: "wYJWtaj33rx4EIh6v9RY", resolved: false, ticket: nil, reportId: siteReadyId, reportType: "site_ready", siteId: site.id, userSubmitted: user.uid, userAssigned: nil))
+                    }
+                    if !viewModel.signHolders11x17GoodCondition {
+                        // get an ID from Firestore
+                        let issueId = try await IssueManager.shared.getNewIssueId()
+                        issues.append(Issue(id: issueId, description: viewModel.signHolders11x17IssueDescription, dateCreated: Date(), dateResolved: nil, issueTypeId: "wYJWtaj33rx4EIh6v9RY", resolved: false, ticket: nil, reportId: siteReadyId, reportType: "site_ready", siteId: site.id, userSubmitted: user.uid, userAssigned: nil))
+                    }
+                    // SitesTech issues
+                    if viewModel.failedToLoginCount > 0 {
+                        for index in 0...(viewModel.failedToLoginCount-1) {
+                            // get an ID from Firestore
+                            let issueId = try await IssueManager.shared.getNewIssueId()
+                            issues.append(Issue(id: issueId, description: viewModel.computerFailures[index], dateCreated: Date(), dateResolved: nil, issueTypeId: "r6jx5SXc0x2OC7bM8XNN", resolved: false, ticket: viewModel.failedLoginTicketNumbers[index], reportId: siteReadyId, reportType: "site_ready", siteId: site.id, userSubmitted: user.uid, userAssigned: nil))
+                        }
+                    }
+                    // label issues
+                    if viewModel.labelsToReplace > 0 {
+                        for index in 0...(viewModel.labelsToReplace-1) {
+                            // get an ID from Firestore
+                            let issueId = try await IssueManager.shared.getNewIssueId()
+                            issues.append(Issue(id: issueId, description: viewModel.computerLabels[index], dateCreated: Date(), dateResolved: nil, issueTypeId: "GxFGSkbDySZmdkCFExt9", resolved: false, ticket: nil, reportId: siteReadyId, reportType: "site_ready", siteId: site.id, userSubmitted: user.uid, userAssigned: nil))
+                        }
+                    }
+                    if viewModel.printerLabelsToReplace > 0 {
+                        for index in 0...(viewModel.printerLabelsToReplace-1) {
+                            // get an ID from Firestore
+                            let issueId = try await IssueManager.shared.getNewIssueId()
+                            issues.append(Issue(id: issueId, description: viewModel.printerLabels[index], dateCreated: Date(), dateResolved: nil, issueTypeId: "GxFGSkbDySZmdkCFExt9", resolved: false, ticket: nil, reportId: siteReadyId, reportType: "site_ready", siteId: site.id, userSubmitted: user.uid, userAssigned: nil))
+                        }
+                    }
+                    // other issues
+                    if viewModel.otherIssuesCount > 0 {
+                        for index in 0...(viewModel.otherIssuesCount-1) {
+                            // get an ID from Firestore
+                            let issueId = try await IssueManager.shared.getNewIssueId()
+                            issues.append(Issue(id: issueId, description: viewModel.otherIssues[index], dateCreated: Date(), dateResolved: nil, issueTypeId: viewModel.otherIssueTypes[index], resolved: false, ticket: viewModel.otherIssueTicketNumbers[index], reportId: siteReadyId, reportType: "site_ready", siteId: site.id, userSubmitted: user.uid, userAssigned: nil))
+                        }
+                    }
+                    // update empty issue documents in Firestore
+                    try await IssueManager.shared.updateIssues(issues)
+                    
+                    // SITE READY
+                    let siteReady = SiteReady(
+                        id: user.uid,
+                        timestamp: Date(),
+                        user: user.uid,
+                        siteId: siteReadyId,
+                        macCount: viewModel.macCount,
+                        pcCount: viewModel.pcCount,
+                        scannerCount: viewModel.scannerCount,
+                        scanerComputers: viewModel.scannerComputers,
+                        bwPrinterCount: viewModel.bwPrinterCount,
+                        colorPrinterCount: viewModel.colorPrinterCount,
+                        chairCount: viewModel.chairCount,
+                        missingChairs: nil, //TODO: would have to pull current chair count and calculate
+                        updatedInventory: viewModel.updatedInventory,
+                        posters: posterReports,
+                        supplyRequests: nil, //TODO: to be implemented later
+                        equipmentStatuses: nil, //TODO: to be implemented later
+                        issues: issues.map { $0.id },
+                        comments: viewModel.additionalComments
+                    )
+                    // update siteCaptain document in Firestore
+                    try await SiteReadyManager.shared.updateSiteReady(siteReady)
+                    
+                    print("Submitted issues \(issues.map { $0.id })")
+                    print("Submitted site ready \(siteReady.id)")
+                    // dismiss the current view
+                    presentationMode.wrappedValue.dismiss()
+                }
+            } catch {
+                print("Error submitting issues and site ready: \(error)")
+            }
+        }
+    }
+    
+    private func printFormData() {
         if let user = user {
             print("User: \(user.uid)")
             print("SiteId: \(site.id)")
@@ -113,8 +234,6 @@ struct SiteReadySurveyView: View {
             print("signHoldersGoodCondition = \(viewModel.signHoldersGoodCondition)")
             print("signHolders11x17GoodCondition = \(viewModel.signHolders11x17GoodCondition)")
             
-            
-            
             print("Tickets:")
             print("signHoldersIssueDescription = \(viewModel.signHoldersIssueDescription)")
             print("signHolders11x17IssueDescription = \(viewModel.signHolders11x17IssueDescription)")
@@ -142,7 +261,7 @@ struct SiteReadySurveyView: View {
                 // Combine reported issues and printer label issues' UUIDs into a single array
                 let allIssues = reportedIssuesUUIDs + printerLabelIssuesUUIDs
                 
-                var data: [String: Any] = [
+                let data: [String: Any] = [
                     // Include all issues UUIDs in the "issues" array
                     SiteReady.CodingKeys.issues.rawValue: allIssues,
                     // Other fields...
@@ -566,94 +685,84 @@ struct PrintersSection: View {
 }
 struct PostersSection: View {
     @ObservedObject var viewModel: SiteReadySurveyView.ViewModel
+    let options = ["No", "Yes", "Yes, but it is in bad condition."]
     
     var body: some View {
         Section(header: Text("Posters")) {
             // Mission Statement banner
             Picker("Is the Mission Statement banner on the poster board?", selection: $viewModel.missionStatementBanner) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // Reserved Board notification
             Picker("Is the Reserved Board notification on the poster board?", selection: $viewModel.reservedBoardNotification) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // Cyber Security Poster
             Picker("Is the Cyber Security Poster displayed?", selection: $viewModel.cyberSecurityPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // Adaptive Computing Poster
             Picker("Is the Adaptive Computing Poster displayed?", selection: $viewModel.adaptiveComputingPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // Print Smart Printing Info Poster
             Picker("Is the Print Smart Printing Info Poster displayed?", selection: $viewModel.printSmartPrintingInfoPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // Need Help Poster
             Picker("Is the Need Help Poster displayed?", selection: $viewModel.needHelpPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // Active Shooter Poster
             Picker("Is the Active Shooter Poster displayed?", selection: $viewModel.activeShooterPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // Emergency Procedures Poster
             Picker("Is the Emergency Procedures Poster displayed?", selection: $viewModel.emergencyProceduresPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // Copyright Wrong Poster
             Picker("Is the Copyright Wrong Poster displayed?", selection: $viewModel.copyRightWrongPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // SAS SPSS Poster
             Picker("Is the SAS SPSS Poster displayed?", selection: $viewModel.sasSpssPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
             // New Adobe CC Login Poster
             Picker("Is the New Adobe CC Login Poster displayed?", selection: $viewModel.newAdobeCcLoginPoster) {
-                ForEach([true, false, nil], id: \.self) { option in
-                    Text(option == true ? "Yes" : (option == false ? "Yes, but it is in bad condition." : "No"))
-                        .tag(option)
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
                 }
             }.pickerStyle(DefaultPickerStyle())
             
@@ -765,6 +874,7 @@ struct RoomSection: View {
             HStack {
                 // Issue Type Picker
                 Picker("Issue Type", selection: $viewModel.otherIssueTypes[index]) {
+                    Text("Choose Type").tag("")
                     ForEach(IssueTypeManager.shared.issueTypes, id: \.id) { issueType in
                         Text(issueType.name).tag(issueType.id)
                     }
@@ -951,17 +1061,17 @@ extension SiteReadySurveyView {
         @Published var showPrinterRelatedSections: Bool = false
         
         // Posters & Notices
-        @Published var missionStatementBanner: Bool? = nil
-        @Published var reservedBoardNotification: Bool? = nil
-        @Published var cyberSecurityPoster: Bool? = nil
-        @Published var adaptiveComputingPoster: Bool? = nil
-        @Published var printSmartPrintingInfoPoster: Bool? = nil
-        @Published var needHelpPoster: Bool? = nil
-        @Published var activeShooterPoster: Bool? = nil
-        @Published var emergencyProceduresPoster: Bool? = nil
-        @Published var copyRightWrongPoster: Bool? = nil
-        @Published var sasSpssPoster: Bool? = nil
-        @Published var newAdobeCcLoginPoster: Bool? = nil
+        @Published var missionStatementBanner: String = "No"
+        @Published var reservedBoardNotification: String = "No"
+        @Published var cyberSecurityPoster: String = "No"
+        @Published var adaptiveComputingPoster: String = "No"
+        @Published var printSmartPrintingInfoPoster: String = "No"
+        @Published var needHelpPoster: String = "No"
+        @Published var activeShooterPoster: String = "No"
+        @Published var emergencyProceduresPoster: String = "No"
+        @Published var copyRightWrongPoster: String = "No"
+        @Published var sasSpssPoster: String = "No"
+        @Published var newAdobeCcLoginPoster: String = "No"
         @Published var signHoldersGoodCondition: Bool = true
         @Published var signHoldersIssueDescription: String = ""
         @Published var signHolders11x17GoodCondition: Bool = true
@@ -1001,21 +1111,47 @@ extension SiteReadySurveyView {
             while scannerComputers.count < scannerCount {
                 scannerComputers.append("")
             }
+            while scannerComputers.count > scannerCount {
+                scannerComputers.removeLast()
+            }
+            
             while computerFailures.count < failedToLoginCount {
                 computerFailures.append("")
             }
+            while computerFailures.count > failedToLoginCount {
+                let count = computerFailures.count - failedToLoginCount
+                computerFailures.removeLast(count)
+            }
+            
             while failedLoginTicketNumbers.count < failedToLoginCount {
                 failedLoginTicketNumbers.append(0)
             }
+            
             while computerLabels.count < labelsToReplace {
                 computerLabels.append("")
             }
+            while computerLabels.count > labelsToReplace {
+                let count = computerLabels.count - labelsToReplace
+                computerLabels.removeLast(count)
+            }
+            
             while printerLabels.count < printerLabelsToReplace {
                 printerLabels.append("")
             }
+            while printerLabels.count > printerLabelsToReplace {
+                let count = printerLabels.count - printerLabelsToReplace
+                printerLabels.removeLast(count)
+            }
+            
             while otherIssues.count < otherIssuesCount {
                 otherIssues.append("")
+                otherIssueTypes.append("")
                 otherIssueTicketNumbers.append(0)
+            }
+            while otherIssues.count > otherIssuesCount {
+                let count = otherIssues.count - otherIssuesCount
+                otherIssues.removeLast(count)
+                otherIssueTypes.removeLast(count)
             }
         }
     }
