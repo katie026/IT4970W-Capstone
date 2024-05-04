@@ -5,73 +5,125 @@
 //
 
 import Foundation
-import Firebase
 import FirebaseFirestoreSwift
 
+@MainActor
 class SitesReadyEntriesViewModel: ObservableObject {
-    @Published var entries: [SiteReadyEntry] = []
-    private let db = Firestore.firestore()
+    // site captain list
+    @Published var siteReadys: [SiteReady] = []
+    
+    // for labels
+    var sites: [Site] = []
+    var users: [DBUser] = []
+    var issueTypes: [IssueType] = []
+    var issues: [Issue] = []
+    var supplyTypes: [SupplyType] = []
+    var supplyRequests: [SupplyRequest] = []
+    
+    // query info
+    @Published var selectedSort = SortOption.descending
     @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
     @Published var endDate = Date()
-
-    func fetchSitesReadyEntries() {
-        db.collection("site_ready_entries")
-            .whereField("timestamp", isGreaterThanOrEqualTo: startDate)
-            .whereField("timestamp", isLessThanOrEqualTo: endDate)
-            .getDocuments { [weak self] querySnapshot, error in
-                guard let self = self else { return }
-
-                if let error = error {
-                    print("Error fetching site ready entries: \(error)")
-                    return
+    @Published var selectedSite: Site = Site(id: "", name: "any site", buildingId: "", nearestInventoryId: "", chairCounts: [ChairCount(count: 0, type: "")], siteTypeId: "", hasClock: false, hasInventory: false, hasWhiteboard: false, hasPosterBoard: false, namePatternMac: "", namePatternPc: "", namePatternPrinter: "", calendarName: "")
+    
+    func swapEntriesOrder() {
+        siteReadys.reverse()
+    }
+    
+    func getSites(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.sites = try await SitesManager.shared.getAllSites(descending: false)
+            } catch {
+                print("Error fetching computing sites: \(error)")
+            }
+            completion()
+        }
+    }
+    
+    func getUsers(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.users = try await UserManager.shared.getUsersList()
+                self.users = self.users.sorted{ $0.fullName ?? "" <  $1.fullName ?? "" }
+            } catch  {
+                print("Error getting users: \(error)")
+            }
+            completion()
+        }
+    }
+    
+    func getIssueTypes() {
+        Task {
+            do {
+                self.issueTypes = try await IssueTypeManager.shared.getAllIssueTypes(descending: false)
+            } catch  {
+                print("Error getting issue types: \(error)")
+            }
+        }
+    }
+    
+    func getSupplyTypes() {
+        Task {
+            self.supplyTypes = try await SupplyTypeManager.shared.getAllSupplyTypes(descending: false)
+        }
+    }
+    
+    func getSiteReadys(siteId: String?, completion: @escaping () -> Void) {
+        Task {
+            if let siteId {
+                do {
+                    self.siteReadys = try await SiteReadyManager.shared.getAllSiteReadys(dateDescending: selectedSort.sortDescending, siteId: siteId, startDate: startDate, endDate: endDate)
+                } catch {
+                    print("Error fetching siteReadys: \(error)")
                 }
-
-                guard let documents = querySnapshot?.documents else {
-                    print("No documents found.")
-                    return
+                completion()
+            } else {
+                do {
+                    self.siteReadys = try await SiteReadyManager.shared.getAllSiteReadys(dateDescending: selectedSort.sortDescending, siteId: nil, startDate: startDate, endDate: endDate)                } catch {
+                    print("Error fetching siteReadys: \(error)")
                 }
-
-                let entries = documents.compactMap { document -> SiteReadyEntry? in
-                    do {
-                        var decodedEntry = try document.data(as: SiteReadyEntry.self)
-                        if let timestamp = document["timestamp"] as? Timestamp {
-                            decodedEntry.timestamp = timestamp.dateValue()
-                        } else {
-                            decodedEntry.timestamp = nil
-                        }
-                        return decodedEntry
-                    } catch {
-                        print("Error decoding document data: \(error)")
-                        return nil
+                completion()
+            }
+        }
+    }
+    
+    func getIssues(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.issues = []
+                for entry in self.siteReadys {
+                    guard let issueIds = entry.issues else {
+                        continue }
+                    for issueId in issueIds {
+                        let issue = try await IssueManager.shared.getIssue(issueId: issueId)
+                        self.issues.append(issue)
                     }
                 }
-
-                DispatchQueue.main.async {
-                    self.entries = entries
-                }
+            } catch {
+                print("Error fetching issues: \(error)")
             }
+            print("Got \(self.issues.count) issues.")
+            completion()
+        }
     }
-}
-
-struct SiteReadyEntry: Codable, Identifiable {
-    let id: String
-    let bwPrinterCount: Int?
-    let chairCount: Int?
-    let colorPrinterCount: Int?
-    let comments: String?
-    let computingSite: String?
-    let issues: [String]?
-    let macCount: Int?
-    let missingChairs: Int?
-    let pcCount: Int?
-    let posters: [Poster]?
-    let scannerComputers: [String]?
-    let scannerCount: Int?
-    var timestamp: Date?
-    let user: String?
-
-    struct Poster: Codable {
-        let posterType: String
-        let status: String
+    
+    func getSupplyRequests(completion: @escaping () -> Void) {
+        Task {
+            do {
+                self.supplyRequests = []
+                for entry in self.siteReadys {
+                    guard let requestIds = entry.supplyRequests else { continue }
+                    for requestId in requestIds {
+                        let request = try await SupplyRequestManager.shared.getSupplyRequest(supplyRequestId: requestId)
+                        self.supplyRequests.append(request)
+                    }
+                }
+            } catch {
+                print("Error fetching supplyRequests: \(error)")
+            }
+            print("Got \(self.supplyRequests.count) supplyRequests.")
+            completion()
+        }
     }
 }

@@ -179,7 +179,7 @@ struct SiteReadySurveyView: View {
                         macCount: viewModel.macCount,
                         pcCount: viewModel.pcCount,
                         scannerCount: viewModel.scannerCount,
-                        scanerComputers: viewModel.scannerComputers,
+                        scannerComputers: viewModel.scannerComputers,
                         bwPrinterCount: viewModel.bwPrinterCount,
                         colorPrinterCount: viewModel.colorPrinterCount,
                         chairCount: viewModel.chairCount,

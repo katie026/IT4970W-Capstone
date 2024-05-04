@@ -81,6 +81,8 @@
 		F1A0BA402BBF09C400BBC9CB /* BuildingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0BA3F2BBF09C400BBC9CB /* BuildingDetailView.swift */; };
 		F6246A7C2BA12FD400828DAE /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6246A7B2BA12FD400828DAE /* KeyManager.swift */; };
 		F6246A7F2BA3BC6A00828DAE /* SimpleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6246A7E2BA3BC6900828DAE /* SimpleMapView.swift */; };
+		F62F80142BE608E300324735 /* SiteReadyCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62F80132BE608E300324735 /* SiteReadyCellView.swift */; };
+		F62F80162BE60FDA00324735 /* SiteReadyDetailedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62F80152BE60FD900324735 /* SiteReadyDetailedView.swift */; };
 		F63F46B42BBAA1D800ADEB9D /* SmallViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63F46B32BBAA1D800ADEB9D /* SmallViews.swift */; };
 		F63F46B72BBAA28600ADEB9D /* InventorySubmissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63F46B62BBAA28600ADEB9D /* InventorySubmissionView.swift */; };
 		F63F46BA2BBAA34800ADEB9D /* InventoryEntryTypePopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63F46B92BBAA34800ADEB9D /* InventoryEntryTypePopupView.swift */; };
@@ -200,6 +202,8 @@
 		F1A0BA3F2BBF09C400BBC9CB /* BuildingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingDetailView.swift; sourceTree = "<group>"; };
 		F6246A7B2BA12FD400828DAE /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
 		F6246A7E2BA3BC6900828DAE /* SimpleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleMapView.swift; sourceTree = "<group>"; };
+		F62F80132BE608E300324735 /* SiteReadyCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteReadyCellView.swift; sourceTree = "<group>"; };
+		F62F80152BE60FD900324735 /* SiteReadyDetailedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteReadyDetailedView.swift; sourceTree = "<group>"; };
 		F63F46B32BBAA1D800ADEB9D /* SmallViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallViews.swift; sourceTree = "<group>"; };
 		F63F46B62BBAA28600ADEB9D /* InventorySubmissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventorySubmissionView.swift; sourceTree = "<group>"; };
 		F63F46B92BBAA34800ADEB9D /* InventoryEntryTypePopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryEntryTypePopupView.swift; sourceTree = "<group>"; };
@@ -279,6 +283,7 @@
 			children = (
 				261E6B732BD60D21000021CA /* SitesReadyEntriesView.swift */,
 				261E6B702BD60C19000021CA /* SiteReadyEntriesModel.swift */,
+				F62F80122BE608BD00324735 /* SubViews */,
 			);
 			path = SitesReadyEntries;
 			sourceTree = "<group>";
@@ -645,6 +650,15 @@
 			path = Subviews;
 			sourceTree = "<group>";
 		};
+		F62F80122BE608BD00324735 /* SubViews */ = {
+			isa = PBXGroup;
+			children = (
+				F62F80132BE608E300324735 /* SiteReadyCellView.swift */,
+				F62F80152BE60FD900324735 /* SiteReadyDetailedView.swift */,
+			);
+			path = SubViews;
+			sourceTree = "<group>";
+		};
 		F63F46B22BBAA16300ADEB9D /* HelperViews */ = {
 			isa = PBXGroup;
 			children = (
@@ -914,6 +928,7 @@
 				F66FCE8B2BDB804B008251F9 /* SiteCaptainsView.swift in Sources */,
 				6E8C57282B7CB39D00B5BF59 /* AuthenticationManager.swift in Sources */,
 				6EA65F512B8714FC000766C7 /* UserBuildingsView.swift in Sources */,
+				F62F80162BE60FDA00324735 /* SiteReadyDetailedView.swift in Sources */,
 				F6B887242BD19D3100E4A7C8 /* HourlyCleaningSubmissionView.swift in Sources */,
 				F6AB56122BC5F508005727D2 /* BuildingDetailView.swift in Sources */,
 				6EA65F6F2B98F70B000766C7 /* InventorySitesView.swift in Sources */,
@@ -943,6 +958,7 @@
 				E553CD7F2BCD947000B9D63B /* SiteCaptainSubmissionView.swift in Sources */,
 				F6AB56182BCB0FBF005727D2 /* ComputersView.swift in Sources */,
 				E553CD822BCD94BC00B9D63B /* SiteCaptainFormViewModel.swift in Sources */,
+				F62F80142BE608E300324735 /* SiteReadyCellView.swift in Sources */,
 				6EA65F4E2B871156000766C7 /* TabBarView.swift in Sources */,
 				6EA65F582B8E7564000766C7 /* Query+EXT.swift in Sources */,
 				F67778662BE49B8B007D4FB1 /* InventorySuppliesView.swift in Sources */,
