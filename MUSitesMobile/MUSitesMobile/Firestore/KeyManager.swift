@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct Key: Identifiable, Codable, Equatable {
+struct Key: Identifiable, Codable, Equatable, Hashable {
     let id: String
     let keyCode: String?
     let keySet: String?
