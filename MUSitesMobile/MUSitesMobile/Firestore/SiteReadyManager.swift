@@ -10,7 +10,7 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Combine
 
-struct PosterReport: Codable {
+struct PosterReport: Codable, Hashable {
     var posterId: String
     var status: String
 }
@@ -28,7 +28,7 @@ struct SiteReady: Codable, Identifiable {
     let macCount: Int?
     let pcCount: Int?
     let scannerCount: Int?
-    let scanerComputers: [String]?
+    let scannerComputers: [String]?
     let bwPrinterCount: Int?
     let colorPrinterCount: Int?
     let chairCount: Int?
@@ -48,7 +48,7 @@ struct SiteReady: Codable, Identifiable {
         macCount: Int? = nil,
         pcCount: Int? = nil,
         scannerCount: Int? = nil,
-        scanerComputers: [String]? = nil,
+        scannerComputers: [String]? = nil,
         bwPrinterCount: Int? = nil,
         colorPrinterCount: Int? = nil,
         chairCount: Int? = nil,
@@ -68,7 +68,7 @@ struct SiteReady: Codable, Identifiable {
         self.macCount = macCount
         self.pcCount = pcCount
         self.scannerCount = scannerCount
-        self.scanerComputers = scanerComputers
+        self.scannerComputers = scannerComputers
         self.bwPrinterCount = bwPrinterCount
         self.colorPrinterCount = colorPrinterCount
         self.chairCount = chairCount
@@ -89,7 +89,7 @@ struct SiteReady: Codable, Identifiable {
         case macCount = "mac_count"
         case pcCount = "pc_count"
         case scannerCount = "scanner_count"
-        case scanerComputers = "scaner_computers"
+        case scannerComputers = "scanner_computers"
         case bwPrinterCount = "bw_printer_count"
         case colorPrinterCount = "color_printer_count"
         case chairCount = "chair_count"
@@ -111,7 +111,7 @@ struct SiteReady: Codable, Identifiable {
         try container.encodeIfPresent(self.macCount, forKey: .macCount)
         try container.encodeIfPresent(self.pcCount, forKey: .pcCount)
         try container.encodeIfPresent(self.scannerCount, forKey: .scannerCount)
-        try container.encodeIfPresent(self.scanerComputers, forKey: .scanerComputers)
+        try container.encodeIfPresent(self.scannerComputers, forKey: .scannerComputers)
         try container.encodeIfPresent(self.bwPrinterCount, forKey: .bwPrinterCount)
         try container.encodeIfPresent(self.colorPrinterCount, forKey: .colorPrinterCount)
         try container.encodeIfPresent(self.chairCount, forKey: .chairCount)
@@ -133,7 +133,7 @@ struct SiteReady: Codable, Identifiable {
         self.macCount = try container.decodeIfPresent(Int.self, forKey: .macCount)
         self.pcCount = try container.decodeIfPresent(Int.self, forKey: .pcCount)
         self.scannerCount = try container.decodeIfPresent(Int.self, forKey: .scannerCount)
-        self.scanerComputers = try container.decodeIfPresent([String].self, forKey: .scanerComputers)
+        self.scannerComputers = try container.decodeIfPresent([String].self, forKey: .scannerComputers)
         self.bwPrinterCount = try container.decodeIfPresent(Int.self, forKey: .bwPrinterCount)
         self.colorPrinterCount = try container.decodeIfPresent(Int.self, forKey: .colorPrinterCount)
         self.chairCount = try container.decodeIfPresent(Int.self, forKey: .chairCount)

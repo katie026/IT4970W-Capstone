@@ -455,50 +455,17 @@ struct InventoryChangeView: View {
         presentationMode.wrappedValue.dismiss()
     }
 }
-
-//MARK: Previews
-//private struct InventoryChangePreview: View {
-//    @State private var path: [Route] = []
-//    
-//    private var inventorySite: InventorySite = InventorySite(
-//        id: "TzLMIsUbadvLh9PEgqaV",
-//        name: "GO BCC",
-//        buildingId: "yXT87CrCZCoJVRvZn5DC",
-//        inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
-//    )
-//    
-//    var body: some View {
-//        NavigationStack (path: $path) {
-//            Button ("Hello World") {
-//                path.append(Route.inventoryChange(inventorySite))
-//            }
-//            .navigationDestination(for: Route.self) { view in
-//                switch view {
-//                case .inventorySitesList:
-//                    InventorySitesView()
-//                case .detailedInventorySite(let inventorySite): DetailedInventorySiteView(path: $path, inventorySite: inventorySite)
-//                case .inventorySubmission(let inventorySite):
-//                    InventorySubmissionView(path: $path, inventorySite: inventorySite)
-//                        .environmentObject(SheetManager())
-//                case .inventoryChange(let inventorySite):
-//                    InventoryChangeView(path: $path, inventorySite: inventorySite)
-//                }
-//            }
-//        }
-//        .onAppear {
-//            path.append(Route.inventoryChange(inventorySite))
-//        }
-//    }
-//}
-
     
 #Preview {
-    InventoryChangeView(inventorySite:
-                            InventorySite(
-                            id: "TzLMIsUbadvLh9PEgqaV",
-                            name: "GO BCC",
-                            buildingId: "yXT87CrCZCoJVRvZn5DC",
-                            inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]),
-                        submissionOver: .constant(false)
-    )
+    NavigationView {
+        InventoryChangeView(
+            inventorySite: InventorySite (
+                id: "TzLMIsUbadvLh9PEgqaV",
+                name: "GO BCC",
+                buildingId: "yXT87CrCZCoJVRvZn5DC",
+                inventoryTypeIds: ["TNkr3dS4rBnWTn5glEw0"]
+            ),
+            submissionOver: .constant(false)
+        )
+    }
 }

@@ -35,7 +35,9 @@ struct ProfileView: View {
                         // Info Section
                         basicInfoSection
                         // Admin Section
-                        adminSection
+                        if isAdmin {
+                            adminSection
+                        }
                         // Clock In/Out
                         clockInSection(user: user)
                     }
@@ -87,11 +89,9 @@ struct ProfileView: View {
     private var adminSection: some View {
         Section("Administrator Access") {
             // ADMIN LINK
-            if isAdmin {
-                NavigationLink(destination: AdminView()) {
-                    HStack {
-                        Text("Admin Panel")
-                    }
+            NavigationLink(destination: AdminView()) {
+                HStack {
+                    Text("Admin Panel")
                 }
             }
         }

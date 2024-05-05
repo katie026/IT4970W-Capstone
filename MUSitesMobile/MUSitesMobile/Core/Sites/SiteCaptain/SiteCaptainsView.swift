@@ -22,7 +22,7 @@ final class SiteCaptainsViewModel: ObservableObject {
     
     // query info
     @Published var selectedSort = SortOption.descending
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
     @Published var endDate = Date()
     @Published var selectedSite: Site = Site(id: "", name: "any site", buildingId: "", nearestInventoryId: "", chairCounts: [ChairCount(count: 0, type: "")], siteTypeId: "", hasClock: false, hasInventory: false, hasWhiteboard: false, hasPosterBoard: false, namePatternMac: "", namePatternPc: "", namePatternPrinter: "", calendarName: "")
     
@@ -270,8 +270,7 @@ struct SiteCaptainsView: View {
                         selection: $viewModel.endDate,
                         in: viewModel.startDate...Date(),
                         displayedComponents: [.date]
-                    )
-                    .labelsHidden()
+                    ).labelsHidden()
                 }.padding([.horizontal])
             }
         }
