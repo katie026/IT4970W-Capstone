@@ -17,6 +17,10 @@ struct AdminView: View {
                     Label{Text("View Users")} icon: {Image(systemName: "person.3.fill")
                         .foregroundColor(.accentColor)}
                 }
+                NavigationLink(destination: KeysView()) {
+                    Label{Text("View Key Sets")} icon: {Image(systemName: "key.fill")
+                        .foregroundColor(.accentColor)}
+                }
             }
             
             // LISTS SECTION
