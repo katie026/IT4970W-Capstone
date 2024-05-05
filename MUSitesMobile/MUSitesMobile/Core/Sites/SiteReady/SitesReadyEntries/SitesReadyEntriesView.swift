@@ -160,8 +160,7 @@ struct SiteReadyEntriesView: View {
                         selection: $viewModel.endDate,
                         in: viewModel.startDate...Date(),
                         displayedComponents: [.date]
-                    )
-                    .labelsHidden()
+                    ).labelsHidden()
                 }.padding([.horizontal])
             }
         }
@@ -214,7 +213,7 @@ struct SiteReadyEntriesView: View {
                 ScrollView (.horizontal) {
                     NavigationLink(destination: SiteReadyDetailedView(siteReady: siteReady, sites: viewModel.sites, users: viewModel.users, supplyTypes: viewModel.supplyTypes, allIssues: viewModel.issues, allSupplyRequests: viewModel.supplyRequests)) {
                         SiteReadyCellView(siteReady: siteReady, sites: viewModel.sites, users: viewModel.users, supplyTypes: viewModel.supplyTypes, allIssues: viewModel.issues, allSupplyRequests: viewModel.supplyRequests)
-                    }
+                    }.buttonStyle(.plain)
                 }
             }
         }

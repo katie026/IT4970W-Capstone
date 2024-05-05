@@ -270,8 +270,7 @@ struct SiteCaptainsView: View {
                         selection: $viewModel.endDate,
                         in: viewModel.startDate...Date(),
                         displayedComponents: [.date]
-                    )
-                    .labelsHidden()
+                    ).labelsHidden()
                 }.padding([.horizontal])
             }
         }
