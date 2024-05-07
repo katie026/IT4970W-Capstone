@@ -337,14 +337,12 @@ struct IssuesView: View {
             }.padding([.horizontal, .top])
             
             HStack {
-                HStack {
-                    DatePicker(
-                        "Start Date:",
-                        selection: $viewModel.startDate,
-                        in: ...viewModel.endDate,
-                        displayedComponents: [.date]
-                    ).labelsHidden()
-                }.padding(.horizontal)
+                DatePicker(
+                    "Start Date:",
+                    selection: $viewModel.startDate,
+                    in: ...viewModel.endDate,
+                    displayedComponents: [.date]
+                ).labelsHidden()
                 
                 Spacer()
                 
@@ -352,16 +350,14 @@ struct IssuesView: View {
                 
                 Spacer()
                 
-                HStack {
-                    DatePicker(
-                        "End Date:",
-                        selection: $viewModel.endDate,
-                        in: viewModel.startDate...Date(),
-                        displayedComponents: [.date]
-                    )
-                    .labelsHidden()
-                }.padding(.horizontal)
-            }
+                DatePicker(
+                    "End Date:",
+                    selection: $viewModel.endDate,
+                    in: viewModel.startDate...Date(),
+                    displayedComponents: [.date]
+                )
+                .labelsHidden()
+            }.padding(.horizontal)
         }
     }
     

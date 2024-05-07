@@ -213,7 +213,7 @@ struct SiteCaptainsView: View {
                 ProgressView()
             } else {
                 // Header
-                sitePicker.padding([.horizontal, .top])
+                sitePicker.padding([.horizontal])
                 datePickers
                 searchBar
                 // List of SiteCaptains
@@ -247,33 +247,27 @@ struct SiteCaptainsView: View {
     }
     
     private var datePickers: some View {
-        VStack {
-            HStack {
-                HStack {
-                    DatePicker(
-                        "Start Date:",
-                        selection: $viewModel.startDate,
-                        in: ...viewModel.endDate,
-                        displayedComponents: [.date]
-                    ).labelsHidden()
-                }.padding([.horizontal])
-                
-                Spacer()
-                
-                Text("to").padding([.horizontal])
-                
-                Spacer()
-                
-                HStack {
-                    DatePicker(
-                        "End Date:",
-                        selection: $viewModel.endDate,
-                        in: viewModel.startDate...Date(),
-                        displayedComponents: [.date]
-                    ).labelsHidden()
-                }.padding([.horizontal])
-            }
-        }
+        HStack {
+            DatePicker(
+                "Start Date:",
+                selection: $viewModel.startDate,
+                in: ...viewModel.endDate,
+                displayedComponents: [.date]
+            ).labelsHidden()
+            
+            Spacer()
+            
+            Text("to").padding([.horizontal])
+            
+            Spacer()
+            
+            DatePicker(
+                "End Date:",
+                selection: $viewModel.endDate,
+                in: viewModel.startDate...Date(),
+                displayedComponents: [.date]
+            ).labelsHidden()
+        }.padding([.horizontal])
     }
     
     private var searchBar: some View {
@@ -320,7 +314,7 @@ struct SiteCaptainsView: View {
                 // prompt user
                 Text("Select a site, and reload.")
                     .foregroundColor(.gray)
-            // else, if site has been selected, and the siteCapatin count is still 0
+                // else, if site has been selected, and the siteCapatin count is still 0
             } else if (hasLoadedOnce && viewModel.siteCaptains.count == 0) {
                 // tell user there are no hourlyCleanings
                 Text("There are no site captain entries at \(viewModel.selectedSite.name ?? "this site") between these dates.")
@@ -328,7 +322,9 @@ struct SiteCaptainsView: View {
             }
             
             ForEach(sortedSiteCaptains) { siteCaptain in
-                SiteCaptainCellView(siteCaptain: siteCaptain, sites: viewModel.sites, users: viewModel.users, supplyTypes: viewModel.supplyTypes, allIssues: viewModel.issues, allSupplyRequests: viewModel.supplyRequests)
+                ScrollView(.horizontal) {
+                    SiteCaptainCellView(siteCaptain: siteCaptain, sites: viewModel.sites, users: viewModel.users, supplyTypes: viewModel.supplyTypes, allIssues: viewModel.issues, allSupplyRequests: viewModel.supplyRequests)
+                }
             }
         }
     }

@@ -22,7 +22,7 @@ class SitesReadyEntriesViewModel: ObservableObject {
     
     // query info
     @Published var selectedSort = SortOption.descending
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -180, to: Date())!
     @Published var endDate = Date()
     @Published var selectedSite: Site = Site(id: "", name: "any site", buildingId: "", nearestInventoryId: "", chairCounts: [ChairCount(count: 0, type: "")], siteTypeId: "", hasClock: false, hasInventory: false, hasWhiteboard: false, hasPosterBoard: false, namePatternMac: "", namePatternPc: "", namePatternPrinter: "", calendarName: "")
     

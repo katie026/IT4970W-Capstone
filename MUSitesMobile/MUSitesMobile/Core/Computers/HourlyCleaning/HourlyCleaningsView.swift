@@ -16,7 +16,7 @@ final class HourlyCleaningsViewModel: ObservableObject {
     var users: [DBUser] = []
     var computers: [Computer] = []
     // query info
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
     @Published var endDate = Date()
     @Published var selectedSort = SortOption.descending
     @Published var selectedSite: Site = Site(id: "", name: "any site", buildingId: "", nearestInventoryId: "", chairCounts: [ChairCount(count: 0, type: "")], siteTypeId: "", hasClock: false, hasInventory: false, hasWhiteboard: false, hasPosterBoard: false, namePatternMac: "", namePatternPc: "", namePatternPrinter: "", calendarName: "")
@@ -153,34 +153,28 @@ struct HourlyCleaningsView: View {
     }
     
     private var datePickers: some View {
-        VStack {
-            HStack {
-                HStack {
-                    DatePicker(
-                        "Start Date:",
-                        selection: $viewModel.startDate,
-                        in: ...viewModel.endDate,
-                        displayedComponents: [.date]
-                    ).labelsHidden()
-                }.padding([.horizontal, .bottom])
-                
-                Spacer()
-                
-                Text("to").padding([.horizontal, .bottom])
-                
-                Spacer()
-                
-                HStack {
-                    DatePicker(
-                        "End Date:",
-                        selection: $viewModel.endDate,
-                        in: viewModel.startDate...Date(),
-                        displayedComponents: [.date]
-                    )
-                    .labelsHidden()
-                }.padding([.horizontal, .bottom])
-            }
-        }
+        HStack {
+            DatePicker(
+                "Start Date:",
+                selection: $viewModel.startDate,
+                in: ...viewModel.endDate,
+                displayedComponents: [.date]
+            ).labelsHidden()
+            
+            Spacer()
+            
+            Text("to").padding([.horizontal])
+            
+            Spacer()
+            
+            DatePicker(
+                "End Date:",
+                selection: $viewModel.endDate,
+                in: viewModel.startDate...Date(),
+                displayedComponents: [.date]
+            )
+            .labelsHidden()
+        }.padding([.horizontal])
     }
     
     private var hourlyCleaningList: some View {

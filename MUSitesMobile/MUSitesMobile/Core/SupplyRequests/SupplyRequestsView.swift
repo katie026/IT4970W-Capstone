@@ -246,14 +246,12 @@ struct SupplyRequestsView: View {
             
             HStack {
                 // Start Date Picker
-                HStack {
-                    DatePicker(
-                        "Start Date:",
-                        selection: $viewModel.startDate,
-                        in: ...viewModel.endDate,
-                        displayedComponents: [.date]
-                    ).labelsHidden()
-                }
+                DatePicker(
+                    "Start Date:",
+                    selection: $viewModel.startDate,
+                    in: ...viewModel.endDate,
+                    displayedComponents: [.date]
+                ).labelsHidden()
                 
                 Spacer()
                 
@@ -262,15 +260,13 @@ struct SupplyRequestsView: View {
                 Spacer()
                 
                 // End Date Picker
-                HStack {
-                    DatePicker(
-                        "End Date:",
-                        selection: $viewModel.endDate,
-                        in: viewModel.startDate...Date(),
-                        displayedComponents: [.date]
-                    )
-                    .labelsHidden()
-                }
+                DatePicker(
+                    "End Date:",
+                    selection: $viewModel.endDate,
+                    in: viewModel.startDate...Date(),
+                    displayedComponents: [.date]
+                )
+                .labelsHidden()
             }
         }
         .padding(.horizontal)
@@ -363,6 +359,7 @@ struct SupplyRequestsView: View {
         .onChange(of: multiSelection) { oldValue, newValue in
             print(newValue)
         }
+        .selectionDisabled() // only select while in edit mode
     }
     
     private var filteredSupplyRequests: [SupplyRequest] {
@@ -420,37 +417,39 @@ struct SupplyRequestsView: View {
             }
         }
         
-        let view = VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                // DATE CREATED
-                Image(systemName: "calendar")
-                Text("\(supplyRequest.dateCreated != nil ? dateFormatter.string(from: supplyRequest.dateCreated!) : "N/A")")
-                // RESOLVED STATUS
-                Image(systemName: supplyRequest.resolved ?? false ? "checkmark.circle.fill" : "xmark.square")
-                    .foregroundColor(supplyRequest.resolved ?? false ? .green : .red)
-                Text("\(supplyRequest.resolved ?? false ? "Resolved" : "Not Resolved")")
-                // SITE
-                Image(systemName: "mappin.and.ellipse")
-                    .foregroundColor(.red)
-                Text("\(siteName)")
-            }
-            HStack {
-                // REPORT TYPE
-                Image(systemName: "pencil.and.list.clipboard")
-                Text("Report: \(reportType)")
-                // USER SUBMITTED
-                Image(systemName: user == "N/A" ? "person" : "person.fill")
-                Text(user)
-            }
-            HStack {
-                // SUPPLY TYPE
-                Image(systemName: "cube.box")
-                    .foregroundColor(.blue)
-                Text("Supply: \(supplyTypeName)")
-                // COUNT NEEDED
-                Image(systemName: "number.circle")
-                    .foregroundColor(.orange)
-                Text("Count: \(countNeeded)")
+        let view = ScrollView(.horizontal) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    // DATE CREATED
+                    Image(systemName: "calendar")
+                    Text("\(supplyRequest.dateCreated != nil ? dateFormatter.string(from: supplyRequest.dateCreated!) : "N/A")")
+                    // RESOLVED STATUS
+                    Image(systemName: supplyRequest.resolved ?? false ? "checkmark.circle.fill" : "xmark.square")
+                        .foregroundColor(supplyRequest.resolved ?? false ? .green : .red)
+                    Text("\(supplyRequest.resolved ?? false ? "Resolved" : "Not Resolved")")
+                    // SITE
+                    Image(systemName: "mappin.and.ellipse")
+                        .foregroundColor(.red)
+                    Text("\(siteName)")
+                }
+                HStack {
+                    // REPORT TYPE
+                    Image(systemName: "pencil.and.list.clipboard")
+                    Text("Report: \(reportType)")
+                    // USER SUBMITTED
+                    Image(systemName: user == "N/A" ? "person" : "person.fill")
+                    Text(user)
+                }
+                HStack {
+                    // SUPPLY TYPE
+                    Image(systemName: "cube.box")
+                        .foregroundColor(.blue)
+                    Text("Supply: \(supplyTypeName)")
+                    // COUNT NEEDED
+                    Image(systemName: "number.circle")
+                        .foregroundColor(.orange)
+                    Text("Count: \(countNeeded)")
+                }
             }
         }
         return AnyView(view)

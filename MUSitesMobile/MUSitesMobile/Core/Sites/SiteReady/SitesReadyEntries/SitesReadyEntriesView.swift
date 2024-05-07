@@ -137,33 +137,27 @@ struct SiteReadyEntriesView: View {
     }
     
     private var datePickers: some View {
-        VStack {
-            HStack {
-                HStack {
-                    DatePicker(
-                        "Start Date:",
-                        selection: $viewModel.startDate,
-                        in: ...viewModel.endDate,
-                        displayedComponents: [.date]
-                    ).labelsHidden()
-                }.padding([.horizontal])
-                
-                Spacer()
-                
-                Text("to").padding([.horizontal])
-                
-                Spacer()
-                
-                HStack {
-                    DatePicker(
-                        "End Date:",
-                        selection: $viewModel.endDate,
-                        in: viewModel.startDate...Date(),
-                        displayedComponents: [.date]
-                    ).labelsHidden()
-                }.padding([.horizontal])
-            }
-        }
+        HStack {
+            DatePicker(
+                "Start Date:",
+                selection: $viewModel.startDate,
+                in: ...viewModel.endDate,
+                displayedComponents: [.date]
+            ).labelsHidden()
+            
+            Spacer()
+            
+            Text("to").padding([.horizontal])
+            
+            Spacer()
+            
+            DatePicker(
+                "End Date:",
+                selection: $viewModel.endDate,
+                in: viewModel.startDate...Date(),
+                displayedComponents: [.date]
+            ).labelsHidden()
+        }.padding([.horizontal])
     }
     
     private var searchBar: some View {

@@ -26,7 +26,7 @@ final class InventoryEntriesViewModel: ObservableObject {
     var supplyTypes: [SupplyType] = []
     @Published var supplyEntries: [SupplyEntry] = []
     @Published var selectedSort = SortOption.descending
-    @Published var startDate = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
+    @Published var startDate = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
     @Published var endDate = Date()
     
     // for labels
@@ -160,34 +160,30 @@ struct InventoryEntriesView: View {
                 Spacer()
                 sortButton
                 refreshButton
-            }.padding([.horizontal, .top])
+            }.padding([.horizontal])
             
             HStack {
-                HStack {
-                    DatePicker(
-                        "Start Date:",
-                        selection: $viewModel.startDate,
-                        in: ...viewModel.endDate,
-                        displayedComponents: [.date]
-                    ).labelsHidden()
-                }.padding([.horizontal, .bottom])
+                DatePicker(
+                    "Start Date:",
+                    selection: $viewModel.startDate,
+                    in: ...viewModel.endDate,
+                    displayedComponents: [.date]
+                ).labelsHidden()
                 
                 Spacer()
                 
-                Text("to").padding([.horizontal, .bottom])
+                Text("to").padding([.horizontal])
                 
                 Spacer()
                 
-                HStack {
-                    DatePicker(
-                        "End Date:",
-                        selection: $viewModel.endDate,
-                        in: viewModel.startDate...Date(),
-                        displayedComponents: [.date]
-                    )
-                    .labelsHidden()
-                }.padding([.horizontal, .bottom])
-            }
+                DatePicker(
+                    "End Date:",
+                    selection: $viewModel.endDate,
+                    in: viewModel.startDate...Date(),
+                    displayedComponents: [.date]
+                )
+                .labelsHidden()
+            }.padding([.horizontal])
         }
     }
     
