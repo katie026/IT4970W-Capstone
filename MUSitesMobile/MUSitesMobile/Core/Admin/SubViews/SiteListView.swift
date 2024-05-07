@@ -31,38 +31,48 @@ struct SiteListView: View {
     }
 
     var body: some View {
-        NavigationView {
-            Group {
-                if isLoading {
-                    ProgressView("Loading...")
-                } else if let error = error {
-                    Text("Error: \(error.localizedDescription)")
-                } else {
-                    listSites()
-                }
-            }
-            .navigationTitle("Select a Site")
-            .toolbar {
-                Picker("Filter", selection: $filter) {
-                    ForEach(SiteFilter.allCases, id: \.self) { filter in
-                        Text(filter.rawValue).tag(filter)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-            }
-            .onChange(of: filter) { newFilter in
-                print("Filter changed to: \(newFilter)")
-                Task {
-                    await fetchSites()
-                }
-            }
-            .onAppear {
-                Task {
-                    await fetchSites()
-                    print("Something")
-                }
+        VStack {
+            if isLoading {
+                ProgressView("Loading...")
+            } else if let error = error {
+                Text("Error: \(error.localizedDescription)")
+            } else {
+                filterPicker
+                listSites()
+                Spacer()
             }
         }
+        .navigationTitle("Select a Site")
+        .toolbar {
+//            Picker("Filter", selection: $filter) {
+//                ForEach(SiteFilter.allCases, id: \.self) { filter in
+//                    Text(filter.rawValue).tag(filter)
+//                }
+//            }
+//            .pickerStyle(SegmentedPickerStyle())
+        }
+        .onChange(of: filter) {
+            print("Filter changed to: \(filter)")
+            Task {
+                await fetchSites()
+            }
+        }
+        .onAppear {
+            Task {
+                await fetchSites()
+                print("Something")
+            }
+        }
+    }
+    
+    private var filterPicker: some View {
+        return Picker("Filter", selection: $filter) {
+            ForEach(SiteFilter.allCases, id: \.self) { filter in
+                Text(filter.rawValue).tag(filter)
+            }
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .padding(.horizontal)
     }
     
     @ViewBuilder
@@ -92,7 +102,6 @@ struct SiteListView: View {
     }
     
     private func fetchSites() async {
-
         do {
             switch filter {
             case .sites:
@@ -110,5 +119,11 @@ struct SiteListView: View {
             self.error = fetchError
             print("Failed to fetch sites: \(fetchError.localizedDescription)")
         }
+    }
+}
+
+#Preview {
+    NavigationView {
+        SiteListView()
     }
 }

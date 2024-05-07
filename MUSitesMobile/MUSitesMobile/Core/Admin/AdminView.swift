@@ -15,11 +15,11 @@ struct AdminView: View {
                 //this is set up correctly(will show all users in the user collection
                 NavigationLink(destination: ViewUsersView()) {
                     Label{Text("View Users")} icon: {Image(systemName: "person.3.fill")
-                        .foregroundColor(.accentColor)}
+                        .foregroundColor(.orange)}
                 }
                 NavigationLink(destination: KeysView()) {
                     Label{Text("View Key Sets")} icon: {Image(systemName: "key.fill")
-                        .foregroundColor(.accentColor)}
+                        .foregroundColor(.orange)}
                 }
             }
             
@@ -39,22 +39,22 @@ struct AdminView: View {
                 }
                 NavigationLink(destination: ComputersView()) {
                     Label{Text("All Computers")} icon: {Image(systemName: "desktopcomputer")
-                        .foregroundColor(.purple)}
+                        .foregroundColor(.teal)}
                 }
                 NavigationLink(destination: PrintersView()) {
                     Label{Text("All Printers")} icon: {Image(systemName: "printer.fill")
-                        .foregroundColor(.purple)}
+                        .foregroundColor(.teal)}
                 }
                 NavigationLink(destination: InventorySuppliesView()) {
-                    Label{Text("All Supplies")} icon: {Image(systemName: "archivebox")
-                        .foregroundColor(.purple)}
+                    Label{Text("All Supplies")} icon: {Image(systemName: "archivebox.fill")
+                        .foregroundColor(.teal)}
                 }
             }
             
             Section("Images") {
                 NavigationLink(destination: SiteListView()) { // we should rename this
                     Label{Text("Images")} icon: {Image(systemName: "photo.fill")
-                        .foregroundColor(.pink)}
+                        .foregroundColor(.purple)}
                 }
             }
             Section(header: Text("Submission Data")) {

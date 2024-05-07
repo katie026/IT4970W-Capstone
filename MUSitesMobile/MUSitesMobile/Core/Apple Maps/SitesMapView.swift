@@ -33,7 +33,7 @@ struct SitesMapView: View {
                             .padding(10) // Adjust the padding size here
                             .background(Color.accentColor)
                             .cornerRadius(10) // Adjust the corner radius as needed
-                            .foregroundColor(.black) // Set text color to black
+                            .foregroundColor(Color("AccentContrastColor"))
                     }
                     .padding()
                     Spacer()
