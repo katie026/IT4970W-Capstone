@@ -111,17 +111,17 @@ struct SiteReadySurveyView: View {
                     
                     // POSTERS
                     var posterReports: [PosterReport] = []
-                    posterReports.append(PosterReport(posterId: "missionStatementBanner", status: viewModel.missionStatementBanner))
-                    posterReports.append(PosterReport(posterId: "reservedBoardNotification", status: viewModel.reservedBoardNotification))
-                    posterReports.append(PosterReport(posterId: "cyberSecurityPoster", status: viewModel.cyberSecurityPoster))
-                    posterReports.append(PosterReport(posterId: "adaptiveComputingPoster", status: viewModel.adaptiveComputingPoster))
-                    posterReports.append(PosterReport(posterId: "printSmartPrintingInfoPoster", status: viewModel.printSmartPrintingInfoPoster))
-                    posterReports.append(PosterReport(posterId: "needHelpPoster", status: viewModel.needHelpPoster))
-                    posterReports.append(PosterReport(posterId: "activeShooterPoster", status: viewModel.activeShooterPoster))
-                    posterReports.append(PosterReport(posterId: "emergencyProceduresPoster", status: viewModel.emergencyProceduresPoster))
-                    posterReports.append(PosterReport(posterId: "copyRightWrongPoster", status: viewModel.copyRightWrongPoster))
-                    posterReports.append(PosterReport(posterId: "sasSpssPoster", status: viewModel.sasSpssPoster))
-                    posterReports.append(PosterReport(posterId: "newAdobeCcLoginPoster", status: viewModel.newAdobeCcLoginPoster))
+                    posterReports.append(PosterReport(posterType: "missionStatementBanner", status: viewModel.missionStatementBanner))
+                    posterReports.append(PosterReport(posterType: "reservedBoardNotification", status: viewModel.reservedBoardNotification))
+                    posterReports.append(PosterReport(posterType: "cyberSecurityPoster", status: viewModel.cyberSecurityPoster))
+                    posterReports.append(PosterReport(posterType: "adaptiveComputingPoster", status: viewModel.adaptiveComputingPoster))
+                    posterReports.append(PosterReport(posterType: "printSmartPrintingInfoPoster", status: viewModel.printSmartPrintingInfoPoster))
+                    posterReports.append(PosterReport(posterType: "needHelpPoster", status: viewModel.needHelpPoster))
+                    posterReports.append(PosterReport(posterType: "activeShooterPoster", status: viewModel.activeShooterPoster))
+                    posterReports.append(PosterReport(posterType: "emergencyProceduresPoster", status: viewModel.emergencyProceduresPoster))
+                    posterReports.append(PosterReport(posterType: "copyRightWrongPoster", status: viewModel.copyRightWrongPoster))
+                    posterReports.append(PosterReport(posterType: "sasSpssPoster", status: viewModel.sasSpssPoster))
+                    posterReports.append(PosterReport(posterType: "newAdobeCcLoginPoster", status: viewModel.newAdobeCcLoginPoster))
                     
                     // ISSUES
                     var issues: [Issue] = []

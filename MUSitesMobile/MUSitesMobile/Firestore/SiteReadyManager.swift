@@ -11,13 +11,18 @@ import FirebaseFirestoreSwift
 import Combine
 
 struct PosterReport: Codable, Hashable {
-    var posterId: String
-    var status: String
+    var posterType: String?
+    var status: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case posterType = "poster_type"
+        case status = "status"
+    }
 }
 
 struct EquipmentStatus: Codable {
-    var equipment: String
-    var status: String
+    var equipment: String?
+    var status: String?
 }
 
 struct SiteReady: Codable, Identifiable {

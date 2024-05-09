@@ -221,7 +221,7 @@ struct SiteReadyCellView: View {
             chairCount: 18,
             missingChairs: nil, //TODO: implement eventually
             updatedInventory: true,
-            posters: [PosterReport(posterId: "newAdobeCcLoginPoster", status: "Yes")],
+            posters: [PosterReport(posterType: "newAdobeCcLoginPoster", status: "Yes")],
             supplyRequests: ["8QQshpEN6Zt7ndDKq3Z9"],
             equipmentStatuses: nil,
             issues: ["LvkB7728one2PFaDky4C", "eGYWgrdU2ngLHo0z3Pk8"],

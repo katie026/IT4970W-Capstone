@@ -114,16 +114,23 @@ struct SiteReadyDetailedView: View {
             }
             
             // SCANNER COUNT
-            VStack {
+            if siteReady.scannerCount ?? 0 > 0 {
+                DisclosureGroup() {
+                    if let scannerComputers = siteReady.scannerComputers {
+                        ForEach(scannerComputers, id: \.self) { computer in
+                            Text(computer)
+                        }
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "scanner")
+                        Text("Scanners: \(siteReady.scannerCount ?? 0)")
+                    }
+                }
+            } else {
                 HStack {
                     Image(systemName: "scanner")
                     Text("Scanners: \(siteReady.scannerCount ?? 0)")
-                }
-                
-                if let scannerComputers = siteReady.scannerComputers {
-                    ForEach(scannerComputers, id: \.self) { computer in
-                        Text(computer).padding(.leading, 25)
-                    }
                 }
             }
             
@@ -156,9 +163,9 @@ struct SiteReadyDetailedView: View {
                 
                 ForEach(posters, id: \.self) { poster in
                     HStack {
-                        Text(poster.posterId)
+                        Text(poster.posterType ?? "N/A")
                         Spacer()
-                        Text(poster.status)
+                        Text(poster.status ?? "N/A")
                     }
                 }
             }
@@ -291,13 +298,13 @@ struct SiteReadyDetailedView: View {
                 macCount: 2,
                 pcCount: 23,
                 scannerCount: 1,
-                scannerComputers: nil,//["PC-01"],
+                scannerComputers: ["PC-01"],
                 bwPrinterCount: 1,
                 colorPrinterCount: 1,
                 chairCount: 18,
                 missingChairs: nil, //TODO: implement eventually
                 updatedInventory: true,
-                posters: [PosterReport(posterId: "newAdobeCcLoginPoster", status: "Yes")],
+                posters: [PosterReport(posterType: "newAdobeCcLoginPoster", status: "Yes")],
                 supplyRequests: ["8QQshpEN6Zt7ndDKq3Z9"],
                 equipmentStatuses: nil,
                 issues: ["LvkB7728one2PFaDky4C", "eGYWgrdU2ngLHo0z3Pk8"],
