@@ -25,7 +25,7 @@ struct AuthenticationView: View {
                 .ignoresSafeArea()
             
             RoundedRectangle(cornerRadius: 0)
-                .foregroundColor(Color.accentColor)
+                .foregroundColor(Color("MizzouGoldColor"))
                 .rotationEffect(Angle(degrees: -20))
                 .frame(width: UIScreen.main.bounds.width * 3,
                        height: 600)
