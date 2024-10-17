@@ -5,4 +5,5 @@ Over the course of 14 weeks, the SitesMobile team embarked on a project to updat
 
 Key objectives included establishing a unified system for tracking employee activities and lab statuses, integrating a dynamic remote database (Firestore) for efficient data storage, and researching viable database options within budgetary constraints. Throughout the semester, we successfully implemented the core features of our minimum viable product. Users can now authenticate themselves, utilize live location and map functionalities, submit productivity forms (such as supply counts and computer cleanings), create, assign, and resolve issues, view lists of buildings and sites, and access submitted reports. Additionally, the application allows users to add and remove images, enhancing the overall user experience and data management capabilities.
 
+The Final Production Report and video demo can be found in the repository files.
 Video Demo: https://youtu.be/0TtgGJuCDII?si=tmtI8XR_0Amo59tO
